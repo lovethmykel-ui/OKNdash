@@ -1,0 +1,6 @@
+{
+  "name": "OKN User Dashboard",
+  "description": "OKN Token Web3 User Dashboard — Portfolio, Presale Gateway, Partner Program, Tasks, Community Missions, and Autonomous Agents Demo.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
