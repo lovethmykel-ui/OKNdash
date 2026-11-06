@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from '@/i18n/navigation';
-import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 /**
  * AnnouncementCarousel — Pure Graphic announcement slider.
@@ -10,21 +10,37 @@ import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
  * Design Architecture:
  * - Zero neon colors: clean surfaces matching var(--s1)/var(--s2) and border-[var(--line)].
  * - Pure vector graphics: high-craft SVG geometric line art embedded in background.
- * - Strict size & hierarchy equality: identical height (178px mobile / 136px desktop),
- *   identical padding, typography scale, icon frames, and primary CTA alignment.
+ * - Clean auto-rotating & touch-swipeable viewport without bottom clutter pills/arrows.
  */
 export function AnnouncementCarousel({ id = 'ann-carousel' }: { id?: string }) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
   const totalSlides = 2;
 
   useEffect(() => {
     if (isPaused) return;
     const timer = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % totalSlides);
-    }, 6000);
+    }, 5500);
     return () => clearInterval(timer);
   }, [isPaused]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0]?.clientX ?? null;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const endX = e.changedTouches[0]?.clientX ?? touchStartX.current;
+    const deltaX = endX - touchStartX.current;
+    if (Math.abs(deltaX) > 40) {
+      setActiveSlide((prev) =>
+        deltaX < 0 ? (prev + 1) % totalSlides : (prev - 1 + totalSlides) % totalSlides,
+      );
+    }
+    touchStartX.current = null;
+  };
 
   return (
     <section
@@ -34,6 +50,8 @@ export function AnnouncementCarousel({ id = 'ann-carousel' }: { id?: string }) {
       aria-label="Featured Announcements"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       <div className="announcement-carousel-viewport overflow-hidden rounded-[22px] border border-[var(--line)] bg-[var(--s1)] shadow-sm">
         <div
@@ -46,10 +64,10 @@ export function AnnouncementCarousel({ id = 'ann-carousel' }: { id?: string }) {
           <div className={`announcement-slide min-w-full shrink-0 ${activeSlide === 0 ? 'active' : ''}`}>
             <Link
               href="/app/polymarket-agent"
-              className="group relative block min-h-[180px] md:min-h-0 md:h-[136px] overflow-hidden p-4 sm:p-5 text-[var(--tx)] transition-all hover:bg-[var(--s2)]/50"
+              className="group relative block overflow-hidden p-4 sm:p-5 md:px-6 md:py-5 text-[var(--tx)] transition-all hover:bg-[var(--s2)]/50"
               aria-label="Open Polymarket Copy Agent"
             >
-              {/* Pure Graphic Background: Fine SVG Prediction Vector Lines (No Neon) */}
+              {/* Pure Graphic Background: Fine SVG Prediction Vector Lines */}
               <svg
                 className="absolute inset-0 size-full pointer-events-none opacity-[0.07] text-[var(--tx)]"
                 viewBox="0 0 800 160"
@@ -66,45 +84,62 @@ export function AnnouncementCarousel({ id = 'ann-carousel' }: { id?: string }) {
                 <circle cx="720" cy="80" r="48" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" opacity="0.4" />
               </svg>
 
-              {/* Slide Content — Structured Flex Layout matching Slide 1 */}
-              <div className="relative z-10 flex flex-col justify-between h-full gap-2.5">
-                {/* Top Row: Type Badge + Metric Pill */}
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-bold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/25">
-                    <span className="size-1.5 rounded-full bg-[#10B981] animate-pulse" />
-                    AI COPY TRADING
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-bold bg-[var(--s2)] text-[var(--tx)] border border-[var(--line)]">
-                    +38.4% 7D ROI
-                  </span>
-                </div>
-
-                {/* Main Row: Graphic Icon + Title & Subtitle */}
-                <div className="flex items-center gap-3 my-auto">
-                  <div className="relative size-10 sm:size-12 rounded-xl bg-[var(--s2)] border border-[var(--line)] flex items-center justify-center shrink-0 shadow-sm group-hover:border-[#7A12F5]/40 transition-colors">
+              {/* Slide Content — 2-Zone Desktop Hierarchy (Left Identity/Copy + Right Social Proof & CTA) */}
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3.5 md:gap-6">
+                {/* Left Zone: Brand Icon + 3-Tier Typographic Stack */}
+                <div className="flex items-start sm:items-center gap-3.5 md:gap-4 min-w-0 flex-1">
+                  <div className="relative size-11 sm:size-12 md:size-14 rounded-2xl bg-[var(--s2)] border border-[var(--line)] flex items-center justify-center shrink-0 shadow-sm group-hover:border-[#7A12F5]/40 transition-colors">
                     <img
                       src="/polymarket.png"
                       alt="Polymarket"
-                      className="size-6 sm:size-8 object-contain"
+                      className="size-7 sm:size-8 md:size-9 object-contain"
                     />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-sm sm:text-lg font-extrabold tracking-tight text-[var(--tx)] truncate">
+
+                  <div className="min-w-0 flex-1 space-y-1">
+                    {/* Tier 1: Eyebrow Badges */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-extrabold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/25">
+                        <span className="size-1.5 rounded-full bg-[#10B981] animate-pulse" />
+                        AI COPY TRADING
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-bold bg-[var(--s2)] text-[var(--tx)] border border-[var(--line)]">
+                        +38.4% 7D ROI · 78% Win Rate
+                      </span>
+                    </div>
+
+                    {/* Tier 2: Headline */}
+                    <h3 className="text-sm sm:text-base md:text-lg font-extrabold tracking-tight text-[var(--tx)] leading-snug">
                       Polymarket Copy Agent <span className="text-[#7A12F5] dark:text-[#9D4EDD]">is Live</span>
                     </h3>
-                    <p className="text-xs text-[var(--mut)] font-medium line-clamp-1 mt-0.5">
-                      Auto-mirror top 1% prediction whales with 1-click execution.
+
+                    {/* Tier 3: Supporting Description */}
+                    <p className="text-xs sm:text-[13px] text-[var(--mut)] font-medium line-clamp-2 sm:line-clamp-1">
+                      Auto-mirror top 1% prediction whales in real time with 1-click execution.
                     </p>
                   </div>
                 </div>
 
-                {/* Bottom Row: Social Proof / Metrics + Consistent Primary CTA */}
-                <div className="flex items-center justify-between gap-2 pt-1 min-w-0">
-                  <span className="text-[11px] sm:text-xs font-semibold text-[var(--mut)] truncate">
-                    142 whales mirrored · 78% Win Rate
-                  </span>
+                {/* Right Zone: Social Proof + Primary CTA Button */}
+                <div className="flex items-center justify-between md:justify-end gap-3.5 pt-2.5 md:pt-0 border-t border-[var(--line)]/60 md:border-t-0 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <div className="hidden sm:flex items-center -space-x-1.5 shrink-0">
+                      <span className="size-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white bg-[#1652F0] border border-[var(--s1)]">
+                        0x
+                      </span>
+                      <span className="size-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white bg-[#10B981] border border-[var(--s1)]">
+                        W1
+                      </span>
+                      <span className="size-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white bg-[#7A12F5] border border-[var(--s1)]">
+                        +9
+                      </span>
+                    </div>
+                    <span className="text-[11px] sm:text-xs font-semibold text-[var(--mut)] whitespace-nowrap">
+                      142 whales mirrored
+                    </span>
+                  </div>
 
-                  <span className="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-xl text-[11px] font-extrabold bg-[#7A12F5] text-white shadow-sm shrink-0 whitespace-nowrap group-hover:bg-[#8C38F7] active:scale-95 transition-all">
+                  <span className="inline-flex items-center justify-center gap-1.5 h-8 sm:h-9 md:h-10 px-3.5 md:px-4 rounded-xl text-[11px] sm:text-xs font-extrabold bg-[#7A12F5] !text-white text-white shadow-[0_4px_14px_rgba(122,18,245,0.35)] shrink-0 whitespace-nowrap group-hover:bg-[#8C38F7] active:scale-95 transition-all">
                     <span>Open Agent</span>
                     <ArrowRight className="size-3.5 stroke-[2.5]" />
                   </span>
@@ -119,10 +154,10 @@ export function AnnouncementCarousel({ id = 'ann-carousel' }: { id?: string }) {
           <div className={`announcement-slide min-w-full shrink-0 ${activeSlide === 1 ? 'active' : ''}`}>
             <Link
               href="/app/buy"
-              className="group relative block min-h-[156px] md:min-h-0 md:h-[136px] overflow-hidden p-4 sm:p-5 text-[var(--tx)] transition-all hover:bg-[var(--s2)]/50"
+              className="group relative block overflow-hidden p-4 sm:p-5 md:px-6 md:py-5 text-[var(--tx)] transition-all hover:bg-[var(--s2)]/50"
               aria-label="Buy $OKN Presale"
             >
-              {/* Pure Graphic Background: Fine SVG Blockchain Orbital Vector Lines (No Neon) */}
+              {/* Pure Graphic Background: Fine SVG Blockchain Orbital Vector Lines */}
               <svg
                 className="absolute inset-0 size-full pointer-events-none opacity-[0.07] text-[var(--tx)]"
                 viewBox="0 0 800 160"
@@ -139,45 +174,59 @@ export function AnnouncementCarousel({ id = 'ann-carousel' }: { id?: string }) {
                 <circle cx="280" cy="15" r="3" fill="currentColor" />
               </svg>
 
-              {/* Slide Content — Exactly Identical Hierarchy and Height as Slide 0 */}
-              <div className="relative z-10 flex flex-col justify-between h-full gap-2.5">
-                {/* Top Row: Type Badge + Metric Pill */}
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-bold bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/25">
-                    <span className="size-1.5 rounded-full bg-[#F59E0B] animate-pulse" />
-                    PRESALE · STAGE 2
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-bold bg-[var(--s2)] text-[var(--tx)] border border-[var(--line)]">
-                    $0.0006 / $OKN
-                  </span>
-                </div>
-
-                {/* Main Row: Graphic Icon + Title & Subtitle */}
-                <div className="flex items-center gap-3 my-auto">
-                  <div className="relative size-10 sm:size-12 rounded-xl bg-[var(--s2)] border border-[var(--line)] flex items-center justify-center shrink-0 shadow-sm group-hover:border-[#7A12F5]/40 transition-colors">
+              {/* Slide Content — Identical 2-Zone Desktop Hierarchy */}
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3.5 md:gap-6">
+                {/* Left Zone: Brand Icon + 3-Tier Typographic Stack */}
+                <div className="flex items-start sm:items-center gap-3.5 md:gap-4 min-w-0 flex-1">
+                  <div className="relative size-11 sm:size-12 md:size-14 rounded-2xl bg-[var(--s2)] border border-[var(--line)] flex items-center justify-center shrink-0 shadow-sm group-hover:border-[#7A12F5]/40 transition-colors">
                     <img
                       src="/okn-logo.png"
                       alt="$OKN Presale"
-                      className="size-6 sm:size-8 object-contain"
+                      className="size-7 sm:size-8 md:size-9 object-contain"
                     />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-sm sm:text-lg font-extrabold tracking-tight text-[var(--tx)] truncate">
-                      Buy $OKN Presale — <span className="text-[#F59E0B] dark:text-[#FBBF24]">Multi-Gateway</span>
+
+                  <div className="min-w-0 flex-1 space-y-1">
+                    {/* Tier 1: Eyebrow Badges */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-extrabold bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/25">
+                        <span className="size-1.5 rounded-full bg-[#F59E0B] animate-pulse" />
+                        PRESALE · STAGE 2
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-bold bg-[var(--s2)] text-[var(--tx)] border border-[var(--line)]">
+                        1 BNB = 1,000,000 $OKN · $0.0006
+                      </span>
+                    </div>
+
+                    {/* Tier 2: Headline */}
+                    <h3 className="text-sm sm:text-base md:text-lg font-extrabold tracking-tight text-[var(--tx)] leading-snug">
+                      Buy $OKN Presale — <span className="text-[#F59E0B] dark:text-[#FBBF24]">Multi-Gateway</span> Live
                     </h3>
-                    <p className="text-xs text-[var(--mut)] font-medium line-clamp-1 mt-0.5">
+
+                    {/* Tier 3: Supporting Description */}
+                    <p className="text-xs sm:text-[13px] text-[var(--mut)] font-medium line-clamp-2 sm:line-clamp-1">
                       Connect Wallet, 300+ Crypto, or Card with instant allocation.
                     </p>
                   </div>
                 </div>
 
-                {/* Bottom Row: Social Proof / Metrics + Consistent Primary CTA */}
-                <div className="flex items-center justify-between gap-2 pt-1 min-w-0">
-                  <span className="text-[11px] sm:text-xs font-semibold text-[var(--mut)] truncate">
-                    68.4% Sold · $412.8K Raised
-                  </span>
+                {/* Right Zone: Social Proof + Primary CTA Button */}
+                <div className="flex items-center justify-between md:justify-end gap-3.5 pt-2.5 md:pt-0 border-t border-[var(--line)]/60 md:border-t-0 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <div className="hidden sm:flex items-center -space-x-1.5 shrink-0">
+                      <span className="size-5 rounded-full flex items-center justify-center bg-[#1E2026] border border-[var(--s1)] p-0.5">
+                        <img src="/bnb-logo.png" alt="BNB" className="size-3 object-contain" />
+                      </span>
+                      <span className="size-5 rounded-full flex items-center justify-center text-[7px] font-extrabold text-white bg-[#0066FF] border border-[var(--s1)]">
+                        300+
+                      </span>
+                    </div>
+                    <span className="text-[11px] sm:text-xs font-semibold text-[var(--mut)] whitespace-nowrap">
+                      68.4% Sold · $412.8K
+                    </span>
+                  </div>
 
-                  <span className="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-xl text-[11px] font-extrabold bg-[#7A12F5] text-white shadow-sm shrink-0 whitespace-nowrap group-hover:bg-[#8C38F7] active:scale-95 transition-all">
+                  <span className="inline-flex items-center justify-center gap-1.5 h-8 sm:h-9 md:h-10 px-3.5 md:px-4 rounded-xl text-[11px] sm:text-xs font-extrabold bg-[#7A12F5] !text-white text-white shadow-[0_4px_14px_rgba(122,18,245,0.35)] shrink-0 whitespace-nowrap group-hover:bg-[#8C38F7] active:scale-95 transition-all">
                     <span>Buy Presale</span>
                     <ArrowRight className="size-3.5 stroke-[2.5]" />
                   </span>
@@ -185,74 +234,6 @@ export function AnnouncementCarousel({ id = 'ann-carousel' }: { id?: string }) {
               </div>
             </Link>
           </div>
-        </div>
-      </div>
-
-      {/* Carousel Controls & Segmented Progress Navigation */}
-      <div className="announcement-carousel-bar flex items-center justify-between mt-2 px-1">
-        <div className="carousel-dots flex items-center gap-1.5" role="tablist" aria-label="Announcement slides">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeSlide === 0}
-            className={`carousel-dot flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
-              activeSlide === 0
-                ? 'active bg-[var(--s2)] text-[var(--tx)] border border-[var(--line)] shadow-sm'
-                : 'text-[var(--mut)] hover:text-[var(--tx)]'
-            }`}
-            onClick={() => setActiveSlide(0)}
-            aria-label="Slide 1: Polymarket Copy Agent"
-          >
-            <span>Polymarket</span>
-            <span className="inline-block w-3.5 h-1 rounded-full bg-[var(--line)] overflow-hidden">
-              <span
-                className={`block h-full bg-[#7A12F5] transition-all duration-300 ${
-                  activeSlide === 0 ? 'w-full' : 'w-0'
-                }`}
-              />
-            </span>
-          </button>
-
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeSlide === 1}
-            className={`carousel-dot flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
-              activeSlide === 1
-                ? 'active bg-[var(--s2)] text-[var(--tx)] border border-[var(--line)] shadow-sm'
-                : 'text-[var(--mut)] hover:text-[var(--tx)]'
-            }`}
-            onClick={() => setActiveSlide(1)}
-            aria-label="Slide 2: Buy $OKN Presale"
-          >
-            <span>$OKN Presale</span>
-            <span className="inline-block w-3.5 h-1 rounded-full bg-[var(--line)] overflow-hidden">
-              <span
-                className={`block h-full bg-[#7A12F5] transition-all duration-300 ${
-                  activeSlide === 1 ? 'w-full' : 'w-0'
-                }`}
-              />
-            </span>
-          </button>
-        </div>
-
-        <div className="carousel-nav-group flex items-center gap-1.5">
-          <button
-            type="button"
-            className="carousel-nav-btn size-7 rounded-lg border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] flex items-center justify-center hover:bg-[var(--line)] active:scale-95 transition-all cursor-pointer"
-            onClick={() => setActiveSlide((prev) => (prev - 1 + totalSlides) % totalSlides)}
-            aria-label="Previous announcement"
-          >
-            <ChevronLeft className="size-4 stroke-[2.5]" />
-          </button>
-          <button
-            type="button"
-            className="carousel-nav-btn size-7 rounded-lg border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] flex items-center justify-center hover:bg-[var(--line)] active:scale-95 transition-all cursor-pointer"
-            onClick={() => setActiveSlide((prev) => (prev + 1) % totalSlides)}
-            aria-label="Next announcement"
-          >
-            <ChevronRight className="size-4 stroke-[2.5]" />
-          </button>
         </div>
       </div>
     </section>

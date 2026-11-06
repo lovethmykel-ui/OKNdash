@@ -126,9 +126,7 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
                       'relative flex flex-col items-center justify-center gap-[3px] h-[50px] min-w-[60px] px-2.5 py-1 rounded-[15px] transition-all duration-200 active:scale-95 cursor-pointer',
                       isActive
                         ? 'bg-gradient-to-br from-[#7A12F5] to-[#8E2BFF] !text-white text-white shadow-[0_4px_16px_rgba(122,18,245,0.45)]'
-                        : isBuy
-                          ? 'bg-[#7A12F5]/12 border border-[#7A12F5]/35 text-[var(--tx)]'
-                          : 'bg-transparent text-[var(--mut)] hover:text-[var(--tx)]',
+                        : 'bg-transparent text-[var(--mut)] hover:text-[var(--tx)]',
                     )}
                     style={isActive ? { background: 'linear-gradient(135deg, #7A12F5 0%, #8E2BFF 100%)', color: '#ffffff' } : undefined}
                   >
@@ -148,8 +146,8 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
                       >
                         <ShoppingCart
                           className={cn(
-                            'size-5 drop-shadow-[0_2px_6px_rgba(122,18,245,0.5)]',
-                            isActive ? '!text-white !stroke-white' : 'text-[#A66BFF]',
+                            'size-5',
+                            isActive ? '!text-white !stroke-white' : 'text-[var(--mut)]',
                           )}
                           style={isActive ? { color: '#ffffff', stroke: '#ffffff' } : undefined}
                         />
@@ -175,7 +173,7 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
                     <span
                       className={cn(
                         'text-[10.5px] tracking-tight font-extrabold',
-                        isActive ? '!text-white' : isBuy ? 'text-[#C9A6FF]' : 'text-[var(--mut)]',
+                        isActive ? '!text-white' : 'text-[var(--mut)]',
                       )}
                       style={isActive ? { color: '#ffffff' } : undefined}
                     >

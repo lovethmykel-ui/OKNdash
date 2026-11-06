@@ -10,8 +10,27 @@
  * NEXT_PUBLIC_APP_URL is the canonical origin (with trailing slash stripped).
  * Defaults to localhost for dev; override via env in production.
  */
-const RAW_URL = process.env.APP_URL || 'https://app.okntoken.com';
-export const SITE_URL = RAW_URL.endsWith('/') ? RAW_URL.slice(0, -1) : RAW_URL;
+function resolveSiteUrl(): string {
+  const candidates = [
+    process.env.NEXT_PUBLIC_APP_URL,
+    process.env.APP_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : undefined,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+    'https://app.okntoken.com',
+  ];
+  for (const raw of candidates) {
+    if (!raw || raw === 'MY_APP_URL') continue;
+    const trimmed = raw.trim().replace(/\/+$/, '');
+    if (/^https?:\/\//i.test(trimmed)) {
+      return trimmed;
+    }
+  }
+  return 'https://app.okntoken.com';
+}
+
+export const SITE_URL = resolveSiteUrl();
 
 export const SITE = {
   // Brand proper noun — not translated (it's a product name).

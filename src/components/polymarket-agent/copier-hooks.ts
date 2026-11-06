@@ -258,6 +258,18 @@ const copierDemo = {
   } satisfies CopierEntitlement,
 };
 
+export function getInitialCopierSnapshot() {
+  return {
+    wallet: { ...copierDemo.wallet },
+    subscriptions: copierDemo.subscriptions.map((s) => ({ ...s })),
+    executions: copierDemo.executions.map((e) => ({ ...e })),
+    entitlement: { ...copierDemo.entitlement },
+    balances: { ...copierDemo.balances },
+    allowlist: copierDemo.allowlist.map((a) => ({ ...a })),
+    withdrawals: copierDemo.withdrawals.map((w) => ({ ...w })),
+  };
+}
+
 export async function fetchWallet() {
   return { ok: true, status: 200, data: { ...copierDemo.wallet } };
 }

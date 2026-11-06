@@ -17,6 +17,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import { motion } from 'motion/react';
 import {
   Activity,
   ArrowLeftRight,
@@ -207,6 +208,8 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
                 const Icon = ICONS[item.href] ?? Home;
                 const label = resolveLabel(item);
                 const isPolymarket = item.href === '/app/polymarket-agent';
+                const isBuy = item.href === '/app/buy';
+                const isActive = pathname === item.href;
                 const isSoon =
                   item.href === '/app/trade-bot' ||
                   item.href === '/app/polymarket-agent' ||
@@ -216,15 +219,15 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       asChild
-                      isActive={pathname === item.href}
+                      isActive={isActive}
                       tooltip={label}
                       className={ITEM_CLASSES}
                     >
                       <Link
                         href={bareAppHref(item.href) as never}
                         onClick={closeMobile}
-                        className={cn(pathname === item.href && '!text-white')}
-                        style={pathname === item.href ? { color: '#ffffff' } : undefined}
+                        className={cn(isActive && '!text-white')}
+                        style={isActive ? { color: '#ffffff' } : undefined}
                       >
                         {isPolymarket ? (
                           <Image
@@ -234,15 +237,46 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
                             height={18}
                             className="size-[18px] rounded-full object-contain shadow-[0_2px_8px_rgba(9,180,255,0.3)]"
                           />
+                        ) : isBuy ? (
+                          <motion.span
+                            animate={{
+                              y: [0, -2, 0],
+                              rotate: [0, -10, 10, 0],
+                              scale: [1, 1.1, 1],
+                            }}
+                            transition={{
+                              duration: 2.2,
+                              repeat: Infinity,
+                              ease: 'easeInOut',
+                            }}
+                            className="relative inline-flex items-center justify-center shrink-0"
+                          >
+                            <ShoppingCart
+                              className={cn('size-[18px]', isActive && '!text-white !stroke-white')}
+                              style={isActive ? { color: '#ffffff', stroke: '#ffffff' } : undefined}
+                            />
+                            <span
+                              className={cn(
+                                'absolute -top-1 -right-1 size-1.5 rounded-full animate-ping',
+                                isActive ? 'bg-[#FFD60A]' : 'bg-[#09B4FF]',
+                              )}
+                            />
+                            <span
+                              className={cn(
+                                'absolute -top-1 -right-1 size-1.5 rounded-full',
+                                isActive ? 'bg-[#FFD60A]' : 'bg-[#09B4FF]',
+                              )}
+                            />
+                          </motion.span>
                         ) : (
                           <Icon
-                            className={cn('size-[18px]', pathname === item.href && '!text-white !stroke-white')}
-                            style={pathname === item.href ? { color: '#ffffff', stroke: '#ffffff' } : undefined}
+                            className={cn('size-[18px]', isActive && '!text-white !stroke-white')}
+                            style={isActive ? { color: '#ffffff', stroke: '#ffffff' } : undefined}
                           />
                         )}
                         <span
-                          className={cn('flex-1 truncate', pathname === item.href && '!text-white')}
-                          style={pathname === item.href ? { color: '#ffffff' } : undefined}
+                          className={cn('flex-1 truncate', isActive && '!text-white')}
+                          style={isActive ? { color: '#ffffff' } : undefined}
                         >
                           {label}
                         </span>
@@ -250,7 +284,7 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
                           <span
                             className={cn(
                               'rounded-md px-1.5 py-0.5 text-[10px] font-bold group-data-[collapsible=icon]:hidden',
-                              pathname === item.href
+                              isActive
                                 ? 'bg-white/25 text-white'
                                 : 'bg-emerald-500/15 text-emerald-400'
                             )}
@@ -270,7 +304,7 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Promo banner (Matches newdash-ruby live layout) */}
+        {/* Promo banner ("Earn more $OKN" CTA card) */}
         <div className="mt-auto px-2 pb-3 group-data-[collapsible=icon]:hidden">
           <div className="rounded-[18px] bg-gradient-to-br from-[#09B4FF] to-[#7A12F5] p-4 text-white shadow-[0_10px_28px_rgba(122,18,245,0.35)] flex flex-col gap-2">
             <p className="font-display text-sm font-extrabold text-white">
@@ -283,16 +317,20 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
               <Link
                 href={area === 'admin' ? '/admin/claims' : '/app/referral'}
                 onClick={closeMobile}
-                className="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-white px-3 text-xs font-extrabold text-[#09B4FF] shadow-sm transition-transform hover:scale-[1.02] active:scale-95"
+                className="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl bg-white px-3 text-xs font-extrabold !text-[#5B0EC9] shadow-sm transition-transform hover:scale-[1.02] active:scale-95"
+                style={{ color: '#5B0EC9' }}
               >
-                <span>{area === 'admin' ? t('sidebar.review') : 'Invite friends'}</span>
+                <span className="font-extrabold !text-[#5B0EC9]" style={{ color: '#5B0EC9' }}>
+                  {area === 'admin' ? t('sidebar.review') : 'Refer friends'}
+                </span>
                 {area === 'admin' ? <ModerationQueueBadge /> : null}
-                <ArrowRight className="size-3.5" />
+                <ArrowRight className="size-3.5 !text-[#5B0EC9]" style={{ color: '#5B0EC9', stroke: '#5B0EC9' }} />
               </Link>
               <Link
                 href={area === 'admin' ? '/admin/audit-logs' : '/app/tasks'}
                 onClick={closeMobile}
-                className="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-xl bg-white/20 px-3 text-xs font-bold text-white transition-colors hover:bg-white/25 active:scale-95"
+                className="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-xl bg-white/20 px-3 text-xs font-bold !text-white transition-colors hover:bg-white/25 active:scale-95"
+                style={{ color: '#ffffff' }}
               >
                 {area === 'admin' ? t('sidebar.auditLogs') : 'Learn more'}
               </Link>

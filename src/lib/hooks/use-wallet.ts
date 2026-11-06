@@ -30,19 +30,31 @@ function asBool(data: unknown): boolean | undefined {
   return typeof data === 'boolean' ? data : undefined;
 }
 
+const DEMO_PLACEHOLDER_ADDRESSES = new Set([
+  '0x1111111111111111111111111111111111111111',
+  '0x2222222222222222222222222222222222222222',
+  '0x3333333333333333333333333333333333333333',
+]);
+
+function isRealDeployedContract(addr?: string): boolean {
+  return Boolean(addr && !DEMO_PLACEHOLDER_ADDRESSES.has(addr.toLowerCase()));
+}
+
 export function useOknBalance() {
   const { address } = useAccount();
+  const realContract = isRealDeployedContract(CONTRACTS.oknToken);
   const result = useReadContract({
     address: CONTRACTS.oknToken,
     abi: oknTokenAbi,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
-    query: { enabled: !!address && !!CONTRACTS.oknToken },
+    query: { enabled: !!address && realContract },
   });
   const demoQuery = useQuery({
     queryKey: ['demo-okn-balance'],
     queryFn: () => getDemoOknBalanceWei(),
     initialData: () => getDemoOknBalanceWei(),
+    staleTime: Infinity,
   });
   const onChainVal = asBigInt(result.data);
   return {
@@ -51,20 +63,21 @@ export function useOknBalance() {
     isLoading: false,
     refetch: async () => {
       await demoQuery.refetch();
-      return result.refetch();
+      return realContract ? result.refetch() : Promise.resolve(result);
     },
   };
 }
 
 export function useRequiredFeeBnb() {
+  const realContract = isRealDeployedContract(CONTRACTS.merkleDistributor);
   const result = useReadContract({
     address: CONTRACTS.merkleDistributor,
     abi: merkleDistributorAbi,
     functionName: 'getRequiredFeeBnb',
     query: {
-      enabled: !!CONTRACTS.merkleDistributor,
-      refetchOnWindowFocus: true,
-      staleTime: 15_000,
+      enabled: realContract,
+      refetchOnWindowFocus: false,
+      staleTime: 60_000,
     },
   });
   const onChainFee = asBigInt(result.data);
@@ -77,53 +90,54 @@ export function useRequiredFeeBnb() {
 }
 
 export function useSaleStatus() {
+  const realContract = isRealDeployedContract(CONTRACTS.tokenSale);
   const rate = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'rate',
-    query: { enabled: !!CONTRACTS.tokenSale },
+    query: { enabled: realContract },
   });
   const cap = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'capPerWallet',
-    query: { enabled: !!CONTRACTS.tokenSale },
+    query: { enabled: realContract },
   });
   const paused = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'paused',
-    query: { enabled: !!CONTRACTS.tokenSale },
+    query: { enabled: realContract },
   });
   const raised = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'totalBnbRaised',
-    query: { enabled: !!CONTRACTS.tokenSale },
+    query: { enabled: realContract },
   });
   const saleStart = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'saleStart',
-    query: { enabled: !!CONTRACTS.tokenSale },
+    query: { enabled: realContract },
   });
   const saleEnd = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'saleEnd',
-    query: { enabled: !!CONTRACTS.tokenSale },
+    query: { enabled: realContract },
   });
   const minPurchase = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'minPurchase',
-    query: { enabled: !!CONTRACTS.tokenSale },
+    query: { enabled: realContract },
   });
   const bnbHardCap = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'bnbHardCap',
-    query: { enabled: !!CONTRACTS.tokenSale },
+    query: { enabled: realContract },
   });
 
   return useMemo(
@@ -144,17 +158,19 @@ export function useSaleStatus() {
 
 export function usePurchasedAmount() {
   const { address } = useAccount();
+  const realContract = isRealDeployedContract(CONTRACTS.tokenSale);
   const result = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'purchased',
     args: address ? [address] : undefined,
-    query: { enabled: !!address && !!CONTRACTS.tokenSale },
+    query: { enabled: !!address && realContract },
   });
   const demoQuery = useQuery({
     queryKey: ['demo-purchased-bnb'],
     queryFn: () => getDemoPurchasedBnbWei(),
     initialData: () => getDemoPurchasedBnbWei(),
+    staleTime: Infinity,
   });
   const onChainVal = asBigInt(result.data);
   return {
@@ -163,17 +179,18 @@ export function usePurchasedAmount() {
     isLoading: false,
     refetch: async () => {
       await demoQuery.refetch();
-      return result.refetch();
+      return realContract ? result.refetch() : Promise.resolve(result);
     },
   };
 }
 
 export function useSaleRemaining() {
+  const realContract = isRealDeployedContract(CONTRACTS.oknToken);
   const result = useReadContract({
     address: CONTRACTS.oknToken,
     abi: oknTokenAbi,
     functionName: 'saleRemaining',
-    query: { enabled: !!CONTRACTS.oknToken },
+    query: { enabled: realContract },
   });
   const onChainVal = asBigInt(result.data);
   return {

@@ -47,6 +47,7 @@ import {
   fetchFees,
   fetchWallet,
   fetchWithdrawals,
+  getInitialCopierSnapshot,
   requestWithdrawal,
   fetchBalances,
   type CopierBalances,
@@ -60,8 +61,9 @@ type LoadState = 'loading' | 'unconfigured' | 'active' | 'error';
 export function FundsPanel() {
   const t = useTranslations('dashboard.polymarketAgent.copier.funds');
   const router = useRouter();
-  const [state, setState] = useState<LoadState>('loading');
-  const [wallet, setWallet] = useState<CopierWallet | null>(null);
+  const initial = getInitialCopierSnapshot();
+  const [state, setState] = useState<LoadState>('active');
+  const [wallet, setWallet] = useState<CopierWallet | null>(initial.wallet);
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {

@@ -39,6 +39,7 @@ import {
   fetchExecutions,
   fetchSubscriptions,
   fetchWallet,
+  getInitialCopierSnapshot,
   updateSubscription,
   type CopierEntitlement,
   type CopierExecution,
@@ -50,11 +51,12 @@ type LoadState = 'loading' | 'unconfigured' | 'active' | 'error';
 
 export function CopierPanel() {
   const t = useTranslations('dashboard.polymarketAgent.copier');
-  const [state, setState] = useState<LoadState>('loading');
-  const [wallet, setWallet] = useState<CopierWallet | null>(null);
-  const [subscriptions, setSubscriptions] = useState<CopierSubscription[]>([]);
-  const [executions, setExecutions] = useState<CopierExecution[]>([]);
-  const [entitlement, setEntitlement] = useState<CopierEntitlement | null>(null);
+  const initial = getInitialCopierSnapshot();
+  const [state, setState] = useState<LoadState>('active');
+  const [wallet, setWallet] = useState<CopierWallet | null>(initial.wallet);
+  const [subscriptions, setSubscriptions] = useState<CopierSubscription[]>(initial.subscriptions);
+  const [executions, setExecutions] = useState<CopierExecution[]>(initial.executions);
+  const [entitlement, setEntitlement] = useState<CopierEntitlement | null>(initial.entitlement);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 

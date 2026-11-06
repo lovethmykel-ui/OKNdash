@@ -33,29 +33,39 @@ export function AgentCopierTabs({ value, onValueChange, agent, copier, funds }: 
 
   return (
     <Tabs value={value} onValueChange={handleValueChange}>
-      <TabsList aria-label={t('ariaLabel')}>
-        <TabsTrigger value="agent" className="cursor-pointer">
-          <Bot data-icon="inline-start" />
+      <TabsList
+        aria-label={t('ariaLabel')}
+        className="h-11 rounded-2xl border border-[var(--line)] bg-[var(--s1)] p-1"
+      >
+        <TabsTrigger
+          value="agent"
+          className="cursor-pointer rounded-xl px-4 py-1.5 text-xs sm:text-sm font-extrabold data-[state=active]:bg-[#7A12F5] data-[state=active]:text-white"
+        >
+          <Bot className="size-4 mr-1.5" />
           {t('agent')}
         </TabsTrigger>
-        <TabsTrigger value="copier" className="cursor-pointer">
-          <Copy data-icon="inline-start" />
+        <TabsTrigger
+          value="copier"
+          className="cursor-pointer rounded-xl px-4 py-1.5 text-xs sm:text-sm font-extrabold data-[state=active]:bg-[#7A12F5] data-[state=active]:text-white"
+        >
+          <Copy className="size-4 mr-1.5" />
           {t('copier')}
         </TabsTrigger>
-        <TabsTrigger value="funds" className="cursor-pointer">
-          <Landmark data-icon="inline-start" />
+        <TabsTrigger
+          value="funds"
+          className="cursor-pointer rounded-xl px-4 py-1.5 text-xs sm:text-sm font-extrabold data-[state=active]:bg-[#7A12F5] data-[state=active]:text-white"
+        >
+          <Landmark className="size-4 mr-1.5" />
           {t('funds')}
         </TabsTrigger>
       </TabsList>
-      {/* Radix unmounts the inactive panel; panels are lightweight and
-          stateless, so default behavior keeps the a11y tree minimal. */}
-      <TabsContent value="agent" className="mt-4 space-y-6">
+      <TabsContent value="agent" className="mt-5 space-y-6">
         {agent}
       </TabsContent>
-      <TabsContent value="copier" className="mt-4 space-y-6">
+      <TabsContent value="copier" className="mt-5 space-y-6">
         {copier}
       </TabsContent>
-      <TabsContent value="funds" className="mt-4 space-y-6">
+      <TabsContent value="funds" className="mt-5 space-y-6">
         {funds}
       </TabsContent>
     </Tabs>
