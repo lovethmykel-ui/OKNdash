@@ -16,7 +16,7 @@ import {
   Flame,
   Globe,
   ListChecks,
-  Sparkles,
+  Share2,
   Users,
   Wallet,
 } from 'lucide-react';
@@ -153,7 +153,7 @@ const ALL_TASKS: TaskItem[] = [
     iconBg: 'var(--s2)',
     iconColor: 'var(--tx)',
     url: 'https://x.com',
-    iconSvg: <Sparkles className="size-5" />,
+    iconSvg: <Share2 className="size-5" />,
   },
   {
     id: 't-reddit',

@@ -16,7 +16,7 @@ import {
   TrendingUp,
   BarChart3,
   ChevronRight,
-  Sparkles,
+  ShieldCheck,
 } from 'lucide-react';
 
 const STAKING_PERIODS: { label: string; apy: string }[] = [
@@ -35,7 +35,7 @@ export default function AgentsPage() {
       <section className="relative overflow-hidden rounded-[28px] md:rounded-[32px] bg-gradient-to-br from-[#7A12F5] via-[#660CD9] to-[#4A00A8] p-6 md:p-8 text-white shadow-xl">
         <div className="relative z-10 max-w-2xl">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-extrabold backdrop-blur-md mb-3">
-            <Sparkles className="size-3.5" />
+            <ShieldCheck className="size-3.5" />
             <span>Autonomous Protocol Suite · Coming Soon</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">

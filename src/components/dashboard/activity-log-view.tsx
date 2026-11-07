@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Coins, FileText, Gift, Sparkles } from 'lucide-react';
+import { Check, Coins } from 'lucide-react';
 import { useStreak } from '@/lib/hooks/use-rewards';
 import { useClaimEligibility } from '@/lib/hooks/use-claim';
 import { formatPoints } from '@/lib/utils';

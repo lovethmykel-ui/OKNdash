@@ -66,13 +66,38 @@ export default function ReferralPage() {
   const [historyFilter, setHistoryFilter] = useState<'all' | 'l1' | 'downline' | 'buyers'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showAllHistory, setShowAllHistory] = useState(false);
+  const [animProgress, setAnimProgress] = useState(0);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('okn_hide_balance') === 'true';
-      setHideBalance(stored);
-    } catch {}
+    let rafId = 0;
+    const durationMs = 1150;
+    let startTime: number | null = null;
+
+    const tick = (now: number) => {
+      if (startTime === null) {
+        startTime = now;
+        try {
+          const stored = localStorage.getItem('okn_hide_balance') === 'true';
+          if (stored) setHideBalance(true);
+        } catch {}
+      }
+      const elapsed = now - startTime;
+      const rawT = Math.min(1, elapsed / durationMs);
+      // Cubic ease-out: 1 - (1 - t)^3
+      const eased = 1 - Math.pow(1 - rawT, 3);
+      setAnimProgress(eased);
+      if (rawT < 1) {
+        rafId = window.requestAnimationFrame(tick);
+      }
+    };
+
+    rafId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(rafId);
   }, []);
+
+  const animatedCashTotal = (142.5 * animProgress).toFixed(2);
+  const animatedBnbTotal = (0.238 * animProgress).toFixed(3);
+  const animatedPointsTotal = Math.round(1420 * animProgress).toLocaleString('en-US');
 
   const toggleBalance = () => {
     setHideBalance((prev) => {
@@ -316,9 +341,11 @@ export default function ReferralPage() {
           <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-3.5 sm:p-4">
             <div className="text-[11px] sm:text-xs font-bold text-[var(--mut)]">Total Earned ($)</div>
             <div className="num text-xl sm:text-2xl font-extrabold text-[#2FBD8E] mt-1">
-              {hideBalance ? '••••••' : '$142.50'}
+              {hideBalance ? '••••••' : `$${animatedCashTotal}`}
             </div>
-            <div className="text-[11px] font-bold text-[#F3BA2F] mt-1">~0.238 BNB Payout</div>
+            <div className="text-[11px] font-bold text-[#F3BA2F] mt-1">
+              {hideBalance ? '•••• BNB Payout' : `~${animatedBnbTotal} BNB Payout`}
+            </div>
           </div>
 
           <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-3.5 sm:p-4">
@@ -330,7 +357,9 @@ export default function ReferralPage() {
           <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-3.5 sm:p-4">
             <div className="text-[11px] sm:text-xs font-bold text-[var(--mut)]">Points Multiplier</div>
             <div className="num text-xl sm:text-2xl font-extrabold text-[#FFD60A] mt-1">1.5x</div>
-            <div className="text-[11px] font-bold text-[var(--mut)] mt-1">+1,420 OK Points</div>
+            <div className="text-[11px] font-bold text-[var(--mut)] mt-1 num">
+              +{animatedPointsTotal} OK Points
+            </div>
           </div>
         </div>
 

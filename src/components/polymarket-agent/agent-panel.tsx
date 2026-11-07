@@ -8,7 +8,7 @@
  */
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Activity, CheckCircle2, Gauge, ShieldCheck, Sparkles, Target } from 'lucide-react';
+import { Activity, CheckCircle2, Clock, Gauge, ShieldCheck, Target } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -123,7 +123,7 @@ export function AgentPanel() {
                   Autonomous Whale Signal &amp; Copy Engine
                 </h2>
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-[#09B4FF]/35 bg-[#09B4FF]/15 px-3 py-0.5 text-[11px] font-extrabold text-[#7DD3FC]">
-                  <Sparkles className="size-3" />
+                  <Clock className="size-3" />
                   <span>Market Preview — In Development</span>
                 </span>
               </div>

@@ -6,7 +6,7 @@
  * Displays a clean, minimalist Coming Soon state for Decentralized Prediction Markets.
  */
 import { useTranslations } from 'next-intl';
-import { BarChart3, Clock, ShieldCheck, Sparkles } from 'lucide-react';
+import { BarChart3, Clock, ShieldCheck } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 
 export default function PredictionMarketsPage() {
@@ -39,7 +39,7 @@ export default function PredictionMarketsPage() {
           </div>
 
           <div className="inline-flex items-center gap-1.5 rounded-full border border-[#FFD60A]/35 bg-[#FFD60A]/12 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-[#FFD60A]">
-            <Sparkles className="size-3.5" />
+            <Clock className="size-3.5" />
             <span>Coming Soon</span>
           </div>
 

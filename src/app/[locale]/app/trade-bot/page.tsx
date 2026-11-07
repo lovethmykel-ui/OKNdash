@@ -7,7 +7,7 @@
  * along with its planned capabilities.
  */
 import { useTranslations } from 'next-intl';
-import { Activity, Bot, Clock, Gauge, ShieldCheck, Sparkles, Target } from 'lucide-react';
+import { Activity, Bot, Clock, Gauge, ShieldCheck, Target } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 
 const CAPABILITY_ICONS = [Activity, Target, Gauge, ShieldCheck];
@@ -42,7 +42,7 @@ export default function TradeBotPage() {
           </div>
 
           <div className="inline-flex items-center gap-1.5 rounded-full border border-[#FFD60A]/35 bg-[#FFD60A]/12 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-[#FFD60A]">
-            <Sparkles className="size-3.5" />
+            <Clock className="size-3.5" />
             <span>Coming Soon</span>
           </div>
 

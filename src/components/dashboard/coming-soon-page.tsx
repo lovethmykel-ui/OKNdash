@@ -12,7 +12,7 @@
  * some consumers render it from a 'use client' page.
  */
 import type { LucideIcon } from 'lucide-react';
-import { Sparkles } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { PageHeader } from '@/components/dashboard/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -57,7 +57,7 @@ export function ComingSoonPage({
         description={description}
         actions={
           <Badge variant="secondary" className="bg-ios-orange/10 text-ios-orange">
-            <Sparkles data-icon="inline-start" />
+            <Clock data-icon="inline-start" />
             {badgeLabel}
           </Badge>
         }
