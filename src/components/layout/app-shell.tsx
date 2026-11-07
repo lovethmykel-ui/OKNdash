@@ -79,10 +79,6 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
 
             {/* Right cluster — compact on mobile so zero icons clip */}
             <div className="ml-auto flex shrink-0 items-center gap-1.5 md:gap-2.5">
-              <span className="hidden lg:inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-extrabold text-emerald-400">
-                <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Interactive Demo
-              </span>
               {area === 'app' ? <LanguageSwitcher /> : null}
               <AreaThemeToggle />
               <NotificationBell />

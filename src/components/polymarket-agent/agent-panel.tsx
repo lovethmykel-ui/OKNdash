@@ -122,9 +122,9 @@ export function AgentPanel() {
                 <h2 className="text-base sm:text-lg md:text-xl font-extrabold tracking-tight text-[var(--tx)]">
                   Autonomous Whale Signal &amp; Copy Engine
                 </h2>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2.5 py-0.5 text-[11px] font-extrabold text-emerald-400">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#09B4FF]/35 bg-[#09B4FF]/15 px-3 py-0.5 text-[11px] font-extrabold text-[#7DD3FC]">
                   <Sparkles className="size-3" />
-                  <span>Live Demo</span>
+                  <span>Market Preview — In Development</span>
                 </span>
               </div>
               <p className="max-w-2xl text-xs sm:text-sm text-[var(--mut)] leading-relaxed">

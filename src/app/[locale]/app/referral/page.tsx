@@ -63,41 +63,41 @@ export default function ReferralPage() {
   return (
     <main className="space-y-6 pb-12">
       {/* 1. Hero Banner: Partner package */}
-      <section className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#7A12F5] via-[#6D0ED8] to-[#5106B3] p-6 sm:p-8 text-white shadow-xl">
+      <section className="relative overflow-hidden rounded-[26px] sm:rounded-[28px] bg-gradient-to-br from-[#7A12F5] via-[#6D0ED8] to-[#5106B3] p-4 sm:p-8 text-white shadow-xl">
         <div className="relative z-10 flex flex-col justify-between">
-          <div>
-            <span className="inline-block text-[11px] font-extrabold tracking-widest text-purple-200/90 uppercase">
+          <div className="px-0.5">
+            <span className="inline-block text-[10.5px] sm:text-[11px] font-extrabold tracking-widest text-purple-200/90 uppercase">
               PARTNER PROGRAM · REFERRAL
             </span>
-            <h1 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl md:text-4xl">
+            <h1 className="mt-1.5 text-2xl font-black tracking-tight text-white sm:text-3xl md:text-4xl">
               Partner package
             </h1>
           </div>
 
-          <div className="mt-6 grid grid-cols-3 gap-2.5 sm:gap-4">
-            <div className="rounded-2xl border border-white/20 bg-white/15 p-3.5 backdrop-blur-md shadow-inner sm:p-4">
-              <div className="font-mono text-lg font-black text-white sm:text-2xl">
+          <div className="mt-5 sm:mt-6 grid grid-cols-3 gap-2 sm:gap-4">
+            <div className="min-w-0 overflow-hidden rounded-2xl border border-white/20 bg-white/15 px-2.5 py-3 backdrop-blur-md shadow-inner sm:p-4 flex flex-col justify-center gap-1.5">
+              <div className="num text-[15px] sm:text-2xl font-black tracking-tight text-white whitespace-nowrap leading-none">
                 10–15%
               </div>
-              <div className="mt-1 text-[11px] font-semibold text-purple-100/80 sm:text-xs">
+              <div className="text-[10px] sm:text-xs font-semibold tracking-tight text-purple-100/95 whitespace-nowrap">
                 Commission
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/20 bg-white/15 p-3.5 backdrop-blur-md shadow-inner sm:p-4">
-              <div className="font-mono text-lg font-black text-white sm:text-2xl">
+            <div className="min-w-0 overflow-hidden rounded-2xl border border-white/20 bg-white/15 px-2.5 py-3 backdrop-blur-md shadow-inner sm:p-4 flex flex-col justify-center gap-1.5">
+              <div className="num text-[15px] sm:text-2xl font-black tracking-tight text-white whitespace-nowrap leading-none">
                 $200,000
               </div>
-              <div className="mt-1 text-[11px] font-semibold text-purple-100/80 sm:text-xs">
+              <div className="text-[10px] sm:text-xs font-semibold tracking-tight text-purple-100/95 whitespace-nowrap">
                 Marketing budget
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/20 bg-white/15 p-3.5 backdrop-blur-md shadow-inner sm:p-4">
-              <div className="font-mono text-lg font-black text-white sm:text-2xl">
+            <div className="min-w-0 overflow-hidden rounded-2xl border border-white/20 bg-white/15 px-2.5 py-3 backdrop-blur-md shadow-inner sm:p-4 flex flex-col justify-center gap-1.5">
+              <div className="num text-[15px] sm:text-2xl font-black tracking-tight text-white whitespace-nowrap leading-none">
                 12 mo
               </div>
-              <div className="mt-1 text-[11px] font-semibold text-purple-100/80 sm:text-xs">
+              <div className="text-[10px] sm:text-xs font-semibold tracking-tight text-purple-100/95 whitespace-nowrap">
                 Token vesting
               </div>
             </div>
@@ -110,10 +110,10 @@ export default function ReferralPage() {
       </section>
 
       {/* 2. Your Unique Referral Link Card */}
-      <section className="rounded-[26px] border border-[var(--line)] bg-[var(--s1)] p-6 shadow-sm sm:p-7">
+      <section className="rounded-[26px] border border-[var(--line)] bg-[var(--s1)] p-5 shadow-sm sm:p-7">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h2 className="text-lg font-extrabold text-[var(--tx)]">
+            <h2 className="text-base sm:text-lg font-extrabold text-[var(--tx)]">
               Your Unique Referral Link
             </h2>
             <p className="mt-1 text-xs text-[var(--mut)] sm:text-sm">
@@ -125,7 +125,7 @@ export default function ReferralPage() {
           </div>
         </div>
 
-        <div className="mt-5 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="mt-4 sm:mt-5 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <input
             id="ref-link-input"
             type="text"
@@ -183,10 +183,10 @@ export default function ReferralPage() {
       </section>
 
       {/* 3. Upgraded Referral Account Statistics */}
-      <section className="rounded-[26px] border border-[var(--line)] bg-[var(--s1)] p-6 md:p-7 shadow-sm space-y-5">
+      <section className="rounded-[26px] border border-[var(--line)] bg-[var(--s1)] p-5 md:p-7 shadow-sm space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="text-lg font-extrabold text-[var(--tx)]">Referral Account Statistics</h3>
+            <h3 className="text-base sm:text-lg font-extrabold text-[var(--tx)]">Referral Account Statistics</h3>
             <p className="text-xs text-[var(--mut)] mt-0.5">
               Real-time earnings performance, active downstream buyers, and partner rank
             </p>
@@ -207,43 +207,43 @@ export default function ReferralPage() {
         </div>
 
         {/* 4-Stat Metric Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-          <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-4">
-            <div className="text-xs font-bold text-[var(--mut)]">Total Referrals</div>
-            <div className="num text-2xl font-extrabold text-[var(--tx)] mt-1">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
+          <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-3.5 sm:p-4">
+            <div className="text-[11px] sm:text-xs font-bold text-[var(--mut)]">Total Referrals</div>
+            <div className="num text-xl sm:text-2xl font-extrabold text-[var(--tx)] mt-1">
               14 <span className="text-xs font-semibold text-[var(--mut)]">friends</span>
             </div>
             <div className="text-[11px] font-bold text-[#2FBD8E] mt-1">11 active buyers (78%)</div>
           </div>
 
-          <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-4">
-            <div className="text-xs font-bold text-[var(--mut)]">Total Earned ($)</div>
-            <div className="num text-2xl font-extrabold text-[#2FBD8E] mt-1">
+          <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-3.5 sm:p-4">
+            <div className="text-[11px] sm:text-xs font-bold text-[var(--mut)]">Total Earned ($)</div>
+            <div className="num text-xl sm:text-2xl font-extrabold text-[#2FBD8E] mt-1">
               {hideBalance ? '••••••' : '$142.50'}
             </div>
             <div className="text-[11px] font-bold text-[#F3BA2F] mt-1">~0.238 BNB Payout</div>
           </div>
 
-          <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-4">
-            <div className="text-xs font-bold text-[var(--mut)]">Active Commission Rate</div>
-            <div className="num text-2xl font-extrabold text-[var(--tx)] mt-1">12.5%</div>
+          <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-3.5 sm:p-4">
+            <div className="text-[11px] sm:text-xs font-bold text-[var(--mut)]">Commission Rate</div>
+            <div className="num text-xl sm:text-2xl font-extrabold text-[var(--tx)] mt-1">12.5%</div>
             <div className="text-[11px] font-bold text-[var(--mut)] mt-1">Next tier: 15.0%</div>
           </div>
 
-          <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-4">
-            <div className="text-xs font-bold text-[var(--mut)]">Ecosystem Multiplier</div>
-            <div className="num text-2xl font-extrabold text-[#FFD60A] mt-1">1.5x</div>
+          <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-3.5 sm:p-4">
+            <div className="text-[11px] sm:text-xs font-bold text-[var(--mut)]">Points Multiplier</div>
+            <div className="num text-xl sm:text-2xl font-extrabold text-[#FFD60A] mt-1">1.5x</div>
             <div className="text-[11px] font-bold text-[var(--mut)] mt-1">+1,420 OK Points</div>
           </div>
         </div>
 
         {/* Tier Progress Bar */}
-        <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-4 space-y-2">
-          <div className="flex items-center justify-between text-xs font-bold">
+        <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-4 space-y-2.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs font-bold">
             <span className="text-[var(--tx)]">
               Rank Progression: <strong className="text-[#C9A6FF]">Gold Partner (15% Commission)</strong>
             </span>
-            <span className="text-[#C9A6FF]">14 / 25 Referrals (56%)</span>
+            <span className="text-[#C9A6FF] shrink-0">14 / 25 Referrals (56%)</span>
           </div>
           <div className="h-2 w-full rounded-full bg-[var(--line)] overflow-hidden">
             <div
@@ -251,9 +251,9 @@ export default function ReferralPage() {
               style={{ width: '56%' }}
             />
           </div>
-          <div className="flex items-center justify-between text-[11px] text-[var(--mut)]">
-            <span>11 more successful invites needed to reach maximum Tier 3 tier status</span>
-            <span className="font-bold text-[var(--tx)]">Instant auto-upgrade upon qualification</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] text-[var(--mut)]">
+            <span>11 more successful invites needed to reach Tier 3 status</span>
+            <span className="font-bold text-[var(--tx)] shrink-0">Instant auto-upgrade upon qualification</span>
           </div>
         </div>
       </section>
@@ -295,9 +295,20 @@ export default function ReferralPage() {
             <div className="flex items-start gap-2.5">
               <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#7A12F5]" />
               <div className="text-xs sm:text-sm leading-relaxed text-[var(--mut)]">
-                <strong className="text-[var(--tx)] font-bold">Direct Sales Commission:</strong>{' '}
-                You earn a <strong className="text-[var(--tx)] font-bold">10% - 15% commission</strong>{' '}
+                <strong className="text-[var(--tx)] font-bold">Direct Cash Commission:</strong>{' '}
+                You earn a <strong className="text-[var(--tx)] font-bold">10% – 15% commission</strong>{' '}
                 on every single token purchase (USDT/BNB) made through your unique tracking links.
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2.5">
+              <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#09B4FF]" />
+              <div className="text-xs sm:text-sm leading-relaxed text-[var(--mut)]">
+                <strong className="text-[var(--tx)] font-bold">&quot;OK Points&quot; Commission Structure:</strong>{' '}
+                You earn a share of the OK Points your referrals make from tasks:{' '}
+                <strong className="text-[var(--tx)] font-bold">
+                  10% at Tier 1 (Starter), 5% at Tier 2 (Growth), 2% at Tier 3 (Whale Partner)
+                </strong>.
               </div>
             </div>
 
@@ -432,29 +443,72 @@ export default function ReferralPage() {
         </section>
       </div>
 
-      {/* 6. Commission Tiers Summary */}
-      <section className="rounded-3xl border border-[var(--line)] bg-[var(--s1)] p-6 sm:p-7 shadow-sm">
-        <h3 className="text-base font-extrabold text-[var(--tx)] mb-4">
-          Commission Tier Structure
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="p-4 rounded-2xl border border-[var(--line)] bg-[var(--s2)] space-y-1">
-            <div className="text-xs font-extrabold text-[var(--tx)]">Tier 1 · Starter</div>
-            <div className="text-[11px] text-[var(--mut)]">0–5 Active Buyers</div>
-            <div className="num text-xl font-black text-[var(--tx)] mt-1">10% BNB</div>
+      {/* 6. Commission Tier Structure: Cash + OK Points */}
+      <section className="rounded-3xl border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-7 shadow-sm space-y-6">
+        {/* Cash Commission Structure */}
+        <div>
+          <div className="mb-3.5">
+            <h3 className="text-base sm:text-lg font-extrabold text-[var(--tx)]">
+              Cash Commission Tier Structure
+            </h3>
+            <p className="text-xs text-[var(--mut)] mt-0.5">
+              Instant BNB / USDT commission payouts on every token purchase made by your referrals.
+            </p>
           </div>
 
-          <div className="p-4 rounded-2xl border border-[#7A12F5]/40 bg-[#7A12F5]/10 space-y-1">
-            <div className="text-xs font-extrabold text-[#C9A6FF]">Tier 2 · Growth (Current)</div>
-            <div className="text-[11px] text-[var(--mut)]">6–25 Active Buyers</div>
-            <div className="num text-xl font-black text-[#C9A6FF] mt-1">12.5% BNB</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="p-4 rounded-2xl border border-[var(--line)] bg-[var(--s2)] space-y-1">
+              <div className="text-xs font-extrabold text-[var(--tx)]">Tier 1 · Starter</div>
+              <div className="text-[11px] text-[var(--mut)]">0–5 Active Buyers</div>
+              <div className="num text-xl font-black text-[var(--tx)] mt-1">10% BNB</div>
+            </div>
+
+            <div className="p-4 rounded-2xl border border-[#7A12F5]/40 bg-[#7A12F5]/10 space-y-1">
+              <div className="text-xs font-extrabold text-[#C9A6FF]">Tier 2 · Growth (Current)</div>
+              <div className="text-[11px] text-[var(--mut)]">6–25 Active Buyers</div>
+              <div className="num text-xl font-black text-[#C9A6FF] mt-1">12.5% BNB</div>
+            </div>
+
+            <div className="p-4 rounded-2xl border border-[#FFD60A]/40 bg-[#FFD60A]/10 space-y-1">
+              <div className="text-xs font-extrabold text-[#FFD60A]">Tier 3 · Whale Partner</div>
+              <div className="text-[11px] text-[var(--mut)]">26+ Active Buyers</div>
+              <div className="num text-xl font-black text-[#FFD60A] mt-1">15% BNB</div>
+            </div>
+          </div>
+        </div>
+
+        {/* OK Points Commission Structure */}
+        <div className="pt-5 border-t border-[var(--line)]">
+          <div className="mb-3.5">
+            <h3 className="text-base sm:text-lg font-extrabold text-[var(--tx)]">
+              &quot;OK Points&quot; Commission Structure
+            </h3>
+            <p className="text-xs sm:text-sm text-[var(--mut)] mt-1 leading-relaxed">
+              You earn a share of the OK Points your referrals make from tasks:{' '}
+              <strong className="text-[var(--tx)] font-bold">
+                10% at Tier 1 (Starter), 5% at Tier 2 (Growth), 2% at Tier 3 (Whale Partner).
+              </strong>
+            </p>
           </div>
 
-          <div className="p-4 rounded-2xl border border-[#FFD60A]/40 bg-[#FFD60A]/10 space-y-1">
-            <div className="text-xs font-extrabold text-[#FFD60A]">Tier 3 · Whale Partner</div>
-            <div className="text-[11px] text-[var(--mut)]">26+ Active Buyers</div>
-            <div className="num text-xl font-black text-[#FFD60A] mt-1">15% BNB</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="p-4 rounded-2xl border border-[var(--line)] bg-[var(--s2)] space-y-1">
+              <div className="text-xs font-extrabold text-[var(--tx)]">Tier 1 (Starter)</div>
+              <div className="text-[11px] text-[var(--mut)]">Share of referral task points</div>
+              <div className="num text-xl font-black text-[#09B4FF] mt-1">10% OK Points</div>
+            </div>
+
+            <div className="p-4 rounded-2xl border border-[#7A12F5]/40 bg-[#7A12F5]/10 space-y-1">
+              <div className="text-xs font-extrabold text-[#C9A6FF]">Tier 2 (Growth)</div>
+              <div className="text-[11px] text-[var(--mut)]">Share of referral task points</div>
+              <div className="num text-xl font-black text-[#C9A6FF] mt-1">5% OK Points</div>
+            </div>
+
+            <div className="p-4 rounded-2xl border border-[#FFD60A]/40 bg-[#FFD60A]/10 space-y-1">
+              <div className="text-xs font-extrabold text-[#FFD60A]">Tier 3 (Whale Partner)</div>
+              <div className="text-[11px] text-[var(--mut)]">Share of referral task points</div>
+              <div className="num text-xl font-black text-[#FFD60A] mt-1">2% OK Points</div>
+            </div>
           </div>
         </div>
       </section>

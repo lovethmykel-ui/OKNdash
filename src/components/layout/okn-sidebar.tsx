@@ -210,10 +210,11 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
                 const isPolymarket = item.href === '/app/polymarket-agent';
                 const isBuy = item.href === '/app/buy';
                 const isActive = pathname === item.href;
-                const isSoon =
+                const isComingSoon =
                   item.href === '/app/trade-bot' ||
                   item.href === '/app/polymarket-agent' ||
-                  item.href === '/app/prediction-markets';
+                  item.href === '/app/prediction-markets' ||
+                  item.href === '/app/staking';
 
                 return (
                   <SidebarMenuItem key={item.href}>
@@ -226,7 +227,7 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
                       <Link
                         href={bareAppHref(item.href) as never}
                         onClick={closeMobile}
-                        className={cn(isActive && '!text-white')}
+                        className={cn('gap-2 px-2.5', isActive && '!text-white')}
                         style={isActive ? { color: '#ffffff' } : undefined}
                       >
                         {isPolymarket ? (
@@ -235,7 +236,7 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
                             alt="Polymarket"
                             width={18}
                             height={18}
-                            className="size-[18px] rounded-full object-contain shadow-[0_2px_8px_rgba(9,180,255,0.3)]"
+                            className="size-[18px] shrink-0 rounded-full object-contain shadow-[0_2px_8px_rgba(9,180,255,0.3)]"
                           />
                         ) : isBuy ? (
                           <motion.span
@@ -270,26 +271,29 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
                           </motion.span>
                         ) : (
                           <Icon
-                            className={cn('size-[18px]', isActive && '!text-white !stroke-white')}
+                            className={cn('size-[18px] shrink-0', isActive && '!text-white !stroke-white')}
                             style={isActive ? { color: '#ffffff', stroke: '#ffffff' } : undefined}
                           />
                         )}
                         <span
-                          className={cn('flex-1 truncate', isActive && '!text-white')}
+                          className={cn(
+                            'flex-1 truncate text-[13px]',
+                            isActive && '!text-white',
+                          )}
                           style={isActive ? { color: '#ffffff' } : undefined}
                         >
                           {label}
                         </span>
-                        {isSoon && (
+                        {isComingSoon && (
                           <span
                             className={cn(
-                              'rounded-md px-1.5 py-0.5 text-[10px] font-bold group-data-[collapsible=icon]:hidden',
+                              'shrink-0 whitespace-nowrap rounded-md px-1.5 py-0.5 text-[9.5px] leading-tight font-extrabold tracking-tight group-data-[collapsible=icon]:hidden',
                               isActive
-                                ? 'bg-white/25 text-white'
-                                : 'bg-emerald-500/15 text-emerald-400'
+                                ? 'bg-white/20 !text-white border border-white/30'
+                                : 'bg-[#7A12F5]/15 text-[#C9A6FF] border border-[#7A12F5]/30',
                             )}
                           >
-                            Demo
+                            Coming Soon
                           </span>
                         )}
                       </Link>

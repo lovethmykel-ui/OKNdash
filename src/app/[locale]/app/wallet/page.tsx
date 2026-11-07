@@ -9,6 +9,7 @@
  *   Holdings (Active) -> /app/wallet
  */
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import {
@@ -481,132 +482,153 @@ export default function WalletPage() {
         </div>
       </div>
 
-      {/* Deposit Modal */}
-      {showDepositModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-[28px] border border-[var(--line)] bg-[var(--s1)] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-extrabold text-[var(--tx)]">Deposit to Account</h3>
-              <button
-                onClick={() => setShowDepositModal(false)}
-                className="size-8 rounded-full bg-[var(--s2)] text-[var(--mut)] hover:text-[var(--tx)] flex items-center justify-center cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-[var(--s2)] border border-[var(--line)] my-4">
-              <div className="size-40 bg-white p-2 rounded-xl flex items-center justify-center shadow-md">
-                <QrCode className="size-36 text-black" />
-              </div>
-              <p className="text-xs font-semibold text-[var(--mut)] mt-3">Scan QR or copy address below</p>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-[var(--mut)] uppercase tracking-wider">Deposit Address (BNB / BEP-20)</label>
-              <div className="flex items-center gap-2 p-2.5 rounded-xl border border-[var(--line)] bg-[var(--s2)]">
-                <span className="font-mono text-xs font-bold text-[var(--tx)] flex-1 truncate">{currentAddress}</span>
+      {/* Deposit Modal — Centered on Web & Mobile */}
+      {showDepositModal &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-md p-4"
+            onClick={() => setShowDepositModal(false)}
+          >
+            <div
+              className="w-full max-w-[380px] sm:max-w-[420px] rounded-[28px] border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-6 shadow-[0_24px_64px_rgba(0,0,0,0.65)]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base sm:text-lg font-extrabold text-[var(--tx)]">Deposit to Account</h3>
                 <button
-                  onClick={copyAddress}
-                  className="px-3 py-1.5 rounded-lg bg-[#7A12F5] text-white text-xs font-bold shadow-sm hover:bg-[#8C38F7] cursor-pointer"
+                  type="button"
+                  onClick={() => setShowDepositModal(false)}
+                  className="size-8 rounded-full bg-[var(--s2)] text-[var(--mut)] hover:text-[var(--tx)] flex items-center justify-center cursor-pointer"
                 >
-                  {copied ? 'Copied' : 'Copy'}
+                  ✕
                 </button>
               </div>
-            </div>
 
-            <p className="text-[11px] text-[var(--mut)] mt-4 text-center">
-              Only send BNB or BEP-20 tokens to this address on BNB Smart Chain.
-            </p>
-          </div>
-        </div>
-      )}
+              <div className="flex flex-col items-center justify-center p-5 rounded-2xl bg-[var(--s2)] border border-[var(--line)] my-3.5">
+                <div className="size-36 bg-white p-2 rounded-xl flex items-center justify-center shadow-md">
+                  <QrCode className="size-32 text-black" />
+                </div>
+                <p className="text-xs font-semibold text-[var(--mut)] mt-2.5">Scan QR or copy address below</p>
+              </div>
 
-      {/* Withdraw Modal */}
-      {showWithdrawModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-[28px] border border-[var(--line)] bg-[var(--s1)] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-extrabold text-[var(--tx)]">Withdraw Funds</h3>
-              <button
-                onClick={() => setShowWithdrawModal(false)}
-                className="size-8 rounded-full bg-[var(--s2)] text-[var(--mut)] hover:text-[var(--tx)] flex items-center justify-center cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleWithdrawSubmit} className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-[var(--mut)] uppercase tracking-wider">Select Asset</label>
-                <div className="grid grid-cols-2 gap-2 mt-1">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-[var(--mut)] uppercase tracking-wider">Deposit Address (BNB / BEP-20)</label>
+                <div className="flex items-center gap-2 p-2.5 rounded-xl border border-[var(--line)] bg-[var(--s2)]">
+                  <span className="font-mono text-xs font-bold text-[var(--tx)] flex-1 truncate">{currentAddress}</span>
                   <button
                     type="button"
-                    onClick={() => setWithdrawAsset('BNB')}
-                    className={`py-2.5 rounded-xl border text-xs font-extrabold transition-all cursor-pointer ${
-                      withdrawAsset === 'BNB'
-                        ? 'border-[#F3BA2F] bg-[#F3BA2F]/15 text-[#F3BA2F]'
-                        : 'border-[var(--line)] bg-[var(--s2)] text-[var(--mut)]'
-                    }`}
+                    onClick={copyAddress}
+                    className="px-3 py-1.5 rounded-lg bg-[#7A12F5] text-white text-xs font-bold shadow-sm hover:bg-[#8C38F7] cursor-pointer"
                   >
-                    BNB (1.45 Available)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setWithdrawAsset('OKN')}
-                    className={`py-2.5 rounded-xl border text-xs font-extrabold transition-all cursor-pointer ${
-                      withdrawAsset === 'OKN'
-                        ? 'border-[#7A12F5] bg-[#7A12F5]/15 text-[#C9A6FF]'
-                        : 'border-[var(--line)] bg-[var(--s2)] text-[var(--mut)]'
-                    }`}
-                  >
-                    $OKN (693K Available)
+                    {copied ? 'Copied' : 'Copy'}
                   </button>
                 </div>
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-[var(--mut)] uppercase tracking-wider">Recipient Address</label>
-                <input
-                  type="text"
-                  placeholder="0x..."
-                  value={withdrawAddress}
-                  onChange={(e) => setWithdrawAddress(e.target.value)}
-                  className="w-full mt-1 px-4 py-2.5 rounded-xl border border-[var(--line)] bg-[var(--s2)] text-xs font-mono font-bold text-[var(--tx)] outline-none focus:border-[#7A12F5]"
-                />
+              <p className="text-[11px] text-[var(--mut)] mt-4 text-center">
+                Only send BNB or BEP-20 tokens to this address on BNB Smart Chain.
+              </p>
+            </div>
+          </div>,
+          document.body,
+        )}
+
+      {/* Withdraw Modal — Centered on Web & Mobile */}
+      {showWithdrawModal &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-md p-4"
+            onClick={() => setShowWithdrawModal(false)}
+          >
+            <div
+              className="w-full max-w-[380px] sm:max-w-[420px] rounded-[28px] border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-6 shadow-[0_24px_64px_rgba(0,0,0,0.65)]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base sm:text-lg font-extrabold text-[var(--tx)]">Withdraw Funds</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowWithdrawModal(false)}
+                  className="size-8 rounded-full bg-[var(--s2)] text-[var(--mut)] hover:text-[var(--tx)] flex items-center justify-center cursor-pointer"
+                >
+                  ✕
+                </button>
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-[var(--mut)] uppercase tracking-wider">Amount</label>
-                <div className="relative mt-1">
+              <form onSubmit={handleWithdrawSubmit} className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-[var(--mut)] uppercase tracking-wider">Select Asset</label>
+                  <div className="grid grid-cols-2 gap-2 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => setWithdrawAsset('BNB')}
+                      className={`py-2.5 rounded-xl border text-xs font-extrabold transition-all cursor-pointer ${
+                        withdrawAsset === 'BNB'
+                          ? 'border-[#F3BA2F] bg-[#F3BA2F]/15 text-[#F3BA2F]'
+                          : 'border-[var(--line)] bg-[var(--s2)] text-[var(--mut)]'
+                      }`}
+                    >
+                      BNB (1.45 Available)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setWithdrawAsset('OKN')}
+                      className={`py-2.5 rounded-xl border text-xs font-extrabold transition-all cursor-pointer ${
+                        withdrawAsset === 'OKN'
+                          ? 'border-[#7A12F5] bg-[#7A12F5]/15 text-[#C9A6FF]'
+                          : 'border-[var(--line)] bg-[var(--s2)] text-[var(--mut)]'
+                      }`}
+                    >
+                      $OKN (693K Available)
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-[var(--mut)] uppercase tracking-wider">Recipient Address</label>
                   <input
-                    type="number"
-                    step="any"
-                    placeholder="0.00"
-                    value={withdrawAmount}
-                    onChange={(e) => setWithdrawAmount(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-[var(--line)] bg-[var(--s2)] text-sm font-bold text-[var(--tx)] outline-none focus:border-[#7A12F5]"
+                    type="text"
+                    placeholder="0x..."
+                    value={withdrawAddress}
+                    onChange={(e) => setWithdrawAddress(e.target.value)}
+                    className="w-full mt-1 px-4 py-2.5 rounded-xl border border-[var(--line)] bg-[var(--s2)] text-xs font-mono font-bold text-[var(--tx)] outline-none focus:border-[#7A12F5]"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setWithdrawAmount(withdrawAsset === 'BNB' ? '1.45' : '693333')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 px-2 py-1 rounded bg-[var(--line)] text-[10px] font-extrabold text-[var(--tx)]"
-                  >
-                    MAX
-                  </button>
                 </div>
-              </div>
 
-              <button
-                type="submit"
-                className="w-full h-11 rounded-xl bg-[#7A12F5] text-white text-xs font-extrabold shadow-md hover:bg-[#8C38F7] transition-all cursor-pointer mt-2"
-              >
-                Confirm Withdrawal
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+                <div>
+                  <label className="text-xs font-bold text-[var(--mut)] uppercase tracking-wider">Amount</label>
+                  <div className="relative mt-1">
+                    <input
+                      type="number"
+                      step="any"
+                      placeholder="0.00"
+                      value={withdrawAmount}
+                      onChange={(e) => setWithdrawAmount(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-[var(--line)] bg-[var(--s2)] text-sm font-bold text-[var(--tx)] outline-none focus:border-[#7A12F5]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setWithdrawAmount(withdrawAsset === 'BNB' ? '1.45' : '693333')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 px-2 py-1 rounded bg-[var(--line)] text-[10px] font-extrabold text-[var(--tx)]"
+                    >
+                      MAX
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full h-11 rounded-xl bg-[#7A12F5] text-white text-xs font-extrabold shadow-md hover:bg-[#8C38F7] transition-all cursor-pointer mt-2"
+                >
+                  Confirm Withdrawal
+                </button>
+              </form>
+            </div>
+          </div>,
+          document.body,
+        )}
     </main>
   );
 }

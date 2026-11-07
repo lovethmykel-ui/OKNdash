@@ -36,13 +36,13 @@ export default function AgentsPage() {
         <div className="relative z-10 max-w-2xl">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-extrabold backdrop-blur-md mb-3">
             <Sparkles className="size-3.5" />
-            <span>Autonomous Protocol Suite · Interactive Demo</span>
+            <span>Autonomous Protocol Suite · Market Preview — In Development</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
             OKN Autonomous Suite
           </h1>
           <p className="mt-2 text-sm md:text-base font-medium text-[#E4D3FF] leading-relaxed">
-            Explore all four autonomous modules in interactive demo mode: mirror whale trades, copy AI crypto signals, bet on outcome markets, or stake $OKN for yield.
+            Explore all four autonomous modules: mirror whale trades, preview AI crypto signals, trade outcome markets, or stake $OKN for yield.
           </p>
         </div>
 
@@ -58,9 +58,14 @@ export default function AgentsPage() {
               <Lock className="size-5 stroke-[2.5]" />
             </span>
             <div className="min-w-0">
-              <h2 className="text-base md:text-lg font-extrabold text-[var(--inv-tx)] leading-tight">
-                $OKN Staking Vault
-              </h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-base md:text-lg font-extrabold text-[var(--inv-tx)] leading-tight">
+                  $OKN Staking Vault
+                </h2>
+                <span className="inline-flex items-center rounded-full bg-[#7A12F5]/15 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#7A12F5]">
+                  Coming Soon
+                </span>
+              </div>
               <p className="text-xs md:text-sm font-semibold text-[var(--inv-mut)] mt-0.5 truncate">
                 Lock $OKN, earn up to 84% APY. Longer locks earn higher multipliers.
               </p>
@@ -70,7 +75,7 @@ export default function AgentsPage() {
             href="/app/staking"
             className="shrink-0 inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-[#7A12F5] text-white text-xs font-extrabold shadow-sm hover:opacity-90 transition-opacity"
           >
-            <span>Open Vault</span>
+            <span>Coming Soon</span>
             <ChevronRight className="size-3.5" />
           </Link>
         </div>
@@ -103,9 +108,14 @@ export default function AgentsPage() {
               <TrendingUp className="size-5 stroke-[2.5]" />
             </span>
             <div className="min-w-0">
-              <h2 className="text-base md:text-lg font-extrabold text-[var(--tx)] leading-tight">
-                AI Trading Agent
-              </h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-base md:text-lg font-extrabold text-[var(--tx)] leading-tight">
+                  AI Trading Agent
+                </h2>
+                <span className="inline-flex items-center rounded-full border border-[#FFAA00]/30 bg-[#FFAA00]/15 px-2.5 py-0.5 text-[10px] font-extrabold text-[#FFAA00]">
+                  Market Preview — In Development
+                </span>
+              </div>
               <p className="text-xs md:text-sm font-semibold text-[var(--mut)] mt-0.5 truncate">
                 Your AI co-pilot for automated Long / Short crypto signals
               </p>
@@ -115,7 +125,7 @@ export default function AgentsPage() {
             href="/app/trade-bot"
             className="shrink-0 inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-[#FFAA00]/15 text-[#FFAA00] text-xs font-extrabold border border-[#FFAA00]/30 hover:bg-[#FFAA00]/25 transition-colors"
           >
-            <span>Open Signals</span>
+            <span>Open Preview</span>
             <ChevronRight className="size-3.5" />
           </Link>
         </div>
@@ -124,7 +134,7 @@ export default function AgentsPage() {
         </p>
       </section>
 
-      {/* Feature Card 3: Polymarket Copy Agent (LIVE NOW) */}
+      {/* Feature Card 3: Polymarket Copy Agent */}
       <section className="rounded-[24px] border-2 border-[#1652F0]/60 bg-gradient-to-br from-[#1652F0]/15 via-[var(--s1)] to-[var(--s1)] p-5 md:p-6 shadow-[0_8px_24px_rgba(22,82,240,0.18)]">
         <div className="flex items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3.5 min-w-0">
@@ -138,9 +148,9 @@ export default function AgentsPage() {
                 <h2 className="text-base md:text-lg font-extrabold text-[var(--tx)] leading-tight">
                   Polymarket Copy Agent
                 </h2>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#10B981]/20 text-[#34D399] border border-[#10B981]/40 text-[10px] font-extrabold uppercase tracking-wider">
-                  <span className="size-1.5 rounded-full bg-[#10B981] animate-pulse" />
-                  <span>LIVE</span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#09B4FF]/20 text-[#7DD3FC] border border-[#09B4FF]/40 text-[10px] font-extrabold">
+                  <span className="size-1.5 rounded-full bg-[#09B4FF] animate-pulse" />
+                  <span>Market Preview — In Development</span>
                 </span>
               </div>
               <p className="text-xs md:text-sm font-semibold text-[var(--mut)] mt-0.5 truncate">
@@ -196,8 +206,8 @@ export default function AgentsPage() {
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <span className="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-extrabold border border-emerald-500/30">
-            Live Demo
+          <span className="px-3 py-1 rounded-full bg-[#E81CFF]/15 text-[#F59EFF] text-[11px] font-extrabold border border-[#E81CFF]/30">
+            Market Preview
           </span>
           <ChevronRight className="size-4 text-[var(--mut)]" />
         </div>

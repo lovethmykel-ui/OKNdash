@@ -65,9 +65,9 @@ export default function PredictionMarketsPage() {
         title={t('title')}
         description={t('description')}
         actions={
-          <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400">
+          <Badge variant="secondary" className="bg-amber-500/15 text-amber-400">
             <Sparkles data-icon="inline-start" />
-            Interactive Demo
+            Market Preview — In Development
           </Badge>
         }
       />
@@ -85,9 +85,9 @@ export default function PredictionMarketsPage() {
                 <p className="max-w-prose text-sm text-muted-foreground">{t('body')}</p>
               </div>
             </div>
-            <div className="flex shrink-0 items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-400">
+            <div className="flex shrink-0 items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-400">
               <Sparkles className="size-3.5" />
-              <span>{Object.keys(positions).length} Active Demo Bets</span>
+              <span>Coming Soon · {Object.keys(positions).length} Preview {Object.keys(positions).length === 1 ? 'Position' : 'Positions'}</span>
             </div>
           </div>
 

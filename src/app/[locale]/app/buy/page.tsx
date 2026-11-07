@@ -9,6 +9,7 @@
  *   2. Web3 Wallet: Instant 1-click BNB Smart Chain swap with connected Demo Wallet
  */
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ArrowDown,
   Check,
@@ -720,96 +721,105 @@ export default function BuyPage() {
         </div>
       </section>
 
-      {/* 4. Live Crypto Deposit Invoice Modal */}
-      {showInvoiceModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/65 backdrop-blur-xs p-0 sm:p-4">
-          <div className="w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-6 shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2.5">
-                <span
-                  className="flex size-8 items-center justify-center rounded-xl text-xs font-black text-white"
-                  style={{ backgroundColor: selectedCrypto.accentColor }}
-                >
-                  {selectedCrypto.ticker}
-                </span>
-                <div>
-                  <h3 className="text-sm sm:text-base font-extrabold text-[var(--tx)]">
-                    {selectedCrypto.ticker} Deposit Invoice
-                  </h3>
-                  <p className="text-[11px] text-[var(--mut)]">
-                    Network: {selectedCrypto.network}
-                  </p>
+      {/* 4. Live Crypto Deposit Invoice Modal — Always Centered on Web & Mobile */}
+      {showInvoiceModal &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-md p-4"
+            onClick={() => setShowInvoiceModal(false)}
+          >
+            <div
+              className="w-full max-w-[380px] sm:max-w-[420px] rounded-[28px] border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-6 shadow-[0_24px_64px_rgba(0,0,0,0.65)]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2.5">
+                  <span
+                    className="flex size-9 items-center justify-center rounded-xl text-xs font-black text-white shadow-xs"
+                    style={{ backgroundColor: selectedCrypto.accentColor }}
+                  >
+                    {selectedCrypto.ticker}
+                  </span>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-extrabold text-[var(--tx)] leading-tight">
+                      {selectedCrypto.ticker} Payment Invoice
+                    </h3>
+                    <p className="text-[11px] font-medium text-[var(--mut)] mt-0.5">
+                      Network: {selectedCrypto.network}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowInvoiceModal(false)}
-                className="size-9 rounded-full bg-[var(--s2)] text-[var(--mut)] hover:text-[var(--tx)] flex items-center justify-center cursor-pointer"
-                aria-label="Close invoice modal"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-3.5 flex items-center justify-between my-3">
-              <div>
-                <div className="text-[11px] font-medium text-[var(--mut)]">Amount Due</div>
-                <div className="font-mono text-xl font-extrabold text-[var(--tx)] tabular-nums mt-0.5">
-                  ${usdAmount} USD
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-[11px] font-medium text-[var(--mut)]">Allocation</div>
-                <div className="font-mono text-base font-extrabold text-[#FFD60A] tabular-nums mt-0.5">
-                  {formatPoints(oknFromUsd)} $OKN
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white my-3">
-              <QrCode className="size-32 text-black" />
-              <span className="text-[10px] font-bold text-zinc-600 mt-1.5 uppercase tracking-wider">
-                Scan on {selectedCrypto.network} Network
-              </span>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-[var(--mut)]">
-                Deposit Address ({selectedCrypto.network})
-              </label>
-              <div className="flex items-center gap-2 p-2.5 rounded-xl border border-[var(--line)] bg-[var(--s2)]">
-                <span className="font-mono text-xs font-bold text-[var(--tx)] flex-1 truncate">
-                  0x892aF21b76A93F424e75A0Bf9689874D14c9B231
-                </span>
                 <button
                   type="button"
-                  onClick={copyInvoiceAddress}
-                  className="h-8 px-3 rounded-lg bg-[#7A12F5] text-white text-xs font-bold shadow-xs hover:bg-[#8C38F7] cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
+                  onClick={() => setShowInvoiceModal(false)}
+                  className="size-8 rounded-full bg-[var(--s2)] text-[var(--mut)] hover:text-[var(--tx)] flex items-center justify-center cursor-pointer transition-colors"
+                  aria-label="Close invoice modal"
                 >
-                  {invoiceCopied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-                  <span>{invoiceCopied ? 'Copied' : 'Copy'}</span>
+                  ✕
                 </button>
               </div>
-            </div>
 
-            <div className="mt-3.5 flex items-center justify-between text-xs text-[var(--mut)]">
-              <span>
-                Expires in <strong className="font-mono text-[var(--tx)]">14:52</strong>
-              </span>
-              <span className="font-medium text-[#2FBD8E]">Awaiting transfer</span>
-            </div>
+              <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] px-4 py-3 flex items-center justify-between">
+                <div>
+                  <div className="text-[11px] font-medium text-[var(--mut)]">Amount Due</div>
+                  <div className="font-mono text-lg sm:text-xl font-extrabold text-[var(--tx)] tabular-nums mt-0.5">
+                    ${usdAmount} USD
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[11px] font-medium text-[var(--mut)]">You Receive</div>
+                  <div className="font-mono text-sm sm:text-base font-extrabold text-[#FFD60A] tabular-nums mt-0.5">
+                    {formatPoints(oknFromUsd)} $OKN
+                  </div>
+                </div>
+              </div>
 
-            <button
-              type="button"
-              onClick={() => void handleSimulateInvoicePaid()}
-              className="mt-4 w-full h-11 rounded-xl bg-[#2FBD8E] text-black text-xs sm:text-sm font-extrabold shadow-md hover:brightness-105 transition-all cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap"
-            >
-              <CheckCircle2 className="size-4 shrink-0" />
-              <span>Simulate Deposit Confirmed (Demo)</span>
-            </button>
-          </div>
-        </div>
-      )}
+              <div className="flex flex-col items-center justify-center py-4 px-3 rounded-2xl bg-white my-3.5 shadow-inner">
+                <QrCode className="size-28 sm:size-32 text-black" />
+                <span className="text-[10px] font-bold text-zinc-600 mt-1.5 uppercase tracking-wider">
+                  Scan on {selectedCrypto.network} Network
+                </span>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold text-[var(--mut)]">
+                  Deposit Address ({selectedCrypto.network})
+                </label>
+                <div className="flex items-center gap-2 p-2.5 rounded-xl border border-[var(--line)] bg-[var(--s2)]">
+                  <span className="font-mono text-xs font-bold text-[var(--tx)] flex-1 truncate">
+                    0x892aF21b76A93F424e75A0Bf9689874D14c9B231
+                  </span>
+                  <button
+                    type="button"
+                    onClick={copyInvoiceAddress}
+                    className="h-8 px-3 rounded-lg bg-[#7A12F5] text-white text-xs font-bold shadow-xs hover:bg-[#8C38F7] cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
+                  >
+                    {invoiceCopied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+                    <span>{invoiceCopied ? 'Copied' : 'Copy'}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-3.5 flex items-center justify-between text-xs text-[var(--mut)]">
+                <span>
+                  Expires in <strong className="font-mono text-[var(--tx)]">14:52</strong>
+                </span>
+                <span className="font-semibold text-[#2FBD8E]">Awaiting transfer</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => void handleSimulateInvoicePaid()}
+                className="mt-4 w-full h-11 rounded-xl bg-[#2FBD8E] text-black text-xs sm:text-sm font-extrabold shadow-md hover:brightness-105 transition-all cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap"
+              >
+                <CheckCircle2 className="size-4 shrink-0" />
+                <span>Confirm Payment Sent</span>
+              </button>
+            </div>
+          </div>,
+          document.body,
+        )}
     </main>
   );
 }

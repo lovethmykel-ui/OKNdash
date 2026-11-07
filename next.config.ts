@@ -43,6 +43,9 @@ const nextConfig: NextConfig = {
     ],
   },
   transpilePackages: ['@okn/shared', 'motion'],
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'motion'],
+  },
   serverExternalPackages: ['@coinbase/cdp-sdk', 'pino', 'pino-pretty'],
   async headers() {
     return [

@@ -82,9 +82,9 @@ export default function TradeBotPage() {
         title={t('title')}
         description={t('description')}
         actions={
-          <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400">
+          <Badge variant="secondary" className="bg-amber-500/15 text-amber-400">
             <Sparkles data-icon="inline-start" />
-            Live Demo Signals
+            Market Preview — In Development
           </Badge>
         }
       />
@@ -106,17 +106,17 @@ export default function TradeBotPage() {
               type="button"
               onClick={() => {
                 setAutoExecute((v) => !v);
-                toast.success(!autoExecute ? 'AI Co-Pilot Auto-Execution Enabled (Demo)' : 'AI Co-Pilot Paused');
+                toast.success(!autoExecute ? 'AI Co-Pilot Preview Enabled' : 'AI Co-Pilot Paused');
               }}
               className={cn(
                 'flex shrink-0 cursor-pointer items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-colors',
                 autoExecute
-                  ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-400'
+                  ? 'border-amber-500/40 bg-amber-500/15 text-amber-400'
                   : 'border-border/60 bg-card/80 text-muted-foreground',
               )}
             >
-              <span className={cn('size-2 rounded-full', autoExecute ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400')} />
-              <span>{autoExecute ? 'Co-Pilot Active (Demo)' : 'Co-Pilot Paused'}</span>
+              <span className={cn('size-2 rounded-full', autoExecute ? 'bg-amber-400 animate-pulse' : 'bg-muted-foreground')} />
+              <span>{autoExecute ? 'Market Preview — In Development' : 'Preview Paused'}</span>
             </button>
           </div>
 
@@ -145,8 +145,8 @@ export default function TradeBotPage() {
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               {t('signalHeading')}
             </h2>
-            <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-bold text-emerald-400">
-              {copiedPairs.length} Active Demo {copiedPairs.length === 1 ? 'Trade' : 'Trades'}
+            <span className="rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-bold text-amber-400">
+              Coming Soon · {copiedPairs.length} Preview {copiedPairs.length === 1 ? 'Signal' : 'Signals'}
             </span>
           </div>
 
@@ -238,7 +238,7 @@ function SignalCard({
             {isCopied ? (
               <>
                 <CheckCircle2 className="mr-1 size-3.5" />
-                Active (Demo)
+                Preview Active
               </>
             ) : (
               <>
