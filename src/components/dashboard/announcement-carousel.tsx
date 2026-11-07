@@ -99,9 +99,9 @@ export function AnnouncementCarousel({ id = 'ann-carousel' }: { id?: string }) {
                   <div className="min-w-0 flex-1 space-y-1">
                     {/* Tier 1: Eyebrow Badges */}
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-extrabold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/25">
-                        <span className="size-1.5 rounded-full bg-[#10B981] animate-pulse" />
-                        AI COPY TRADING
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-extrabold bg-[#FFD60A]/15 text-[#FFD60A] border border-[#FFD60A]/30">
+                        <span className="size-1.5 rounded-full bg-[#FFD60A] animate-pulse" />
+                        COMING SOON
                       </span>
                       <span className="px-2.5 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-bold bg-[var(--s2)] text-[var(--tx)] border border-[var(--line)]">
                         +38.4% 7D ROI · 78% Win Rate
@@ -110,7 +110,7 @@ export function AnnouncementCarousel({ id = 'ann-carousel' }: { id?: string }) {
 
                     {/* Tier 2: Headline */}
                     <h3 className="text-sm sm:text-base md:text-lg font-extrabold tracking-tight text-[var(--tx)] leading-snug">
-                      Polymarket Copy Agent <span className="text-[#7A12F5] dark:text-[#9D4EDD]">is Live</span>
+                      Polymarket Copy Agent — <span className="text-[#7A12F5] dark:text-[#9D4EDD]">Coming Soon</span>
                     </h3>
 
                     {/* Tier 3: Supporting Description */}

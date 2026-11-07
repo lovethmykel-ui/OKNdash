@@ -33,8 +33,7 @@ const APP_NAV = [
   { href: '/app/learn', labelKey: 'learn' },
   { href: '/app/wallet', labelKey: 'wallet' },
   { href: '/app/referral', labelKey: 'referral' },
-  // Settings + Appearance live in the avatar dropdown (top-right), not the
-  // sidebar, to avoid duplication. /app/settings is still a reachable route.
+  { href: '/app/settings', labelKey: 'settings' },
 ] as const;
 
 type Props = {

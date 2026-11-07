@@ -1,250 +1,92 @@
 'use client';
 
 /**
- * /app/prediction-markets — Prediction Markets (Interactive Demo).
+ * /app/prediction-markets — Prediction Markets ("Coming Soon" state).
  *
- * Interactive cross-protocol prediction-market browser: filter by category
- * and place instant $25 Demo YES/NO outcome positions.
+ * Displays a clean, minimalist Coming Soon state for Decentralized Prediction Markets.
  */
-import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import {
-  BarChart3,
-  CheckCircle2,
-  Droplets,
-  Sparkles,
-  TrendingUp,
-} from 'lucide-react';
-import { PageHeader } from '@/components/dashboard/page-header';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
-
-interface SampleMarket {
-  id: string;
-  title: string;
-  category: string;
-  volume: string;
-  liquidity: string;
-  yesProbability: number;
-}
-
-const SAMPLE_MARKETS: SampleMarket[] = [
-  { id: 'pm-1', title: 'BTC above $70k by end of Q4', category: 'Crypto', volume: '$4.2M', liquidity: '$810k', yesProbability: 64 },
-  { id: 'pm-2', title: 'Next US presidential winner', category: 'Politics', volume: '$12.8M', liquidity: '$2.1M', yesProbability: 53 },
-  { id: 'pm-3', title: 'Fed cuts rates in next meeting', category: 'Economics', volume: '$6.4M', liquidity: '$1.3M', yesProbability: 71 },
-  { id: 'pm-4', title: 'Lakers make the playoffs', category: 'Sports', volume: '$1.9M', liquidity: '$420k', yesProbability: 47 },
-  { id: 'pm-5', title: 'SOL ETF approved this year', category: 'Crypto', volume: '$3.1M', liquidity: '$680k', yesProbability: 58 },
-  { id: 'pm-6', title: 'GDP growth above 3% in Q3', category: 'Economics', volume: '$2.5M', liquidity: '$510k', yesProbability: 33 },
-];
+import { BarChart3, Clock, ShieldCheck, Sparkles } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
 
 export default function PredictionMarketsPage() {
   const t = useTranslations('dashboard.predictionMarkets');
   const categories = t.raw('categories') as unknown as string[];
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [positions, setPositions] = useState<Record<string, 'YES' | 'NO'>>({
-    'pm-1': 'YES',
-  });
-
-  const filteredMarkets = SAMPLE_MARKETS.filter((m) =>
-    selectedCategory === 'All' || selectedCategory === categories[0]
-      ? true
-      : m.category.toLowerCase() === selectedCategory.toLowerCase(),
-  );
-
-  const handleBet = (market: SampleMarket, side: 'YES' | 'NO') => {
-    setPositions((prev) => ({ ...prev, [market.id]: side }));
-    toast.success(`Placed $25 Demo ${side} position on "${market.title}"`);
-  };
 
   return (
-    <main className="space-y-6">
-      <PageHeader
-        title={t('title')}
-        description={t('description')}
-        actions={
-          <Badge variant="secondary" className="bg-amber-500/15 text-amber-400">
-            <Sparkles data-icon="inline-start" />
-            Market Preview — In Development
-          </Badge>
-        }
-      />
-
-      {/* Hero / status banner */}
-      <Card className="overflow-hidden">
-        <div className="bg-gradient-to-br from-ios-blue/10 via-ios-green/5 to-transparent p-5 md:p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex items-start gap-4">
-              <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-ios-blue/10 text-ios-blue">
-                <BarChart3 className="size-6" />
-              </span>
-              <div className="space-y-1">
-                <p className="font-display text-lg font-bold md:text-xl">{t('headline')}</p>
-                <p className="max-w-prose text-sm text-muted-foreground">{t('body')}</p>
-              </div>
-            </div>
-            <div className="flex shrink-0 items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-400">
-              <Sparkles className="size-3.5" />
-              <span>Coming Soon · {Object.keys(positions).length} Preview {Object.keys(positions).length === 1 ? 'Position' : 'Positions'}</span>
-            </div>
-          </div>
-
-          {/* Interactive Category filter chips */}
-          <div className="mt-5 flex flex-wrap gap-2">
-            {categories.map((label, i) => {
-              const isActive =
-                selectedCategory === label || (i === 0 && selectedCategory === 'All');
-              return (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => setSelectedCategory(i === 0 ? 'All' : label)}
-                  className={cn(
-                    'cursor-pointer inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold ring-1 transition-all',
-                    isActive
-                      ? 'bg-[#7A12F5] text-white ring-[#7A12F5]'
-                      : 'bg-card/80 text-foreground/80 ring-border/60 hover:bg-card',
-                  )}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
+    <main className="space-y-6 pb-12">
+      {/* Page Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--tx)]">
+            {t('title')}
+          </h1>
+          <p className="mt-1 text-xs sm:text-sm text-[var(--mut)]">
+            {t('description')}
+          </p>
         </div>
-      </Card>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#FFD60A]/40 bg-[#FFD60A]/15 px-3.5 py-1.5 text-xs font-extrabold text-[#FFD60A]">
+          <Clock className="size-3.5" />
+          <span>Coming Soon</span>
+        </span>
+      </div>
 
-      {/* Interactive Market grid */}
-      <section aria-label={t('title')} className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            {t('headline')}
+      {/* Main Coming Soon Space */}
+      <section className="relative overflow-hidden rounded-[28px] border border-[var(--line)] bg-[var(--s1)] p-6 sm:p-10 md:p-14 text-center shadow-sm">
+        <div className="mx-auto max-w-2xl space-y-5 relative z-10">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-3xl border border-[#09B4FF]/35 bg-[#09B4FF]/15 text-[#09B4FF] shadow-[0_8px_28px_rgba(9,180,255,0.2)]">
+            <BarChart3 className="size-7 stroke-[2.2]" />
+          </div>
+
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-[#FFD60A]/35 bg-[#FFD60A]/12 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-[#FFD60A]">
+            <Sparkles className="size-3.5" />
+            <span>Coming Soon</span>
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[var(--tx)]">
+            Prediction Markets — Coming Soon
           </h2>
-          <span className="text-xs text-muted-foreground">
-            Showing {filteredMarkets.length} markets
-          </span>
+
+          <p className="text-xs sm:text-sm md:text-base text-[var(--mut)] leading-relaxed max-w-xl mx-auto">
+            {t('body')}
+          </p>
+
+          {/* Planned Market Categories */}
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
+            {categories.map((cat) => (
+              <span
+                key={cat}
+                className="rounded-xl border border-[var(--line)] bg-[var(--s2)] px-3.5 py-2 text-xs font-extrabold text-[var(--tx)]"
+              >
+                {cat}
+              </span>
+            ))}
+          </div>
+
+          <div className="pt-3 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/app/buy"
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-[#7A12F5] px-6 text-xs sm:text-sm font-extrabold text-white shadow-md shadow-[#7A12F5]/25 hover:bg-[#8C38F7] transition-all"
+            >
+              Buy $OKN Presale
+            </Link>
+            <Link
+              href="/app/tasks"
+              className="inline-flex h-11 items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--s2)] px-5 text-xs sm:text-sm font-bold text-[var(--tx)] hover:bg-[var(--line)]/50 transition-all"
+            >
+              Earn Free OK Points
+            </Link>
+          </div>
+
+          <div className="pt-2 flex items-center justify-center gap-2 text-xs text-[var(--mut)]">
+            <ShieldCheck className="size-4 text-[#2FBD8E] shrink-0" />
+            <span>On-chain YES / NO outcome shares · Instant settlement</span>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredMarkets.map((m) => (
-            <MarketCard
-              key={m.id}
-              market={m}
-              activeSide={positions[m.id]}
-              onBet={(side) => handleBet(m, side)}
-            />
-          ))}
-        </div>
+        {/* Ambient lighting */}
+        <div className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 size-80 rounded-full bg-[#09B4FF]/12 blur-3xl" />
       </section>
     </main>
-  );
-}
-
-function MarketCard({
-  market,
-  activeSide,
-  onBet,
-}: {
-  market: SampleMarket;
-  activeSide?: 'YES' | 'NO';
-  onBet: (side: 'YES' | 'NO') => void;
-}) {
-  const yesLeading = market.yesProbability >= 50;
-  return (
-    <Card className={cn('transition-all', activeSide && 'border-emerald-500/50')}>
-      <CardContent className="space-y-3 p-4">
-        {/* Header: category + title */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="space-y-1">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-ios-blue">
-              {market.category}
-            </p>
-            <p className="text-sm font-semibold leading-snug">{market.title}</p>
-          </div>
-          {activeSide && (
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
-              <CheckCircle2 className="size-3" />
-              {activeSide} ($25)
-            </span>
-          )}
-        </div>
-
-        {/* Volume + liquidity stats */}
-        <div className="grid grid-cols-2 gap-2 border-t border-border/60 pt-3 text-center">
-          <Stat icon={TrendingUp} label="Volume" value={market.volume} />
-          <Stat icon={Droplets} label="Liquidity" value={market.liquidity} />
-        </div>
-
-        {/* Probability bar */}
-        <div className="border-t border-border/60 pt-3">
-          <div className="flex items-center justify-between text-xs">
-            <span className={cn('font-semibold', yesLeading ? 'text-ios-green' : 'text-ios-red')}>
-              YES {market.yesProbability}%
-            </span>
-            <span className={cn('font-semibold', !yesLeading ? 'text-ios-green' : 'text-ios-red')}>
-              NO {100 - market.yesProbability}%
-            </span>
-          </div>
-          <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-ios-red/20">
-            <div
-              className="h-full rounded-full bg-ios-green"
-              style={{ width: `${market.yesProbability}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Interactive Bet buttons */}
-        <div className="grid grid-cols-2 gap-2 border-t border-border/60 pt-3">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => onBet('YES')}
-            className={cn(
-              'h-8 cursor-pointer text-xs font-bold',
-              activeSide === 'YES'
-                ? 'border-ios-green bg-ios-green text-white hover:bg-ios-green/90'
-                : 'border-ios-green/40 bg-ios-green/10 text-ios-green hover:bg-ios-green/20',
-            )}
-          >
-            Bet YES ({market.yesProbability}¢)
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => onBet('NO')}
-            className={cn(
-              'h-8 cursor-pointer text-xs font-bold',
-              activeSide === 'NO'
-                ? 'border-ios-red bg-ios-red text-white hover:bg-ios-red/90'
-                : 'border-ios-red/40 bg-ios-red/10 text-ios-red hover:bg-ios-red/20',
-            )}
-          >
-            Bet NO ({100 - market.yesProbability}¢)
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function Stat({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof TrendingUp;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div>
-      <p className="flex items-center justify-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-        <Icon className="size-3" />
-        {label}
-      </p>
-      <p className="mt-0.5 font-mono text-xs font-semibold tabular-nums">{value}</p>
-    </div>
   );
 }

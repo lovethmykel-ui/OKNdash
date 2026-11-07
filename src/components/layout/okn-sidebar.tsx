@@ -89,6 +89,7 @@ const ICONS: Record<string, LucideIcon> = {
   '/app/learn': GraduationCap,
   '/app/wallet': Wallet,
   '/app/referral': Users,
+  '/app/settings': Settings,
   '/admin': LayoutDashboard,
   '/admin/token': Coins,
   '/admin/users': Users,
@@ -210,11 +211,6 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
                 const isPolymarket = item.href === '/app/polymarket-agent';
                 const isBuy = item.href === '/app/buy';
                 const isActive = pathname === item.href;
-                const isComingSoon =
-                  item.href === '/app/trade-bot' ||
-                  item.href === '/app/polymarket-agent' ||
-                  item.href === '/app/prediction-markets' ||
-                  item.href === '/app/staking';
 
                 return (
                   <SidebarMenuItem key={item.href}>
@@ -227,7 +223,7 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
                       <Link
                         href={bareAppHref(item.href) as never}
                         onClick={closeMobile}
-                        className={cn('gap-2 px-2.5', isActive && '!text-white')}
+                        className={cn('gap-2.5 px-3', isActive && '!text-white')}
                         style={isActive ? { color: '#ffffff' } : undefined}
                       >
                         {isPolymarket ? (
@@ -284,18 +280,6 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
                         >
                           {label}
                         </span>
-                        {isComingSoon && (
-                          <span
-                            className={cn(
-                              'shrink-0 whitespace-nowrap rounded-md px-1.5 py-0.5 text-[9.5px] leading-tight font-extrabold tracking-tight group-data-[collapsible=icon]:hidden',
-                              isActive
-                                ? 'bg-white/20 !text-white border border-white/30'
-                                : 'bg-[#7A12F5]/15 text-[#C9A6FF] border border-[#7A12F5]/30',
-                            )}
-                          >
-                            Coming Soon
-                          </span>
-                        )}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

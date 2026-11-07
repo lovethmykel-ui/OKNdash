@@ -136,76 +136,90 @@ export function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        sideOffset={6}
-        className={cn('min-w-60', darkClass)}
+        sideOffset={8}
+        className={cn(
+          'min-w-64 rounded-2xl border border-[var(--line)] bg-[var(--s1)] p-2 text-[var(--tx)] shadow-2xl',
+          darkClass,
+        )}
       >
         {/* Identity header */}
         <DropdownMenuLabel className="p-0 font-normal">
-          <div className="flex items-center gap-2 px-1 py-1.5 text-left">
-            <Avatar size="sm">
+          <div className="flex items-center gap-3 rounded-xl bg-[var(--s2)] px-3 py-2.5 text-left">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#7A12F5] to-[#09B4FF] text-xs font-extrabold text-white shadow-xs">
               {user.photoUrl ? (
-                <AvatarImage src={user.photoUrl} alt={displayName} />
-              ) : null}
-              <AvatarFallback>{initialsOf(user)}</AvatarFallback>
-            </Avatar>
-            <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">{displayName}</span>
-              <span className="truncate text-xs text-muted-foreground">{subLine}</span>
+                <img src={user.photoUrl} alt={displayName} className="size-full rounded-xl object-cover" />
+              ) : (
+                <span>{initialsOf(user)}</span>
+              )}
+            </div>
+            <div className="grid flex-1 text-left leading-tight min-w-0">
+              <span className="truncate text-sm font-extrabold text-[var(--tx)]">{displayName}</span>
+              <span className="truncate text-xs font-medium text-[var(--mut)]">{subLine}</span>
             </div>
           </div>
         </DropdownMenuLabel>
 
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="my-1.5 bg-[var(--line)]" />
 
-        <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link href="/app/settings">
-              <Settings className="size-4" />
-              {t('settings')}
+        <DropdownMenuGroup className="space-y-0.5">
+          <DropdownMenuItem
+            asChild
+            className="rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-[var(--tx)] focus:bg-[var(--s2)] focus:text-[var(--tx)] cursor-pointer"
+          >
+            <Link href="/app/settings" className="flex items-center gap-2.5">
+              <Settings className="size-4 text-[#C9A6FF]" />
+              <span>{t('settings')}</span>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/app/wallet">
-              <Wallet className="size-4" />
-              {t('wallet')}
+          <DropdownMenuItem
+            asChild
+            className="rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-[var(--tx)] focus:bg-[var(--s2)] focus:text-[var(--tx)] cursor-pointer"
+          >
+            <Link href="/app/wallet" className="flex items-center gap-2.5">
+              <Wallet className="size-4 text-[#2FBD8E]" />
+              <span>{t('wallet')}</span>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/app/referral">
-              <Users className="size-4" />
-              {t('referral')}
+          <DropdownMenuItem
+            asChild
+            className="rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-[var(--tx)] focus:bg-[var(--s2)] focus:text-[var(--tx)] cursor-pointer"
+          >
+            <Link href="/app/referral" className="flex items-center gap-2.5">
+              <Users className="size-4 text-[#09B4FF]" />
+              <span>{t('referral')}</span>
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
 
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="my-1.5 bg-[var(--line)]" />
 
-        {/* Community: social links are always reachable from the avatar menu.
-            stopPropagation keeps the dropdown from interfering with the anchors. */}
+        {/* Inline appearance switch */}
+        <div className="flex items-center justify-between gap-2 rounded-xl px-3 py-2">
+          <span className="text-xs sm:text-sm font-bold text-[var(--mut)]">{t('appearance')}</span>
+          <AreaThemeSwitch />
+        </div>
+
+        {/* Community social links */}
         <div
-          className="px-2 py-1.5"
+          className="px-3 py-2"
           onClick={(e) => e.stopPropagation()}
         >
-          <span className="text-xs text-muted-foreground">{tSocial('ariaLabel')}</span>
-          <div className="mt-1">
+          <span className="text-[11px] font-bold text-[var(--mut)]">{tSocial('ariaLabel')}</span>
+          <div className="mt-1.5">
             <SocialIconRow />
           </div>
         </div>
 
-        <DropdownMenuSeparator />
-
-        {/* Inline appearance switch */}
-        <div className="flex items-center justify-between gap-2 px-2 py-1.5">
-          <span className="text-sm text-muted-foreground">{t('appearance')}</span>
-          <AreaThemeSwitch />
-        </div>
-
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="my-1.5 bg-[var(--line)]" />
 
         {/* Separated, destructive: sign-out. */}
-        <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
+        <DropdownMenuItem
+          variant="destructive"
+          onClick={handleSignOut}
+          className="rounded-xl px-3 py-2 text-xs sm:text-sm font-extrabold text-[#EF4444] focus:bg-[#EF4444]/15 focus:text-[#EF4444] cursor-pointer"
+        >
           <LogOut className="size-4" />
-          {t('signOut')}
+          <span>{t('signOut')}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

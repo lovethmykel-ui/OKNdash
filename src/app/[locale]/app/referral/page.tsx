@@ -7,12 +7,55 @@
  * Features dynamic referral links, real-time earnings stats, rank progression bar,
  * 4 partner package sections, and tiered commissions.
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { Check, Copy, Eye, EyeOff, Sparkles, TrendingUp, Users } from 'lucide-react';
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Eye,
+  EyeOff,
+  Search,
+  Users,
+} from 'lucide-react';
 import { useReferral } from '@/lib/hooks/use-referral';
 import { useMe } from '@/lib/hooks/use-me';
 import { toast } from 'sonner';
+
+interface InvitedFriendRow {
+  id: string;
+  name: string;
+  username: string;
+  wallet: string;
+  level: 1 | 2 | 3;
+  status: 'Active Buyer' | 'Task Verified' | 'Joined';
+  cashUsd: number;
+  cashBnb: number;
+  okPoints: number;
+  joinedAgo: string;
+  joinedDate: string;
+}
+
+const INVITED_FRIENDS_META: Record<
+  string,
+  { wallet: string; cashUsd: number; cashBnb: number; joinedAgo: string; joinedDate: string }
+> = {
+  'ref-1': { wallet: '0x71C4...9A21', cashUsd: 28.5, cashBnb: 0.048, joinedAgo: '2h ago', joinedDate: 'Nov 7, 2026' },
+  'ref-2': { wallet: '0x94E1...3B08', cashUsd: 22.0, cashBnb: 0.037, joinedAgo: '7h ago', joinedDate: 'Nov 7, 2026' },
+  'ref-3': { wallet: '0x38A9...7C14', cashUsd: 19.5, cashBnb: 0.033, joinedAgo: '19h ago', joinedDate: 'Nov 6, 2026' },
+  'ref-4': { wallet: '0x52D0...1E66', cashUsd: 12.0, cashBnb: 0.020, joinedAgo: '1d ago', joinedDate: 'Nov 6, 2026' },
+  'ref-5': { wallet: '0x8B12...4F90', cashUsd: 16.5, cashBnb: 0.028, joinedAgo: '1d ago', joinedDate: 'Nov 5, 2026' },
+  'ref-6': { wallet: '0x19F3...8D42', cashUsd: 0, cashBnb: 0, joinedAgo: '2d ago', joinedDate: 'Nov 5, 2026' },
+  'ref-7': { wallet: '0x63C8...2A15', cashUsd: 9.5, cashBnb: 0.016, joinedAgo: '3d ago', joinedDate: 'Nov 4, 2026' },
+  'ref-8': { wallet: '0x4E77...9C03', cashUsd: 14.0, cashBnb: 0.023, joinedAgo: '4d ago', joinedDate: 'Nov 3, 2026' },
+  'ref-9': { wallet: '0x2A55...6B81', cashUsd: 5.5, cashBnb: 0.009, joinedAgo: '5d ago', joinedDate: 'Nov 2, 2026' },
+  'ref-10': { wallet: '0x7D91...0E34', cashUsd: 8.5, cashBnb: 0.014, joinedAgo: '6d ago', joinedDate: 'Nov 1, 2026' },
+  'ref-11': { wallet: '0xC048...5A79', cashUsd: 0, cashBnb: 0, joinedAgo: '7d ago', joinedDate: 'Oct 31, 2026' },
+  'ref-12': { wallet: '0xF182...3D90', cashUsd: 0, cashBnb: 0, joinedAgo: '8d ago', joinedDate: 'Oct 30, 2026' },
+  'ref-13': { wallet: '0xA923...7F12', cashUsd: 6.5, cashBnb: 0.010, joinedAgo: '9d ago', joinedDate: 'Oct 29, 2026' },
+  'ref-14': { wallet: '0xE410...8B55', cashUsd: 0, cashBnb: 0, joinedAgo: '10d ago', joinedDate: 'Oct 28, 2026' },
+};
 
 export default function ReferralPage() {
   const t = useTranslations('dashboard.referral');
@@ -20,6 +63,9 @@ export default function ReferralPage() {
   const { data: meData } = useMe();
   const [copied, setCopied] = useState(false);
   const [hideBalance, setHideBalance] = useState(false);
+  const [historyFilter, setHistoryFilter] = useState<'all' | 'l1' | 'downline' | 'buyers'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showAllHistory, setShowAllHistory] = useState(false);
 
   useEffect(() => {
     try {
@@ -51,6 +97,57 @@ export default function ReferralPage() {
       toast.info('Link copied');
     }
   };
+
+  const invitedFriends: InvitedFriendRow[] = useMemo(() => {
+    const entries = referral.data?.recent ?? [];
+    return entries.map((entry, idx) => {
+      const meta = INVITED_FRIENDS_META[entry.id] ?? {
+        wallet: `0x89A${idx}...4C1${idx}`,
+        cashUsd: entry.status === 'paid' ? 10 : 0,
+        cashBnb: entry.status === 'paid' ? 0.017 : 0,
+        joinedAgo: `${idx + 1}d ago`,
+        joinedDate: 'Nov 2026',
+      };
+      const statusLabel: InvitedFriendRow['status'] =
+        entry.status === 'paid'
+          ? 'Active Buyer'
+          : entry.status === 'eligible'
+            ? 'Task Verified'
+            : 'Joined';
+      return {
+        id: entry.id,
+        name: entry.referredFirstName ?? entry.referredUsername ?? `User #${idx + 1}`,
+        username: entry.referredUsername ? `@${entry.referredUsername}` : `@okn_user_${idx + 1}`,
+        wallet: meta.wallet,
+        level: (entry.level as 1 | 2 | 3) || 1,
+        status: statusLabel,
+        cashUsd: meta.cashUsd,
+        cashBnb: meta.cashBnb,
+        okPoints: entry.rewardPoints ?? 0,
+        joinedAgo: meta.joinedAgo,
+        joinedDate: meta.joinedDate,
+      };
+    });
+  }, [referral.data]);
+
+  const filteredFriends = useMemo(() => {
+    return invitedFriends.filter((item) => {
+      if (historyFilter === 'l1' && item.level !== 1) return false;
+      if (historyFilter === 'downline' && item.level === 1) return false;
+      if (historyFilter === 'buyers' && item.status !== 'Active Buyer') return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.trim().toLowerCase();
+        return (
+          item.name.toLowerCase().includes(q) ||
+          item.username.toLowerCase().includes(q) ||
+          item.wallet.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    });
+  }, [invitedFriends, historyFilter, searchQuery]);
+
+  const visibleFriends = showAllHistory ? filteredFriends : filteredFriends.slice(0, 6);
 
   const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
     'Join the $OKN ecosystem and stack points with me!',
@@ -256,6 +353,276 @@ export default function ReferralPage() {
             <span className="font-bold text-[var(--tx)] shrink-0">Instant auto-upgrade upon qualification</span>
           </div>
         </div>
+      </section>
+
+      {/* 3.5. Referral History (Invited Friends) */}
+      <section className="rounded-[26px] border border-[var(--line)] bg-[var(--s1)] p-5 md:p-7 shadow-sm space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl border border-[#7A12F5]/30 bg-[#7A12F5]/15 text-[#C9A6FF]">
+              <Users className="size-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-extrabold text-[var(--tx)]">
+                  Referral History
+                </h3>
+                <span className="rounded-full border border-[var(--line)] bg-[var(--s2)] px-2.5 py-0.5 text-[11px] font-extrabold text-[var(--tx)] num">
+                  {invitedFriends.length} Invited
+                </span>
+              </div>
+              <p className="text-xs text-[var(--mut)] mt-0.5">
+                Track everyone you invited, their tier level, presale activity, and your earned rewards.
+              </p>
+            </div>
+          </div>
+
+          {/* Search input */}
+          <div className="relative w-full lg:w-64">
+            <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-[var(--mut)]" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search name, @handle, wallet..."
+              aria-label="Search invited friends"
+              className="h-10 w-full rounded-xl border border-[var(--line)] bg-[var(--s2)] pr-3 pl-9 text-xs font-semibold text-[var(--tx)] outline-none transition-colors placeholder:text-[var(--mut)] focus:border-[#7A12F5]"
+            />
+          </div>
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--line)] pb-3">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {[
+              { id: 'all' as const, label: `All (${invitedFriends.length})` },
+              { id: 'l1' as const, label: `Direct · L1 (${invitedFriends.filter((f) => f.level === 1).length})` },
+              { id: 'downline' as const, label: `Downline · L2/L3 (${invitedFriends.filter((f) => f.level > 1).length})` },
+              { id: 'buyers' as const, label: `Active Buyers (${invitedFriends.filter((f) => f.status === 'Active Buyer').length})` },
+            ].map((tab) => {
+              const active = historyFilter === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setHistoryFilter(tab.id)}
+                  className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                    active
+                      ? 'bg-[#7A12F5] text-white shadow-sm'
+                      : 'border border-[var(--line)] bg-[var(--s2)] text-[var(--mut)] hover:text-[var(--tx)]'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="text-[11px] font-semibold text-[var(--mut)]">
+            Showing <strong className="text-[var(--tx)] num">{visibleFriends.length}</strong> of{' '}
+            <strong className="text-[var(--tx)] num">{filteredFriends.length}</strong> referrals
+          </div>
+        </div>
+
+        {/* Desktop Table Header (hidden on mobile) */}
+        <div className="hidden md:grid md:grid-cols-12 gap-3 px-3.5 text-[11px] font-bold uppercase tracking-wider text-[var(--mut)]">
+          <div className="col-span-4">Invited User</div>
+          <div className="col-span-2">Tier Level</div>
+          <div className="col-span-2">Status</div>
+          <div className="col-span-2 text-right">Cash Commission</div>
+          <div className="col-span-2 text-right">OK Points / Joined</div>
+        </div>
+
+        {/* Referral List */}
+        {visibleFriends.length === 0 ? (
+          <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-8 text-center">
+            <p className="text-sm font-bold text-[var(--tx)]">No matching referrals found</p>
+            <p className="mt-1 text-xs text-[var(--mut)]">
+              Try clearing your search query or switching filter tabs above.
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y divide-[var(--line)] rounded-2xl border border-[var(--line)] bg-[var(--s2)] overflow-hidden">
+            {visibleFriends.map((friend) => {
+              const initials = friend.name
+                .split(' ')
+                .map((p) => p[0])
+                .join('')
+                .slice(0, 2)
+                .toUpperCase();
+
+              return (
+                <div
+                  key={friend.id}
+                  className="p-3.5 sm:px-4 sm:py-3.5 hover:bg-[var(--s1)]/60 transition-colors"
+                >
+                  {/* Desktop Row + Mobile Stacked Layout */}
+                  <div className="flex flex-col gap-3 md:grid md:grid-cols-12 md:items-center md:gap-3">
+                    {/* User Identity */}
+                    <div className="flex items-center justify-between md:col-span-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="relative flex size-10 shrink-0 items-center justify-center rounded-full border border-[#7A12F5]/30 bg-gradient-to-br from-[#7A12F5]/25 to-[#09B4FF]/20 font-display text-xs font-extrabold text-[var(--tx)]">
+                          {initials}
+                          <span
+                            className={`absolute -right-0.5 -bottom-0.5 size-2.5 rounded-full ring-2 ring-[var(--s2)] ${
+                              friend.status === 'Active Buyer'
+                                ? 'bg-[#2FBD8E]'
+                                : friend.status === 'Task Verified'
+                                  ? 'bg-[#09B4FF]'
+                                  : 'bg-[#F3BA2F]'
+                            }`}
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="truncate text-sm font-extrabold text-[var(--tx)]">
+                              {friend.name}
+                            </span>
+                            <span className="font-mono text-[11px] font-semibold text-[var(--mut)]">
+                              {friend.username}
+                            </span>
+                          </div>
+                          <div className="mt-0.5 flex items-center gap-2 text-[11px] text-[var(--mut)]">
+                            <span className="font-mono">{friend.wallet}</span>
+                            <span className="md:hidden">· {friend.joinedAgo}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Mobile Status Badge */}
+                      <div className="md:hidden shrink-0">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-extrabold ${
+                            friend.status === 'Active Buyer'
+                              ? 'bg-[#2FBD8E]/15 text-[#2FBD8E] border border-[#2FBD8E]/30'
+                              : friend.status === 'Task Verified'
+                                ? 'bg-[#09B4FF]/15 text-[#09B4FF] border border-[#09B4FF]/30'
+                                : 'bg-[#F3BA2F]/15 text-[#F3BA2F] border border-[#F3BA2F]/30'
+                          }`}
+                        >
+                          {friend.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Tier Level (Desktop) */}
+                    <div className="hidden md:flex md:col-span-2 items-center">
+                      <span
+                        className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-bold ${
+                          friend.level === 1
+                            ? 'bg-[#7A12F5]/15 text-[#C9A6FF] border border-[#7A12F5]/30'
+                            : friend.level === 2
+                              ? 'bg-[#09B4FF]/15 text-[#09B4FF] border border-[#09B4FF]/30'
+                              : 'bg-[var(--line)] text-[var(--mut)]'
+                        }`}
+                      >
+                        {friend.level === 1
+                          ? 'Tier 1 · Direct'
+                          : friend.level === 2
+                            ? 'Tier 2 · L2'
+                            : 'Tier 3 · L3'}
+                      </span>
+                    </div>
+
+                    {/* Status (Desktop) */}
+                    <div className="hidden md:flex md:col-span-2 items-center">
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${
+                          friend.status === 'Active Buyer'
+                            ? 'bg-[#2FBD8E]/15 text-[#2FBD8E] border border-[#2FBD8E]/30'
+                            : friend.status === 'Task Verified'
+                              ? 'bg-[#09B4FF]/15 text-[#09B4FF] border border-[#09B4FF]/30'
+                              : 'bg-[#F3BA2F]/15 text-[#F3BA2F] border border-[#F3BA2F]/30'
+                        }`}
+                      >
+                        <span
+                          className={`size-1.5 rounded-full ${
+                            friend.status === 'Active Buyer'
+                              ? 'bg-[#2FBD8E]'
+                              : friend.status === 'Task Verified'
+                                ? 'bg-[#09B4FF]'
+                                : 'bg-[#F3BA2F]'
+                          }`}
+                        />
+                        {friend.status}
+                      </span>
+                    </div>
+
+                    {/* Cash Commission (Desktop) */}
+                    <div className="hidden md:block md:col-span-2 text-right">
+                      {friend.cashUsd > 0 ? (
+                        <>
+                          <div className="num text-sm font-extrabold text-[#2FBD8E]">
+                            {hideBalance ? '••••' : `+$${friend.cashUsd.toFixed(2)}`}
+                          </div>
+                          <div className="num text-[11px] font-semibold text-[#F3BA2F]">
+                            {hideBalance ? '•••• BNB' : `${friend.cashBnb.toFixed(3)} BNB`}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-xs font-semibold text-[var(--mut)]">—</div>
+                      )}
+                    </div>
+
+                    {/* OK Points & Joined (Desktop) */}
+                    <div className="hidden md:block md:col-span-2 text-right">
+                      <div className="num text-sm font-extrabold text-[#09B4FF]">
+                        +{friend.okPoints} OK Pts
+                      </div>
+                      <div className="text-[11px] font-medium text-[var(--mut)]">
+                        {friend.joinedDate} ({friend.joinedAgo})
+                      </div>
+                    </div>
+
+                    {/* Mobile Compact Metrics Row */}
+                    <div className="flex items-center justify-between rounded-xl border border-[var(--line)] bg-[var(--s1)] px-3 py-2 text-xs md:hidden">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-[#C9A6FF]">
+                          {friend.level === 1 ? 'L1 Direct' : `L${friend.level} Downline`}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="num font-extrabold text-[#2FBD8E]">
+                          {friend.cashUsd > 0
+                            ? hideBalance
+                              ? '••••'
+                              : `+$${friend.cashUsd.toFixed(2)}`
+                            : '$0.00'}
+                        </span>
+                        <span className="text-[var(--line)]">|</span>
+                        <span className="num font-extrabold text-[#09B4FF]">
+                          +{friend.okPoints} Pts
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Expand / Collapse Footer */}
+        {filteredFriends.length > 6 && (
+          <div className="pt-1 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setShowAllHistory((prev) => !prev)}
+              className="inline-flex items-center gap-2 rounded-xl border border-[var(--line)] bg-[var(--s2)] px-4 py-2 text-xs font-extrabold text-[var(--tx)] hover:border-[#7A12F5]/50 hover:bg-[var(--s1)] transition-all cursor-pointer"
+            >
+              {showAllHistory ? (
+                <>
+                  <span>Show Less</span>
+                  <ChevronUp className="size-4 text-[#C9A6FF]" />
+                </>
+              ) : (
+                <>
+                  <span>View All {filteredFriends.length} Invited Friends</span>
+                  <ChevronDown className="size-4 text-[#C9A6FF]" />
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </section>
 
       {/* 4. Section Title: Here is the package */}

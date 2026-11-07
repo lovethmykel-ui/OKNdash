@@ -36,13 +36,13 @@ export default function AgentsPage() {
         <div className="relative z-10 max-w-2xl">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-extrabold backdrop-blur-md mb-3">
             <Sparkles className="size-3.5" />
-            <span>Autonomous Protocol Suite · Market Preview — In Development</span>
+            <span>Autonomous Protocol Suite · Coming Soon</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
             OKN Autonomous Suite
           </h1>
           <p className="mt-2 text-sm md:text-base font-medium text-[#E4D3FF] leading-relaxed">
-            Explore all four autonomous modules: mirror whale trades, preview AI crypto signals, trade outcome markets, or stake $OKN for yield.
+            Explore all four upcoming autonomous modules: mirror whale trades, copy AI crypto signals, trade outcome markets, or stake $OKN for yield.
           </p>
         </div>
 
@@ -112,8 +112,8 @@ export default function AgentsPage() {
                 <h2 className="text-base md:text-lg font-extrabold text-[var(--tx)] leading-tight">
                   AI Trading Agent
                 </h2>
-                <span className="inline-flex items-center rounded-full border border-[#FFAA00]/30 bg-[#FFAA00]/15 px-2.5 py-0.5 text-[10px] font-extrabold text-[#FFAA00]">
-                  Market Preview — In Development
+                <span className="inline-flex items-center rounded-full border border-[#FFD60A]/40 bg-[#FFD60A]/15 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#FFD60A]">
+                  Coming Soon
                 </span>
               </div>
               <p className="text-xs md:text-sm font-semibold text-[var(--mut)] mt-0.5 truncate">
@@ -125,7 +125,7 @@ export default function AgentsPage() {
             href="/app/trade-bot"
             className="shrink-0 inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-[#FFAA00]/15 text-[#FFAA00] text-xs font-extrabold border border-[#FFAA00]/30 hover:bg-[#FFAA00]/25 transition-colors"
           >
-            <span>Open Preview</span>
+            <span>Coming Soon</span>
             <ChevronRight className="size-3.5" />
           </Link>
         </div>
@@ -148,9 +148,9 @@ export default function AgentsPage() {
                 <h2 className="text-base md:text-lg font-extrabold text-[var(--tx)] leading-tight">
                   Polymarket Copy Agent
                 </h2>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#09B4FF]/20 text-[#7DD3FC] border border-[#09B4FF]/40 text-[10px] font-extrabold">
-                  <span className="size-1.5 rounded-full bg-[#09B4FF] animate-pulse" />
-                  <span>Market Preview — In Development</span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FFD60A]/15 text-[#FFD60A] border border-[#FFD60A]/40 text-[10px] font-extrabold uppercase tracking-wider">
+                  <span className="size-1.5 rounded-full bg-[#FFD60A] animate-pulse" />
+                  <span>Coming Soon</span>
                 </span>
               </div>
               <p className="text-xs md:text-sm font-semibold text-[var(--mut)] mt-0.5 truncate">
@@ -162,7 +162,7 @@ export default function AgentsPage() {
             href="/app/polymarket-agent"
             className="shrink-0 inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-[#1652F0] text-white text-xs font-extrabold shadow-[0_4px_12px_rgba(22,82,240,0.4)] hover:bg-[#1E60FF] active:scale-95 transition-all"
           >
-            <span>Open Agent</span>
+            <span>Coming Soon</span>
             <ChevronRight className="size-3.5" />
           </Link>
         </div>
@@ -206,8 +206,8 @@ export default function AgentsPage() {
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <span className="px-3 py-1 rounded-full bg-[#E81CFF]/15 text-[#F59EFF] text-[11px] font-extrabold border border-[#E81CFF]/30">
-            Market Preview
+          <span className="px-3 py-1 rounded-full bg-[#FFD60A]/15 text-[#FFD60A] text-[10px] font-extrabold uppercase tracking-wider border border-[#FFD60A]/40">
+            Coming Soon
           </span>
           <ChevronRight className="size-4 text-[var(--mut)]" />
         </div>

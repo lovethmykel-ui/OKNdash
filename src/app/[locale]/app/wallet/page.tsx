@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * /app/wallet — Modern Web3 & Fintech Custody Wallet Dashboard.
+ * /app/wallet — Sleek Web3 & Fintech Custody Wallet Dashboard.
  *
  * Integrated with the portfolio segmented control:
  *   Overview -> /app/portfolio
@@ -11,29 +11,22 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from '@/i18n/navigation';
-import { useTranslations } from 'next-intl';
 import {
   ArrowDownLeft,
   ArrowUpRight,
   Check,
-  ChevronRight,
   Coins,
   Copy,
-  ExternalLink,
   Eye,
   EyeOff,
-  Flame,
-  Globe,
-  Plus,
   QrCode,
-  Send,
+  RefreshCw,
   ShieldCheck,
   ShoppingCart,
   Users,
-  Wallet,
   Zap,
 } from 'lucide-react';
-import { useAccount, useBalance } from 'wagmi';
+import { useAccount } from 'wagmi';
 import { useQueryClient } from '@tanstack/react-query';
 import { useOknBalance } from '@/lib/hooks/use-wallet';
 import { useClaimEligibility } from '@/lib/hooks/use-claim';
@@ -47,11 +40,11 @@ export default function WalletPage() {
   const qc = useQueryClient();
   const me = useMe();
   const oknBalance = useOknBalance();
-  const nativeBalance = useBalance({ address });
   const eligibility = useClaimEligibility();
 
   const [hideBalance, setHideBalance] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [switchingWallet, setSwitchingWallet] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAddress, setWithdrawAddress] = useState('');
@@ -76,9 +69,11 @@ export default function WalletPage() {
   };
 
   const points = eligibility.data?.points ?? 135;
-  const currentAddress = address || me.data?.user?.walletAddress || '0xBF6B0312f52fa8390Ec9393A9375BF05c8E40377';
+  const currentAddress =
+    address || me.data?.user?.walletAddress || '0xBF6B0312f52fa8390Ec9393A9375BF05c8E40377';
   const displayAddress = `${currentAddress.slice(0, 6)}...${currentAddress.slice(-4)}`;
-  const oknDisplay = oknBalance.data != null ? `${formatWei(oknBalance.data)} $OKN` : '693,333 $OKN';
+  const oknDisplay =
+    oknBalance.data != null ? `${formatWei(oknBalance.data)} $OKN` : '693,333 $OKN';
 
   const copyAddress = async () => {
     try {
@@ -92,9 +87,16 @@ export default function WalletPage() {
   };
 
   const handleSwitchDemoWallet = async () => {
-    const res = await api.cycleDemoWallet();
-    await qc.invalidateQueries({ queryKey: ['me'] });
-    toast.success(`Switched active demo wallet to ${res.walletAddress.slice(0, 6)}...${res.walletAddress.slice(-4)}`);
+    setSwitchingWallet(true);
+    try {
+      const res = await api.cycleDemoWallet();
+      await qc.invalidateQueries({ queryKey: ['me'] });
+      toast.success(
+        `Switched demo wallet to ${res.walletAddress.slice(0, 6)}...${res.walletAddress.slice(-4)}`,
+      );
+    } finally {
+      setSwitchingWallet(false);
+    }
   };
 
   const handleWithdrawSubmit = (e: React.FormEvent) => {
@@ -110,41 +112,39 @@ export default function WalletPage() {
   };
 
   return (
-    <main className="space-y-4 md:space-y-6">
-      {/* Mobile Segmented Switcher — Beautifully placed at top of mobile wallet */}
+    <main className="space-y-4 md:space-y-6 pb-12">
+      {/* Mobile Segmented Switcher */}
       <div className="block md:hidden">
-        <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-[var(--s2)] border border-[var(--line)] shadow-sm backdrop-blur-xl">
+        <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-[var(--s1)] border border-[var(--line)] shadow-xs">
           <Link
             href="/app/portfolio"
-            className="flex items-center justify-center py-2.5 px-2 rounded-xl text-xs font-extrabold text-[var(--mut)] hover:text-[var(--tx)] active:scale-95 transition-all duration-200 cursor-pointer"
+            className="flex items-center justify-center py-2 px-2 rounded-xl text-xs font-extrabold text-[var(--mut)] hover:text-[var(--tx)] active:scale-95 transition-all cursor-pointer"
           >
             Overview
           </Link>
           <Link
             href="/app/portfolio?tab=activity"
-            className="flex items-center justify-center py-2.5 px-2 rounded-xl text-xs font-extrabold text-[var(--mut)] hover:text-[var(--tx)] active:scale-95 transition-all duration-200 cursor-pointer"
+            className="flex items-center justify-center py-2 px-2 rounded-xl text-xs font-extrabold text-[var(--mut)] hover:text-[var(--tx)] active:scale-95 transition-all cursor-pointer"
           >
             Activity
           </Link>
-          <span
-            className="flex items-center justify-center py-2.5 px-2 rounded-xl text-xs font-extrabold bg-gradient-to-r from-[#7A12F5] to-[#8C38F7] text-white shadow-[0_2px_12px_rgba(122,18,245,0.45)] cursor-default"
-          >
+          <span className="flex items-center justify-center py-2 px-2 rounded-xl text-xs font-extrabold bg-[#7A12F5] text-white shadow-[0_2px_10px_rgba(122,18,245,0.35)] cursor-default">
             Holdings
           </span>
         </div>
       </div>
 
       {/* Desktop Header with integrated switcher */}
-      <div className="hidden md:flex flex-wrap items-end justify-between gap-4 pb-1">
+      <div className="hidden md:flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-[var(--tx)] md:text-3xl">
-            Portfolio
+            Wallet &amp; Holdings
           </h1>
           <p className="mt-1 text-sm font-medium text-[var(--mut)]">
-            Your $OKN at a glance: activity, holdings, and earnings.
+            Your $OKN custody vault, on-chain balances, and payout rails.
           </p>
         </div>
-        <div className="inline-flex items-center rounded-xl border border-[var(--line)] bg-[var(--s2)] p-1 gap-1">
+        <div className="inline-flex items-center rounded-xl border border-[var(--line)] bg-[var(--s1)] p-1 gap-1">
           <Link
             href="/app/portfolio"
             className="rounded-lg px-4 py-1.5 text-xs font-bold text-[var(--mut)] hover:text-[var(--tx)] transition-all cursor-pointer"
@@ -163,320 +163,388 @@ export default function WalletPage() {
         </div>
       </div>
 
-      {/* 1. Fintech Account Summary Hero Card */}
+      {/* 1. Sleek Fintech Hero Card */}
       <section
-        className="relative overflow-hidden rounded-[26px] border border-[var(--line)] p-6 md:p-8 shadow-sm transition-all"
+        className="relative overflow-hidden rounded-[24px] md:rounded-[28px] border border-[var(--line)] p-5 sm:p-6 md:p-7 shadow-sm"
         style={{
           background:
-            'linear-gradient(135deg, rgba(122, 18, 245, 0.24) 0%, rgba(9, 180, 255, 0.12) 100%), var(--s1)',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+            'linear-gradient(135deg, rgba(122, 18, 245, 0.22) 0%, rgba(9, 180, 255, 0.1) 100%), var(--s1)',
         }}
       >
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-[var(--mut)]">
-                Total Net Asset Value
-              </span>
-              <button
-                type="button"
-                onClick={toggleBalance}
-                className="balance-eye-btn flex size-7 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] hover:bg-[var(--line)] transition-colors cursor-pointer"
-                aria-label={hideBalance ? 'Show balance' : 'Hide balance'}
-              >
-                {hideBalance ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
-              </button>
-            </div>
-            <div className="flex items-baseline gap-3 mt-1.5">
-              <span className="num text-3xl md:text-5xl font-extrabold text-[var(--tx)] tracking-tight">
-                {hideBalance ? '••••••••' : '$1,428.50'}
-              </span>
-              <span className="rounded-xl border border-[#2FBD8E]/30 bg-[#2FBD8E]/15 px-3 py-1 text-xs font-extrabold text-[#2FBD8E]">
-                +$142.50 (24h)
-              </span>
-            </div>
+        {/* Top Row: Eyebrow + Eye Toggle on Left, Compact Address + Switch Button on Right */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-[var(--mut)]">
+              Total Net Asset Value
+            </span>
+            <button
+              type="button"
+              onClick={toggleBalance}
+              className="flex size-7 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--s2)]/80 text-[var(--mut)] hover:text-[var(--tx)] transition-colors cursor-pointer"
+              aria-label={hideBalance ? 'Show balance' : 'Hide balance'}
+            >
+              {hideBalance ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+            </button>
           </div>
 
-          {/* Custody & Address Bar */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            <div className="flex items-center gap-2.5 rounded-2xl border border-[var(--line)] bg-[var(--s2)] px-4 py-2.5">
-              <span className="size-2.5 rounded-full bg-[#2FBD8E] shadow-[0_0_8px_#2FBD8E]" />
-              <span className="font-mono text-xs font-extrabold text-[var(--tx)]">
-                {displayAddress}
-              </span>
-              <button
-                type="button"
-                onClick={copyAddress}
-                className="ml-1 text-[var(--mut)] hover:text-[var(--tx)] transition-colors cursor-pointer"
-                aria-label="Copy address"
-              >
-                {copied ? <Check className="size-3.5 text-[#2FBD8E]" /> : <Copy className="size-3.5" />}
-              </button>
-            </div>
+          {/* Compact Single-Row Wallet Pill + Demo Switcher */}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={copyAddress}
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--s2)]/90 px-3 py-1.5 text-xs font-mono font-bold text-[var(--tx)] hover:border-[#7A12F5]/50 transition-colors cursor-pointer"
+              title="Copy wallet address"
+            >
+              <span className="size-2 rounded-full bg-[#2FBD8E]" />
+              <span>{displayAddress}</span>
+              {copied ? (
+                <Check className="size-3 text-[#2FBD8E]" />
+              ) : (
+                <Copy className="size-3 text-[var(--mut)]" />
+              )}
+            </button>
             <button
               type="button"
               onClick={() => void handleSwitchDemoWallet()}
-              className="h-10 px-4 rounded-2xl bg-[#7A12F5] text-white text-xs font-extrabold shadow-md hover:bg-[#8C38F7] active:scale-95 transition-all cursor-pointer"
+              disabled={switchingWallet}
+              title="Switch Demo Wallet"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#7A12F5]/40 bg-[#7A12F5]/20 px-3 py-1.5 text-[11px] font-extrabold text-[#C9A6FF] hover:bg-[#7A12F5] hover:text-white transition-all cursor-pointer whitespace-nowrap"
             >
-              Switch Demo Wallet
+              <RefreshCw className={`size-3 ${switchingWallet ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Switch Wallet</span>
+              <span className="sm:hidden">Switch</span>
             </button>
           </div>
         </div>
 
-        {/* Quick Fintech Action Dock */}
-        <div className="mt-7 grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-[var(--line)]">
+        {/* Center Row: Primary Balance + 24h Change */}
+        <div className="mt-3 sm:mt-4 flex flex-wrap items-baseline gap-2.5 sm:gap-3">
+          <span className="num text-3xl sm:text-4xl md:text-5xl font-extrabold text-[var(--tx)] tracking-tight tabular-nums">
+            {hideBalance ? '••••••••' : '$1,428.50'}
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full border border-[#2FBD8E]/30 bg-[#2FBD8E]/15 px-2.5 py-0.5 text-xs font-extrabold text-[#2FBD8E] tabular-nums">
+            +$142.50 (+11.1%)
+          </span>
+        </div>
+
+        {/* Bottom Row: 4-Column Single-Row Action Dock (Mobile & Desktop) */}
+        <div className="mt-5 pt-4 border-t border-[var(--line)]/80 grid grid-cols-4 gap-2 sm:gap-3">
           <button
             type="button"
             onClick={() => setShowDepositModal(true)}
-            className="flex items-center justify-center gap-2 h-12 rounded-xl bg-[var(--s2)] border border-[var(--line)] text-xs font-extrabold text-[var(--tx)] hover:border-[#7A12F5]/50 hover:bg-[var(--s1)] active:scale-98 transition-all cursor-pointer shadow-sm"
+            className="group flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 rounded-2xl border border-[var(--line)] bg-[var(--s2)]/90 py-2.5 sm:py-3 px-2 text-xs font-extrabold text-[var(--tx)] hover:border-[#09B4FF]/50 hover:bg-[var(--s1)] active:scale-95 transition-all cursor-pointer"
           >
-            <ArrowDownLeft className="size-4 text-[#09B4FF]" />
-            <span>Deposit</span>
+            <span className="flex size-8 sm:size-7 items-center justify-center rounded-xl bg-[#09B4FF]/15 text-[#09B4FF] group-hover:scale-105 transition-transform">
+              <ArrowDownLeft className="size-4 stroke-[2.4]" />
+            </span>
+            <span className="text-[11px] sm:text-xs whitespace-nowrap">Deposit</span>
           </button>
 
           <button
             type="button"
             onClick={() => setShowWithdrawModal(true)}
-            className="flex items-center justify-center gap-2 h-12 rounded-xl bg-[var(--s2)] border border-[var(--line)] text-xs font-extrabold text-[var(--tx)] hover:border-[#7A12F5]/50 hover:bg-[var(--s1)] active:scale-98 transition-all cursor-pointer shadow-sm"
+            className="group flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 rounded-2xl border border-[var(--line)] bg-[var(--s2)]/90 py-2.5 sm:py-3 px-2 text-xs font-extrabold text-[var(--tx)] hover:border-[#FFD60A]/50 hover:bg-[var(--s1)] active:scale-95 transition-all cursor-pointer"
           >
-            <ArrowUpRight className="size-4 text-[#FFD60A]" />
-            <span>Withdraw</span>
+            <span className="flex size-8 sm:size-7 items-center justify-center rounded-xl bg-[#FFD60A]/15 text-[#FFD60A] group-hover:scale-105 transition-transform">
+              <ArrowUpRight className="size-4 stroke-[2.4]" />
+            </span>
+            <span className="text-[11px] sm:text-xs whitespace-nowrap">Withdraw</span>
           </button>
 
           <Link
             href="/app/buy"
-            className="flex items-center justify-center gap-2 h-12 rounded-xl bg-[var(--s2)] border border-[var(--line)] text-xs font-extrabold text-[var(--tx)] hover:border-[#7A12F5]/50 hover:bg-[var(--s1)] active:scale-98 transition-all cursor-pointer shadow-sm"
+            className="group flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 rounded-2xl border border-[#7A12F5]/40 bg-[#7A12F5]/15 py-2.5 sm:py-3 px-2 text-xs font-extrabold text-[var(--tx)] hover:bg-[#7A12F5] hover:text-white active:scale-95 transition-all cursor-pointer"
           >
-            <ShoppingCart className="size-4 text-[#7A12F5]" />
-            <span>Buy $OKN</span>
+            <span className="flex size-8 sm:size-7 items-center justify-center rounded-xl bg-[#7A12F5] text-white group-hover:bg-white/20 transition-colors">
+              <ShoppingCart className="size-4 stroke-[2.2]" />
+            </span>
+            <span className="text-[11px] sm:text-xs whitespace-nowrap">Buy $OKN</span>
           </Link>
 
           <Link
             href="/app/tasks"
-            className="flex items-center justify-center gap-2 h-12 rounded-xl bg-[var(--s2)] border border-[var(--line)] text-xs font-extrabold text-[var(--tx)] hover:border-[#7A12F5]/50 hover:bg-[var(--s1)] active:scale-98 transition-all cursor-pointer shadow-sm"
+            className="group flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 rounded-2xl border border-[var(--line)] bg-[var(--s2)]/90 py-2.5 sm:py-3 px-2 text-xs font-extrabold text-[var(--tx)] hover:border-[#2FBD8E]/50 hover:bg-[var(--s1)] active:scale-95 transition-all cursor-pointer"
           >
-            <Zap className="size-4 text-[#2FBD8E]" />
-            <span>Stake &amp; Earn</span>
+            <span className="flex size-8 sm:size-7 items-center justify-center rounded-xl bg-[#2FBD8E]/15 text-[#2FBD8E] group-hover:scale-105 transition-transform">
+              <Zap className="size-4 stroke-[2.2]" />
+            </span>
+            <span className="text-[11px] sm:text-xs whitespace-nowrap">Earn</span>
           </Link>
         </div>
       </section>
 
-      {/* 2. 4-Column Account Summary KPI Strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* KPI 1 */}
-        <div className="rounded-[20px] border border-[var(--line)] bg-[var(--s1)] p-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[rgba(243,186,47,0.15)] text-[#F3BA2F]">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 3.2L16.2 7.4L18.4 5.2L12 0L5.6 5.2L7.8 7.4L12 3.2ZM20.8 7.6L18.6 9.8L20.8 12L23 9.8L20.8 7.6ZM12 8.4L15.6 12L12 15.6L8.4 12L12 8.4ZM3.2 7.6L1 9.8L3.2 12L5.4 9.8L3.2 7.6ZM12 16.6L7.8 12.4L5.6 14.6L12 21L18.4 14.6L16.2 12.4L12 16.6ZM20.8 12L18.6 14.2L20.8 16.4L23 14.2L20.8 12ZM3.2 12L1 14.2L3.2 16.4L5.4 14.2L3.2 12Z" />
-              </svg>
+      {/* 2. 4-Column Account Summary KPI Strip — Clean Vertical Stack on Mobile so Labels Never Clip */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* KPI 1: Liquid BNB */}
+        <div className="rounded-[22px] border border-[var(--line)] bg-[var(--s1)] p-4 sm:p-5 shadow-sm flex flex-col justify-between gap-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-bold text-[var(--mut)] truncate">Liquid On-Chain</span>
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#F3BA2F]/15 text-[#F3BA2F]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/bnb-logo.png" alt="BNB" className="size-4.5 object-contain" />
             </span>
-            <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--mut)]">Liquid On-Chain</p>
-              <p className="num text-xl font-extrabold text-[var(--tx)] mt-0.5">
-                {hideBalance ? '••••••' : '$870.00'}
-              </p>
-            </div>
           </div>
-          <p className="mt-3 text-xs font-semibold text-[var(--mut)] truncate">1.45 BNB (Gas Ready)</p>
+          <div>
+            <p className="num text-lg sm:text-xl font-extrabold text-[var(--tx)] tabular-nums">
+              {hideBalance ? '••••••' : '$870.00'}
+            </p>
+            <p className="mt-0.5 text-[11px] sm:text-xs font-semibold text-[var(--mut)] truncate">
+              1.45 BNB · Gas Ready
+            </p>
+          </div>
         </div>
 
-        {/* KPI 2 */}
-        <div className="rounded-[20px] border border-[var(--line)] bg-[var(--s1)] p-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[rgba(122,18,245,0.15)] text-[#7A12F5]">
-              <img src="/assets/okn-logo.png" alt="OKN" className="size-5 rounded-md object-contain" />
+        {/* KPI 2: Presale $OKN */}
+        <div className="rounded-[22px] border border-[var(--line)] bg-[var(--s1)] p-4 sm:p-5 shadow-sm flex flex-col justify-between gap-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-bold text-[var(--mut)] truncate">Presale $OKN</span>
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#7A12F5]/15">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/okn-logo.png" alt="$OKN" className="size-5 object-contain" />
             </span>
-            <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--mut)]">Presale $OKN</p>
-              <p className="num text-xl font-extrabold text-[var(--tx)] mt-0.5">
-                {hideBalance ? '••••••' : '$416.00'}
-              </p>
-            </div>
           </div>
-          <p className="mt-3 text-xs font-semibold text-[var(--mut)] truncate">693,333 $OKN Allocated</p>
+          <div>
+            <p className="num text-lg sm:text-xl font-extrabold text-[var(--tx)] tabular-nums">
+              {hideBalance ? '••••••' : '$416.00'}
+            </p>
+            <p className="mt-0.5 text-[11px] sm:text-xs font-semibold text-[#C9A6FF] truncate">
+              693,333 $OKN Allocated
+            </p>
+          </div>
         </div>
 
-        {/* KPI 3 */}
-        <div className="rounded-[20px] border border-[var(--line)] bg-[var(--s1)] p-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[rgba(255,214,10,0.15)] text-[#FFD60A]">
-              <Users className="size-5" />
+        {/* KPI 3: Partner Vault */}
+        <div className="rounded-[22px] border border-[var(--line)] bg-[var(--s1)] p-4 sm:p-5 shadow-sm flex flex-col justify-between gap-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-bold text-[var(--mut)] truncate">Partner Vault</span>
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#2FBD8E]/15 text-[#2FBD8E]">
+              <Users className="size-4" />
             </span>
-            <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--mut)]">Partner Vault</p>
-              <p className="num text-xl font-extrabold text-[#2FBD8E] mt-0.5">
-                {hideBalance ? '••••••' : '$142.50'}
-              </p>
-            </div>
           </div>
-          <p className="mt-3 text-xs font-semibold text-[var(--mut)] truncate">0.238 BNB (14 Invites)</p>
+          <div>
+            <p className="num text-lg sm:text-xl font-extrabold text-[#2FBD8E] tabular-nums">
+              {hideBalance ? '••••••' : '$142.50'}
+            </p>
+            <p className="mt-0.5 text-[11px] sm:text-xs font-semibold text-[var(--mut)] truncate">
+              0.238 BNB · 14 Invites
+            </p>
+          </div>
         </div>
 
-        {/* KPI 4 */}
-        <div className="rounded-[20px] border border-[var(--line)] bg-[var(--s1)] p-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[rgba(9,180,255,0.15)] text-[#09B4FF]">
-              <Coins className="size-5" />
+        {/* KPI 4: OK Points */}
+        <div className="rounded-[22px] border border-[var(--line)] bg-[var(--s1)] p-4 sm:p-5 shadow-sm flex flex-col justify-between gap-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-bold text-[var(--mut)] truncate">OK Points</span>
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#09B4FF]/15 text-[#09B4FF]">
+              <Coins className="size-4" />
             </span>
-            <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--mut)]">OK Points Value</p>
-              <p className="num text-xl font-extrabold text-[var(--tx)] mt-0.5">
-                {formatPoints(points)} pts
-              </p>
-            </div>
           </div>
-          <p className="mt-3 text-xs font-semibold text-[#FFD60A] truncate">Awaiting Merkle Commit</p>
-        </div>
-      </div>
-
-      {/* 3. Portfolio Allocation Bar Card */}
-      <div className="rounded-[22px] border border-[var(--line)] bg-[var(--s1)] p-5 md:p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-extrabold text-[var(--tx)]">Account Asset Allocation</h3>
-          <span className="text-xs font-bold text-[var(--mut)]">100% Fully Backed</span>
-        </div>
-
-        {/* Visual Multi-Segment Bar */}
-        <div className="h-4 w-full rounded-full bg-[var(--s2)] overflow-hidden flex gap-1 p-0.5 border border-[var(--line)]">
-          <div className="h-full rounded-full bg-[#F3BA2F]" style={{ width: '60.9%' }} title="BNB: 60.9%" />
-          <div className="h-full rounded-full bg-[#7A12F5]" style={{ width: '29.1%' }} title="Presale OKN: 29.1%" />
-          <div className="h-full rounded-full bg-[#2FBD8E]" style={{ width: '10.0%' }} title="Partner Vault: 10.0%" />
-        </div>
-
-        {/* Legend */}
-        <div className="mt-3.5 flex flex-wrap items-center gap-4 text-xs font-bold">
-          <div className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-full bg-[#F3BA2F]" />
-            <span className="text-[var(--tx)]">BNB (60.9%)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-full bg-[#7A12F5]" />
-            <span className="text-[var(--tx)]">Presale $OKN (29.1%)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-full bg-[#2FBD8E]" />
-            <span className="text-[var(--tx)]">Partner Vault (10.0%)</span>
+          <div>
+            <p className="num text-lg sm:text-xl font-extrabold text-[var(--tx)] tabular-nums">
+              {formatPoints(points)} pts
+            </p>
+            <p className="mt-0.5 text-[11px] sm:text-xs font-semibold text-[#FFD60A] truncate">
+              Merkle Claim Ready
+            </p>
           </div>
         </div>
       </div>
 
-      {/* 4. Main 2-Column Split: Detailed Asset Breakdown & Account Rails */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
-        {/* Left Column (span 3): Detailed Asset Breakdown */}
-        <div className="lg:col-span-3 rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-[var(--line)]">
-            <h3 className="text-base font-extrabold text-[var(--tx)]">Asset Holdings Breakdown</h3>
-            <span className="text-xs font-bold text-[var(--mut)]">4 Active Positions</span>
+      {/* 3. Main 2-Column Split: Asset Holdings Breakdown & Custody Rails */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 md:gap-6 items-start">
+        {/* Left Column (lg:col-span-7): Asset Holdings + Integrated Allocation Bar */}
+        <div className="lg:col-span-7 rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-6 shadow-sm space-y-5">
+          {/* Header + Integrated Allocation Progress */}
+          <div className="space-y-3 pb-4 border-b border-[var(--line)]">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--tx)]">
+                Asset Holdings
+              </h2>
+              <span className="text-xs font-semibold text-[var(--mut)]">
+                4 Active Positions · 100% Backed
+              </span>
+            </div>
+
+            {/* Multi-Segment Allocation Bar */}
+            <div className="h-2.5 w-full rounded-full bg-[var(--s2)] overflow-hidden flex gap-1 p-0.5">
+              <div className="h-full rounded-full bg-[#F3BA2F]" style={{ width: '60.9%' }} />
+              <div className="h-full rounded-full bg-[#7A12F5]" style={{ width: '29.1%' }} />
+              <div className="h-full rounded-full bg-[#2FBD8E]" style={{ width: '10.0%' }} />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] sm:text-xs font-semibold text-[var(--mut)]">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-[#F3BA2F]" />
+                <span>BNB 60.9%</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-[#7A12F5]" />
+                <span>$OKN 29.1%</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-[#2FBD8E]" />
+                <span>Partner Vault 10.0%</span>
+              </span>
+            </div>
           </div>
 
+          {/* Clean Asset Rows */}
           <div className="divide-y divide-[var(--line)]">
-            {/* Asset Row 1: BNB */}
-            <div className="flex items-center justify-between py-4">
-              <div className="flex items-center gap-3">
-                <span className="flex size-11 items-center justify-center rounded-xl bg-[rgba(243,186,47,0.15)] text-[#F3BA2F]">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 3.2L16.2 7.4L18.4 5.2L12 0L5.6 5.2L7.8 7.4L12 3.2ZM20.8 7.6L18.6 9.8L20.8 12L23 9.8L20.8 7.6ZM12 8.4L15.6 12L12 15.6L8.4 12L12 8.4ZM3.2 7.6L1 9.8L3.2 12L5.4 9.8L3.2 7.6ZM12 16.6L7.8 12.4L5.6 14.6L12 21L18.4 14.6L16.2 12.4L12 16.6ZM20.8 12L18.6 14.2L20.8 16.4L23 14.2L20.8 12ZM3.2 12L1 14.2L3.2 16.4L5.4 14.2L3.2 12Z" />
-                  </svg>
+            {/* Row 1: BNB */}
+            <div className="flex items-center justify-between gap-3 py-3.5 first:pt-0">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-2xl bg-[#F3BA2F]/15 border border-[#F3BA2F]/25">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/bnb-logo.png" alt="BNB" className="size-5.5 object-contain" />
                 </span>
-                <div>
-                  <div className="font-extrabold text-sm text-[var(--tx)]">BNB (Binance Smart Chain)</div>
-                  <div className="text-xs font-semibold text-[var(--mut)]">Gas &amp; Native Asset · BEP-20</div>
+                <div className="min-w-0">
+                  <div className="font-extrabold text-sm text-[var(--tx)] truncate">
+                    BNB Smart Chain
+                  </div>
+                  <div className="text-xs font-medium text-[var(--mut)] truncate">
+                    Native Gas &amp; Settlement · BEP-20
+                  </div>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="num font-extrabold text-sm text-[var(--tx)]">1.45 BNB</div>
-                <div className="text-xs font-bold text-[var(--mut)]">{hideBalance ? '••••••' : '$870.00'}</div>
+              <div className="text-right shrink-0">
+                <div className="num font-extrabold text-sm text-[var(--tx)] tabular-nums">
+                  1.45 BNB
+                </div>
+                <div className="text-xs font-semibold text-[var(--mut)] tabular-nums">
+                  {hideBalance ? '••••••' : '$870.00'}
+                </div>
               </div>
             </div>
 
-            {/* Asset Row 2: $OKN Token */}
-            <div className="flex items-center justify-between py-4">
-              <div className="flex items-center gap-3">
-                <span className="flex size-11 items-center justify-center rounded-xl bg-[rgba(122,18,245,0.15)] text-[#7A12F5]">
-                  <img src="/assets/okn-logo.png" alt="OKN" className="size-6 rounded-md object-contain" />
+            {/* Row 2: $OKN Token */}
+            <div className="flex items-center justify-between gap-3 py-3.5">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-2xl bg-[#7A12F5]/15 border border-[#7A12F5]/30">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/okn-logo.png" alt="$OKN" className="size-6 object-contain" />
                 </span>
-                <div>
-                  <div className="font-extrabold text-sm text-[var(--tx)]">$OKN Token</div>
-                  <div className="text-xs font-semibold text-[#C9A6FF]">BEP-20 Presale Allocation</div>
+                <div className="min-w-0">
+                  <div className="font-extrabold text-sm text-[var(--tx)] truncate">
+                    $OKN Token
+                  </div>
+                  <div className="text-xs font-medium text-[#C9A6FF] truncate">
+                    Stage 2 Presale Allocation
+                  </div>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="num font-extrabold text-sm text-[var(--tx)]">{oknDisplay}</div>
-                <div className="text-xs font-bold text-[var(--mut)]">{hideBalance ? '••••••' : '$416.00'}</div>
+              <div className="text-right shrink-0">
+                <div className="num font-extrabold text-sm text-[var(--tx)] tabular-nums">
+                  {oknDisplay}
+                </div>
+                <div className="text-xs font-semibold text-[var(--mut)] tabular-nums">
+                  {hideBalance ? '••••••' : '$416.00'}
+                </div>
               </div>
             </div>
 
-            {/* Asset Row 3: Partner Commission Vault */}
-            <div className="flex items-center justify-between py-4">
-              <div className="flex items-center gap-3">
-                <span className="flex size-11 items-center justify-center rounded-xl bg-[rgba(255,214,10,0.15)] text-[#FFD60A]">
+            {/* Row 3: Partner Commission Vault */}
+            <div className="flex items-center justify-between gap-3 py-3.5">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-2xl bg-[#2FBD8E]/15 border border-[#2FBD8E]/25 text-[#2FBD8E]">
                   <Users className="size-5" />
                 </span>
-                <div>
-                  <div className="font-extrabold text-sm text-[var(--tx)]">Partner Commission Vault</div>
-                  <div className="text-xs font-semibold text-[#2FBD8E]">14 Referrals · Instant Payout</div>
+                <div className="min-w-0">
+                  <div className="font-extrabold text-sm text-[var(--tx)] truncate">
+                    Partner Commission Vault
+                  </div>
+                  <div className="text-xs font-medium text-[#2FBD8E] truncate">
+                    14 Active Referrals · Instant Payout
+                  </div>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="num font-extrabold text-sm text-[#2FBD8E]">0.238 BNB</div>
-                <div className="text-xs font-bold text-[var(--mut)]">{hideBalance ? '••••••' : '$142.50'}</div>
+              <div className="text-right shrink-0">
+                <div className="num font-extrabold text-sm text-[#2FBD8E] tabular-nums">
+                  0.238 BNB
+                </div>
+                <div className="text-xs font-semibold text-[var(--mut)] tabular-nums">
+                  {hideBalance ? '••••••' : '$142.50'}
+                </div>
               </div>
             </div>
 
-            {/* Asset Row 4: OK Points */}
-            <div className="flex items-center justify-between py-4">
-              <div className="flex items-center gap-3">
-                <span className="flex size-11 items-center justify-center rounded-xl bg-[rgba(9,180,255,0.15)] text-[#09B4FF]">
+            {/* Row 4: OK Points */}
+            <div className="flex items-center justify-between gap-3 py-3.5 last:pb-0">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-2xl bg-[#09B4FF]/15 border border-[#09B4FF]/25 text-[#09B4FF]">
                   <Coins className="size-5" />
                 </span>
-                <div>
-                  <div className="font-extrabold text-sm text-[var(--tx)]">OK Points Balance</div>
-                  <div className="text-xs font-semibold text-[#FFD60A]">Awaiting next Merkle commit</div>
+                <div className="min-w-0">
+                  <div className="font-extrabold text-sm text-[var(--tx)] truncate">
+                    OK Points Balance
+                  </div>
+                  <div className="text-xs font-medium text-[#FFD60A] truncate">
+                    Eligible for Merkle Claim
+                  </div>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="num font-extrabold text-sm text-[#09B4FF]">{formatPoints(points)} pts</div>
-                <div className="text-xs font-bold text-[var(--mut)]">$3 BNB Claim Fee</div>
+              <div className="text-right shrink-0">
+                <div className="num font-extrabold text-sm text-[#09B4FF] tabular-nums">
+                  {formatPoints(points)} pts
+                </div>
+                <div className="text-xs font-semibold text-[var(--mut)]">
+                  1:1 $OKN Claim
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Column (span 2): Account Summary & Connected Payment Rails */}
-        <div className="lg:col-span-2 rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-6 shadow-sm space-y-5">
-          <div className="flex items-center justify-between pb-2 border-b border-[var(--line)]">
-            <h3 className="text-base font-extrabold text-[var(--tx)]">Account Summary &amp; Rails</h3>
-            <span className="size-2 rounded-full bg-[#2FBD8E] shadow-[0_0_8px_#2FBD8E]" />
+        {/* Right Column (lg:col-span-5): Custody Details & Payment Rails */}
+        <div className="lg:col-span-5 rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-6 shadow-sm space-y-5">
+          <div className="pb-4 border-b border-[var(--line)]">
+            <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--tx)]">
+              Custody &amp; Payment Rails
+            </h2>
+            <p className="mt-0.5 text-xs text-[var(--mut)]">
+              Connected settlement gateways for your bound wallet.
+            </p>
           </div>
 
-          <div className="space-y-3.5 text-xs font-semibold text-[var(--mut)]">
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--s2)] border border-[var(--line)]">
-              <span>Web3 Identity</span>
-              <span className="font-bold text-[var(--tx)]">@dev_user (DE)</span>
+          <div className="divide-y divide-[var(--line)] rounded-2xl border border-[var(--line)] bg-[var(--s2)]/60 px-4 text-xs sm:text-sm">
+            <div className="flex items-center justify-between gap-3 py-3">
+              <span className="font-semibold text-[var(--mut)]">Bound Address</span>
+              <button
+                type="button"
+                onClick={copyAddress}
+                className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-[var(--tx)] hover:text-[#C9A6FF] transition-colors cursor-pointer"
+              >
+                <span>{displayAddress}</span>
+                {copied ? (
+                  <Check className="size-3.5 text-[#2FBD8E]" />
+                ) : (
+                  <Copy className="size-3.5 text-[var(--mut)]" />
+                )}
+              </button>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--s2)] border border-[var(--line)]">
-              <span>Crypto Deposit Gateway</span>
-              <span className="font-bold text-[#00C2FF]">300+ Assets Enabled</span>
+            <div className="flex items-center justify-between gap-3 py-3">
+              <span className="font-semibold text-[var(--mut)]">Primary Network</span>
+              <span className="font-bold text-[var(--tx)]">BNB Smart Chain (BEP-20)</span>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--s2)] border border-[var(--line)]">
-              <span>Card Rails</span>
-              <span className="font-bold text-[#2FBD8E]">Visa / Mastercard Ready</span>
+            <div className="flex items-center justify-between gap-3 py-3">
+              <span className="font-semibold text-[var(--mut)]">Crypto Gateway</span>
+              <span className="font-bold text-[#09B4FF]">300+ Coins Enabled</span>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--s2)] border border-[var(--line)]">
-              <span>Network</span>
-              <span className="font-bold text-[var(--tx)]">BNB Smart Chain (56)</span>
+            <div className="flex items-center justify-between gap-3 py-3">
+              <span className="font-semibold text-[var(--mut)]">Card On-Ramp</span>
+              <span className="font-bold text-[#2FBD8E]">Visa · Mastercard · Apple Pay</span>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[var(--line)] bg-gradient-to-br from-[#7A12F5]/10 via-[#09B4FF]/10 to-[var(--s2)] p-4 text-[var(--tx)] flex items-start gap-3">
+          <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-4 flex items-start gap-3">
             <ShieldCheck className="size-5 text-[#2FBD8E] shrink-0 mt-0.5" />
-            <div className="text-xs leading-relaxed">
-              <span className="font-extrabold block text-[var(--tx)]">Non-Custodial Security</span>
-              Your balances and on-chain claims are verified via cryptographic Merkle proofs and BEP-20 contracts.
+            <div className="text-xs leading-relaxed text-[var(--mut)]">
+              <span className="font-extrabold block text-[var(--tx)] mb-0.5">
+                Non-Custodial Merkle Verification
+              </span>
+              Your presale allocations and OK Points claims are cryptographically verified on BNB Smart Chain.
             </div>
           </div>
         </div>
@@ -495,7 +563,9 @@ export default function WalletPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base sm:text-lg font-extrabold text-[var(--tx)]">Deposit to Account</h3>
+                <h3 className="text-base sm:text-lg font-extrabold text-[var(--tx)]">
+                  Deposit to Account
+                </h3>
                 <button
                   type="button"
                   onClick={() => setShowDepositModal(false)}
@@ -509,13 +579,19 @@ export default function WalletPage() {
                 <div className="size-36 bg-white p-2 rounded-xl flex items-center justify-center shadow-md">
                   <QrCode className="size-32 text-black" />
                 </div>
-                <p className="text-xs font-semibold text-[var(--mut)] mt-2.5">Scan QR or copy address below</p>
+                <p className="text-xs font-semibold text-[var(--mut)] mt-2.5">
+                  Scan QR or copy address below
+                </p>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-[var(--mut)] uppercase tracking-wider">Deposit Address (BNB / BEP-20)</label>
+                <label className="text-xs font-bold text-[var(--mut)] uppercase tracking-wider">
+                  Deposit Address (BNB / BEP-20)
+                </label>
                 <div className="flex items-center gap-2 p-2.5 rounded-xl border border-[var(--line)] bg-[var(--s2)]">
-                  <span className="font-mono text-xs font-bold text-[var(--tx)] flex-1 truncate">{currentAddress}</span>
+                  <span className="font-mono text-xs font-bold text-[var(--tx)] flex-1 truncate">
+                    {currentAddress}
+                  </span>
                   <button
                     type="button"
                     onClick={copyAddress}
@@ -547,7 +623,9 @@ export default function WalletPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base sm:text-lg font-extrabold text-[var(--tx)]">Withdraw Funds</h3>
+                <h3 className="text-base sm:text-lg font-extrabold text-[var(--tx)]">
+                  Withdraw Funds
+                </h3>
                 <button
                   type="button"
                   onClick={() => setShowWithdrawModal(false)}
@@ -559,7 +637,9 @@ export default function WalletPage() {
 
               <form onSubmit={handleWithdrawSubmit} className="space-y-4">
                 <div>
-                  <label className="text-xs font-bold text-[var(--mut)] uppercase tracking-wider">Select Asset</label>
+                  <label className="text-xs font-bold text-[var(--mut)] uppercase tracking-wider">
+                    Select Asset
+                  </label>
                   <div className="grid grid-cols-2 gap-2 mt-1">
                     <button
                       type="button"
@@ -587,7 +667,9 @@ export default function WalletPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-[var(--mut)] uppercase tracking-wider">Recipient Address</label>
+                  <label className="text-xs font-bold text-[var(--mut)] uppercase tracking-wider">
+                    Recipient Address
+                  </label>
                   <input
                     type="text"
                     placeholder="0x..."
@@ -598,7 +680,9 @@ export default function WalletPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-[var(--mut)] uppercase tracking-wider">Amount</label>
+                  <label className="text-xs font-bold text-[var(--mut)] uppercase tracking-wider">
+                    Amount
+                  </label>
                   <div className="relative mt-1">
                     <input
                       type="number"
@@ -632,3 +716,4 @@ export default function WalletPage() {
     </main>
   );
 }
+
