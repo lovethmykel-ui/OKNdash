@@ -159,7 +159,7 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
             <SidebarMenuButton
               size="lg"
               asChild
-              className="h-11 rounded-xl hover:bg-transparent group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!"
+              className="h-11 rounded-xl pr-10 md:pr-2 hover:bg-transparent group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!"
             >
               <Link href={(area === 'admin' ? '/admin' : bareAppHref('/app')) as never}>
                 <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--s2)] shadow-sm">

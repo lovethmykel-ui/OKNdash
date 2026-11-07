@@ -93,7 +93,7 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
               className={cn(
                 'mx-auto w-full px-3.5 py-5 sm:px-5 md:px-8 md:py-6',
                 area === 'app'
-                  ? 'max-w-7xl pb-24 md:pb-10'
+                  ? 'max-w-7xl pb-28 md:pb-10'
                   : 'max-w-[96rem] pb-8',
               )}
             >
@@ -101,84 +101,86 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
             </div>
           </div>
 
-          {/* Mobile Bottom Navigation Bar (app area only) */}
+          {/* Floating Mobile Bottom Navigation Dock (app area only) */}
           {area === 'app' && (
-            <nav
-              aria-label="Mobile Navigation"
-              className="web3-bottom-nav fixed bottom-0 left-0 right-0 z-50 flex h-[68px] items-center justify-around border-t border-[var(--line)] bg-[rgba(19,19,22,0.95)] px-2 backdrop-blur-2xl md:hidden"
-            >
-              {MOBILE_BOTTOM_NAV.map((tab) => {
-                const Icon = tab.icon;
-                const isBuy = tab.href === '/app/buy';
-                const isActive =
-                  (tab.href === '/app/portfolio' && (pathname === '/app' || pathname === '/app/portfolio' || pathname.startsWith('/app/portfolio'))) ||
-                  (tab.href === '/app/agents' && (pathname.startsWith('/app/agents') || pathname.startsWith('/app/trade-bot') || pathname.startsWith('/app/polymarket-agent') || pathname.startsWith('/app/prediction-markets'))) ||
-                  (tab.href !== '/app/portfolio' && tab.href !== '/app/agents' && (pathname === tab.href || pathname.startsWith(tab.href + '/')));
-                return (
-                  <Link
-                    key={tab.href}
-                    href={tab.href as never}
-                    className={cn(
-                      'relative flex flex-col items-center justify-center gap-[3px] h-[50px] min-w-[60px] px-2.5 py-1 rounded-[15px] transition-all duration-200 active:scale-95 cursor-pointer',
-                      isActive
-                        ? 'bg-gradient-to-br from-[#7A12F5] to-[#8E2BFF] !text-white text-white shadow-[0_4px_16px_rgba(122,18,245,0.45)]'
-                        : 'bg-transparent text-[var(--mut)] hover:text-[var(--tx)]',
-                    )}
-                    style={isActive ? { background: 'linear-gradient(135deg, #7A12F5 0%, #8E2BFF 100%)', color: '#ffffff' } : undefined}
-                  >
-                    {isBuy ? (
-                      <motion.div
-                        animate={{
-                          y: [0, -2.5, 0],
-                          rotate: [0, -8, 8, 0],
-                          scale: [1, 1.08, 1],
-                        }}
-                        transition={{
-                          duration: 2.2,
-                          repeat: Infinity,
-                          ease: 'easeInOut',
-                        }}
-                        className="relative flex items-center justify-center"
-                      >
-                        <ShoppingCart
-                          className={cn(
-                            'size-5',
-                            isActive ? '!text-white !stroke-white' : 'text-[var(--mut)]',
-                          )}
+            <div className="pointer-events-none fixed inset-x-0 bottom-[max(12px,env(safe-area-inset-bottom,12px))] z-50 flex justify-center px-2.5 sm:px-4 md:hidden">
+              <nav
+                aria-label="Mobile Navigation"
+                className="web3-bottom-nav pointer-events-auto grid w-full max-w-[420px] grid-cols-5 items-center gap-1 rounded-[24px] p-1.5"
+              >
+                {MOBILE_BOTTOM_NAV.map((tab) => {
+                  const Icon = tab.icon;
+                  const isBuy = tab.href === '/app/buy';
+                  const isActive =
+                    (tab.href === '/app/portfolio' && (pathname === '/app' || pathname === '/app/portfolio' || pathname.startsWith('/app/portfolio'))) ||
+                    (tab.href === '/app/agents' && (pathname.startsWith('/app/agents') || pathname.startsWith('/app/trade-bot') || pathname.startsWith('/app/polymarket-agent') || pathname.startsWith('/app/prediction-markets'))) ||
+                    (tab.href !== '/app/portfolio' && tab.href !== '/app/agents' && (pathname === tab.href || pathname.startsWith(tab.href + '/')));
+                  return (
+                    <Link
+                      key={tab.href}
+                      href={tab.href as never}
+                      className={cn(
+                        'relative flex h-[50px] sm:h-[52px] min-w-0 w-full flex-col items-center justify-center gap-0.5 rounded-[18px] px-1 py-1 transition-all duration-200 active:scale-95 cursor-pointer select-none',
+                        isActive
+                          ? 'bg-gradient-to-br from-[#7A12F5] to-[#8E2BFF] !text-white text-white shadow-[0_6px_18px_rgba(122,18,245,0.45)]'
+                          : 'bg-transparent text-[var(--mut)] hover:text-[var(--tx)] hover:bg-white/[0.04]',
+                      )}
+                      style={isActive ? { background: 'linear-gradient(135deg, #7A12F5 0%, #8E2BFF 100%)', color: '#ffffff' } : undefined}
+                    >
+                      {isBuy ? (
+                        <motion.div
+                          animate={{
+                            y: [0, -2, 0],
+                            rotate: [0, -8, 8, 0],
+                            scale: [1, 1.08, 1],
+                          }}
+                          transition={{
+                            duration: 2.2,
+                            repeat: Infinity,
+                            ease: 'easeInOut',
+                          }}
+                          className="relative flex items-center justify-center shrink-0"
+                        >
+                          <ShoppingCart
+                            className={cn(
+                              'size-[18px] sm:size-5',
+                              isActive ? '!text-white !stroke-white' : 'text-[var(--mut)]',
+                            )}
+                            style={isActive ? { color: '#ffffff', stroke: '#ffffff' } : undefined}
+                          />
+                          <span
+                            className={cn(
+                              'absolute -top-1 -right-1.5 size-1.5 sm:size-2 rounded-full animate-ping',
+                              isActive ? 'bg-[#FFD60A]' : 'bg-[#09B4FF]',
+                            )}
+                          />
+                          <span
+                            className={cn(
+                              'absolute -top-1 -right-1.5 size-1.5 sm:size-2 rounded-full',
+                              isActive ? 'bg-[#FFD60A]' : 'bg-[#09B4FF]',
+                            )}
+                          />
+                        </motion.div>
+                      ) : (
+                        <Icon
+                          className={cn('size-[18px] sm:size-5 shrink-0', isActive ? '!text-white !stroke-white' : 'text-[var(--mut)]')}
                           style={isActive ? { color: '#ffffff', stroke: '#ffffff' } : undefined}
                         />
-                        <span
-                          className={cn(
-                            'absolute -top-1 -right-1.5 size-2 rounded-full animate-ping',
-                            isActive ? 'bg-[#FFD60A]' : 'bg-[#09B4FF]',
-                          )}
-                        />
-                        <span
-                          className={cn(
-                            'absolute -top-1 -right-1.5 size-2 rounded-full',
-                            isActive ? 'bg-[#FFD60A]' : 'bg-[#09B4FF]',
-                          )}
-                        />
-                      </motion.div>
-                    ) : (
-                      <Icon
-                        className={cn('size-5', isActive ? '!text-white !stroke-white' : 'text-[var(--mut)]')}
-                        style={isActive ? { color: '#ffffff', stroke: '#ffffff' } : undefined}
-                      />
-                    )}
-                    <span
-                      className={cn(
-                        'text-[10.5px] tracking-tight font-extrabold',
-                        isActive ? '!text-white' : 'text-[var(--mut)]',
                       )}
-                      style={isActive ? { color: '#ffffff' } : undefined}
-                    >
-                      {tab.label}
-                    </span>
-                  </Link>
-                );
-              })}
-            </nav>
+                      <span
+                        className={cn(
+                          'max-w-full truncate text-[10px] sm:text-[10.5px] leading-tight tracking-tight font-extrabold',
+                          isActive ? '!text-white' : 'text-[var(--mut)]',
+                        )}
+                        style={isActive ? { color: '#ffffff' } : undefined}
+                      >
+                        {tab.label}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
           )}
         </SidebarInset>
 

@@ -190,10 +190,10 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+          className="data-[side=left]:top-2.5 data-[side=left]:bottom-2.5 data-[side=left]:left-2.5 data-[side=left]:h-[calc(100dvh-20px)] data-[side=left]:w-[calc(100vw-20px)] data-[side=left]:max-w-[300px] rounded-[24px] border border-[var(--line)] bg-[var(--s1)]/95 p-0 text-sidebar-foreground shadow-[0_20px_50px_rgba(0,0,0,0.65)] backdrop-blur-2xl overflow-hidden [&>button]:top-3.5 [&>button]:right-3.5 [&>button]:z-20 [&>button]:rounded-xl [&>button]:border [&>button]:border-[var(--line)] [&>button]:bg-[var(--s2)] [&>button]:text-[var(--tx)]"
           style={
             {
-              "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+              "--sidebar-width": "min(calc(100vw - 20px), 300px)",
             } as React.CSSProperties
           }
           side={side}
@@ -202,7 +202,7 @@ function Sidebar({
             <SheetTitle>Sidebar</SheetTitle>
             <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
-          <div className="flex h-full w-full flex-col">{children}</div>
+          <div className="flex h-full w-full flex-col overflow-y-auto">{children}</div>
         </SheetContent>
       </Sheet>
     )

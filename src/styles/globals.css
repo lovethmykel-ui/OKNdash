@@ -592,28 +592,26 @@ body::before {
   }
 }
 
-/* Mobile Bottom Navigation Bar */
+/* Floating Mobile Bottom Navigation Dock */
 .web3-bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 64px;
-  padding-bottom: env(safe-area-inset-bottom);
-  background: rgba(19, 19, 22, 0.94);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid var(--line);
-  box-shadow: 0 -1px 0 var(--line);
-  display: none;
-  align-items: center;
-  justify-content: space-around;
-  z-index: 50;
+  background: rgba(18, 18, 24, 0.88);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 16px 40px -6px rgba(0, 0, 0, 0.65),
+    0 4px 16px rgba(122, 18, 245, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .light .web3-bottom-nav,
 [data-theme="light"] .web3-bottom-nav {
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  box-shadow:
+    0 14px 36px -6px rgba(15, 23, 42, 0.16),
+    0 4px 14px rgba(122, 18, 245, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 /* Ensure active nav items with purple background ALWAYS have pure white text and icons across light and dark modes */
@@ -621,6 +619,7 @@ body::before {
 [data-sidebar="menu-button"][data-state="active"],
 [data-sidebar="menu-button"].active,
 .web3-bottom-nav a.bg-gradient-to-r,
+.web3-bottom-nav a.bg-gradient-to-br,
 .web3-bottom-nav a.active,
 .bottom-nav-item.active {
   color: #FFFFFF !important;
@@ -634,6 +633,8 @@ body::before {
 [data-sidebar="menu-button"].active svg,
 .web3-bottom-nav a.bg-gradient-to-r span,
 .web3-bottom-nav a.bg-gradient-to-r svg,
+.web3-bottom-nav a.bg-gradient-to-br span,
+.web3-bottom-nav a.bg-gradient-to-br svg,
 .web3-bottom-nav a.active span,
 .web3-bottom-nav a.active svg,
 .bottom-nav-item.active span,
@@ -646,6 +647,8 @@ body::before {
 [data-theme="light"] [data-sidebar="menu-button"][data-active="true"],
 .light .web3-bottom-nav a.bg-gradient-to-r,
 [data-theme="light"] .web3-bottom-nav a.bg-gradient-to-r,
+.light .web3-bottom-nav a.bg-gradient-to-br,
+[data-theme="light"] .web3-bottom-nav a.bg-gradient-to-br,
 .light .bottom-nav-item.active,
 [data-theme="light"] .bottom-nav-item.active {
   color: #FFFFFF !important;
@@ -659,6 +662,10 @@ body::before {
 [data-theme="light"] .web3-bottom-nav a.bg-gradient-to-r span,
 .light .web3-bottom-nav a.bg-gradient-to-r svg,
 [data-theme="light"] .web3-bottom-nav a.bg-gradient-to-r svg,
+.light .web3-bottom-nav a.bg-gradient-to-br span,
+[data-theme="light"] .web3-bottom-nav a.bg-gradient-to-br span,
+.light .web3-bottom-nav a.bg-gradient-to-br svg,
+[data-theme="light"] .web3-bottom-nav a.bg-gradient-to-br svg,
 .light .bottom-nav-item.active span,
 [data-theme="light"] .bottom-nav-item.active span,
 .light .bottom-nav-item.active svg,
@@ -668,11 +675,11 @@ body::before {
 }
 
 @media (max-width: 767px) {
-  .web3-bottom-nav {
-    display: flex;
-  }
   .app-shell-main {
-    padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important;
+    padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  nextjs-portal {
+    display: none !important;
   }
 }
 
