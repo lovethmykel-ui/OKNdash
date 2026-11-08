@@ -17,8 +17,23 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('[GlobalErrorBoundary]', error);
-  }, [error]);
+    const isChunkError =
+      error?.name === 'ChunkLoadError' ||
+      error?.message?.includes('ChunkLoadError') ||
+      error?.message?.includes('Loading chunk');
+    if (isChunkError) {
+      if (typeof window !== 'undefined') {
+        const key = 'okn_global_chunk_retry';
+        if (!sessionStorage.getItem(key)) {
+          sessionStorage.setItem(key, '1');
+          window.location.reload();
+          return;
+        }
+      }
+      reset();
+      return;
+    }
+  }, [error, reset]);
 
   return (
     <html lang="en">

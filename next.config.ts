@@ -42,9 +42,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  transpilePackages: ['@okn/shared', 'motion'],
+  transpilePackages: ['@okn/shared'],
   experimental: {
-    optimizePackageImports: ['lucide-react', 'motion'],
+    optimizePackageImports: ['lucide-react', 'motion', 'framer-motion'],
   },
   serverExternalPackages: ['@coinbase/cdp-sdk', 'pino', 'pino-pretty'],
   async headers() {
@@ -129,10 +129,15 @@ const nextConfig: NextConfig = {
     ];
   },
   webpack: (config, { dev }) => {
-    if (dev && process.env.DISABLE_HMR === 'true') {
-      config.watchOptions = {
-        ignored: /.*/,
-      };
+    if (dev) {
+      config.devtool = false;
+      config.output = config.output ?? {};
+      config.output.chunkLoadTimeout = 300000;
+      if (process.env.DISABLE_HMR === 'true') {
+        config.watchOptions = {
+          ignored: /.*/,
+        };
+      }
     }
     config.resolve = config.resolve ?? {};
     config.resolve.alias = {

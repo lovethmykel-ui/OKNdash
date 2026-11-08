@@ -8,7 +8,7 @@
  * WebComponent chunks or WalletConnect relay connections.
  */
 
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { WagmiProvider, createConfig, http } from 'wagmi';
 import { bsc, bscTestnet } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -57,23 +57,11 @@ interface Props {
 
 export function WagmiProviders({ children }: Props) {
   const [queryClient] = useState(createPrewarmedQueryClient);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        {mounted ? (
-          children
-        ) : (
-          <div
-            suppressHydrationWarning
-            style={{ minHeight: '100vh', background: 'var(--bg0, #09080f)' }}
-          />
-        )}
+        {children}
       </QueryClientProvider>
     </WagmiProvider>
   );

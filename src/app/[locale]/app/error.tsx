@@ -17,6 +17,22 @@ export default function AppError({
   reset: () => void;
 }) {
   useEffect(() => {
+    const isChunkError =
+      error?.name === 'ChunkLoadError' ||
+      error?.message?.includes('ChunkLoadError') ||
+      error?.message?.includes('Loading chunk');
+    if (isChunkError) {
+      if (typeof window !== 'undefined') {
+        const key = 'okn_app_chunk_retry';
+        if (!sessionStorage.getItem(key)) {
+          sessionStorage.setItem(key, '1');
+          window.location.reload();
+          return;
+        }
+      }
+      reset();
+      return;
+    }
     void fetch('/api/client-error', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -28,7 +44,7 @@ export default function AppError({
         area: 'app',
       }),
     }).catch(() => {});
-  }, [error]);
+  }, [error, reset]);
 
   return (
     <div className="mx-auto flex max-w-md flex-col items-center justify-center gap-4 px-4 py-16 text-center">
