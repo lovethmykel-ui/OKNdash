@@ -7,11 +7,10 @@ const intlMiddleware = createIntlMiddleware(routing);
 export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Root redirects straight to user dashboard portfolio
-  if (pathname === '/' || pathname === '/en') {
-    const url = req.nextUrl.clone();
-    url.pathname = '/app/portfolio';
-    return NextResponse.redirect(url);
+  // Serve the portfolio dashboard directly at root / without a 307 redirect
+  if (pathname === '/' || pathname === '/en' || pathname === '/app' || pathname === '/en/app') {
+    req.nextUrl.pathname = '/app/portfolio';
+    return intlMiddleware(req);
   }
 
   return intlMiddleware(req);

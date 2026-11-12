@@ -46,7 +46,11 @@ const MOBILE_BOTTOM_NAV = [
 export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppShellProps) {
   const pathname = usePathname();
   const t = useTranslations('dashboard');
-  const activeItem = navItems.find((i) => i.href === pathname);
+  const activeItem = navItems.find(
+    (i) =>
+      i.href === pathname ||
+      (i.href === '/app/portfolio' && (pathname === '/' || pathname === '/app')),
+  );
   const title = activeItem
     ? (activeItem.labelKey ? t(`nav.${activeItem.labelKey}`) : (activeItem.label ?? ''))
     : (pathname.startsWith('/admin') ? t('shell.admin') : t('shell.dashboard'));
@@ -112,7 +116,7 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
                   const Icon = tab.icon;
                   const isBuy = tab.href === '/app/buy';
                   const isActive =
-                    (tab.href === '/app/portfolio' && (pathname === '/app' || pathname === '/app/portfolio' || pathname.startsWith('/app/portfolio'))) ||
+                    (tab.href === '/app/portfolio' && (pathname === '/' || pathname === '/app' || pathname === '/app/portfolio' || pathname.startsWith('/app/portfolio'))) ||
                     (tab.href === '/app/agents' && (pathname.startsWith('/app/agents') || pathname.startsWith('/app/trade-bot') || pathname.startsWith('/app/polymarket-agent') || pathname.startsWith('/app/prediction-markets'))) ||
                     (tab.href !== '/app/portfolio' && tab.href !== '/app/agents' && (pathname === tab.href || pathname.startsWith(tab.href + '/')));
                   return (

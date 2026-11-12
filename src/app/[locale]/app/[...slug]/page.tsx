@@ -16,7 +16,16 @@
  * ever reach this page, so no auth check is needed here.
  */
 import { notFound } from 'next/navigation';
+import { AnalyticsView } from '@/components/analytics/analytics-view';
 
-export default function CatchAll() {
+export default async function CatchAll({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string[] }>;
+}) {
+  const { slug } = await params;
+  if (slug.length === 1 && slug[0] === 'analytics') {
+    return <AnalyticsView />;
+  }
   notFound();
 }

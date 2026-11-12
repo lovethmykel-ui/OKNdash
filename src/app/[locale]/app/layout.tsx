@@ -20,6 +20,9 @@ import { routing, type Locale } from '@/i18n/routing';
 // dashboard.nav message namespace by key (resolved in the sidebar component).
 const APP_NAV = [
   { href: '/app/portfolio', labelKey: 'portfolio' },
+  { href: '/app/analytics', label: 'Analytics' },
+  { href: '/app/buy', labelKey: 'buy' },
+  { href: '/app/referral', labelKey: 'referral' },
   { href: '/app/trade-bot', labelKey: 'aiTradingAgent' },
   { href: '/app/polymarket-agent', labelKey: 'polymarketAgent' },
   { href: '/app/prediction-markets', labelKey: 'predictionMarkets' },
@@ -27,12 +30,10 @@ const APP_NAV = [
   { href: '/app/missions', labelKey: 'missions' },
   { href: '/app/tasks', labelKey: 'tasks' },
   { href: '/app/claim', labelKey: 'claim' },
-  { href: '/app/buy', labelKey: 'buy' },
   { href: '/app/staking', labelKey: 'staking' },
   { href: '/app/news', labelKey: 'news' },
   { href: '/app/learn', labelKey: 'learn' },
   { href: '/app/wallet', labelKey: 'wallet' },
-  { href: '/app/referral', labelKey: 'referral' },
   { href: '/app/settings', labelKey: 'settings' },
 ] as const;
 

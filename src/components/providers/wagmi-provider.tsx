@@ -8,7 +8,7 @@
  * WebComponent chunks or WalletConnect relay connections.
  */
 
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { WagmiProvider, createConfig, http } from 'wagmi';
 import { bsc, bscTestnet } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -23,8 +23,8 @@ const wagmiConfig = createConfig({
   ssr: true,
 });
 
-function createPrewarmedQueryClient(): QueryClient {
-  const client = new QueryClient({
+function createQueryClient(): QueryClient {
+  return new QueryClient({
     defaultOptions: {
       queries: {
         staleTime: 5 * 60 * 1000,
@@ -35,19 +35,6 @@ function createPrewarmedQueryClient(): QueryClient {
       },
     },
   });
-
-  // Pre-warm core dashboard queries so every page renders on Frame 1 with zero skeleton flash
-  void client.prefetchQuery({ queryKey: ['me'], queryFn: api.getMe });
-  void client.prefetchQuery({ queryKey: ['portfolio'], queryFn: api.getPortfolio });
-  void client.prefetchQuery({ queryKey: ['tasks'], queryFn: api.getTasks });
-  void client.prefetchQuery({ queryKey: ['claim-eligibility'], queryFn: api.getClaimEligibility });
-  void client.prefetchQuery({ queryKey: ['rewards', 'streak'], queryFn: api.getStreak });
-  void client.prefetchQuery({ queryKey: ['sale-price'], queryFn: api.getSalePrice });
-  void client.prefetchQuery({ queryKey: ['purchase-history'], queryFn: () => api.getPurchaseHistory(1, 20) });
-  void client.prefetchQuery({ queryKey: ['referral'], queryFn: api.getReferralInfo });
-  void client.prefetchQuery({ queryKey: ['missions'], queryFn: api.getMissions });
-
-  return client;
 }
 
 interface Props {
@@ -56,7 +43,19 @@ interface Props {
 }
 
 export function WagmiProviders({ children }: Props) {
-  const [queryClient] = useState(createPrewarmedQueryClient);
+  const [queryClient] = useState(createQueryClient);
+
+  useEffect(() => {
+    void queryClient.prefetchQuery({ queryKey: ['me'], queryFn: api.getMe });
+    void queryClient.prefetchQuery({ queryKey: ['portfolio'], queryFn: api.getPortfolio });
+    void queryClient.prefetchQuery({ queryKey: ['tasks'], queryFn: api.getTasks });
+    void queryClient.prefetchQuery({ queryKey: ['claim-eligibility'], queryFn: api.getClaimEligibility });
+    void queryClient.prefetchQuery({ queryKey: ['rewards', 'streak'], queryFn: api.getStreak });
+    void queryClient.prefetchQuery({ queryKey: ['sale-price'], queryFn: api.getSalePrice });
+    void queryClient.prefetchQuery({ queryKey: ['purchase-history'], queryFn: () => api.getPurchaseHistory(1, 20) });
+    void queryClient.prefetchQuery({ queryKey: ['referral'], queryFn: api.getReferralInfo });
+    void queryClient.prefetchQuery({ queryKey: ['missions'], queryFn: api.getMissions });
+  }, [queryClient]);
 
   return (
     <WagmiProvider config={wagmiConfig}>
