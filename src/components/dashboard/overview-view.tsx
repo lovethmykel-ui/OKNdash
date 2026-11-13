@@ -31,6 +31,7 @@ import { useSalePrice } from '@/lib/hooks/use-sale';
 import { useStreak } from '@/lib/hooks/use-rewards';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { OknWatermark } from '@/components/ui/okn-watermark';
+import { AnimatedCounter } from '@/components/ui/animated-counter';
 import { formatPoints, formatWei } from '@/lib/utils';
 import { useAccount } from 'wagmi';
 
@@ -114,8 +115,12 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
                 </button>
               </div>
               <div className="flex items-baseline gap-3 mt-1">
-                <span className="num text-3xl font-extrabold text-[var(--tx)]">
-                  {hideBalance ? '••••••••' : '$1,428.50'}
+                <span className="num text-3xl font-extrabold text-[var(--tx)] tabular-nums">
+                  {hideBalance ? (
+                    '••••••••'
+                  ) : (
+                    <AnimatedCounter target={1428.5} decimals={2} prefix="$" durationMs={1200} />
+                  )}
                 </span>
                 <span className="rounded-lg bg-[#2FBD8E]/15 px-2.5 py-0.5 text-xs font-extrabold text-[#2FBD8E]">
                   +$142.50 (24h)
@@ -137,8 +142,18 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
                 Referral Earnings
               </div>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="num text-lg font-extrabold text-[var(--tx)]">
-                  {hideBalance ? '••••••' : '$142.50 USD'}
+                <span className="num text-lg font-extrabold text-[var(--tx)] tabular-nums">
+                  {hideBalance ? (
+                    '••••••'
+                  ) : (
+                    <AnimatedCounter
+                      target={142.5}
+                      decimals={2}
+                      prefix="$"
+                      suffix=" USD"
+                      durationMs={1150}
+                    />
+                  )}
                 </span>
                 <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#F0B90B]">
                   <img src="/bnb-logo.png" alt="BNB" className="size-3.5 object-contain" />
@@ -146,7 +161,7 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
                 </span>
               </div>
             </div>
-            <span className="ml-1.5 text-xs font-bold text-[#C9A6FF]">14 invites →</span>
+            <span className="ml-1.5 text-xs font-bold text-[#7A12F5] dark:text-[#C9A6FF]">14 invites →</span>
           </Link>
         </div>
 
@@ -528,12 +543,12 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
               <button
                 type="button"
                 onClick={onSelectActivity}
-                className="text-xs font-bold text-[#C9A6FF] hover:underline cursor-pointer"
+                className="text-xs font-bold text-[#7A12F5] dark:text-[#C9A6FF] hover:underline cursor-pointer"
               >
                 Details
               </button>
             ) : (
-              <Link href="/app/portfolio?tab=activity" className="text-xs font-bold text-[#C9A6FF] hover:underline">
+              <Link href="/app/portfolio?tab=activity" className="text-xs font-bold text-[#7A12F5] dark:text-[#C9A6FF] hover:underline">
                 Details
               </Link>
             )}
@@ -541,15 +556,19 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
           <div className="grid grid-cols-2 gap-2.5">
             <div className="p-3.5 rounded-[18px] bg-[var(--s2)]">
               <div className="text-xs font-bold text-[var(--mut)]">OK Points</div>
-              <div className="num text-2xl font-extrabold text-[var(--tx)] mt-1.5 leading-none">
-                {formatPoints(points)}
+              <div className="num text-2xl font-extrabold text-[var(--tx)] mt-1.5 leading-none tabular-nums">
+                <AnimatedCounter target={points} durationMs={1100} />
               </div>
               <div className="text-[11px] font-bold text-[#2FBD8E] mt-2">+20 today</div>
             </div>
             <div className="p-3.5 rounded-[18px] bg-[var(--s2)]">
               <div className="text-xs font-bold text-[var(--mut)]">$OKN balance</div>
-              <div className="num text-2xl font-extrabold text-[var(--tx)] mt-1.5 leading-none">
-                {balance.data != null ? formatWei(balance.data) : '693,333'}
+              <div className="num text-2xl font-extrabold text-[var(--tx)] mt-1.5 leading-none tabular-nums">
+                {balance.data != null ? (
+                  formatWei(balance.data)
+                ) : (
+                  <AnimatedCounter target={693333} durationMs={1250} />
+                )}
               </div>
               <div className="text-[11px] font-bold text-[#2FBD8E] mt-2">
                 {address ? address.slice(0, 6) + '...' + address.slice(-4) : '0xBF6B...0377 (Demo)'}
@@ -558,7 +577,9 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
           </div>
           <div className="flex items-center justify-between pt-3 border-t border-[var(--line)] text-xs font-bold">
             <span className="text-[var(--mut)]">Claimable after next commit</span>
-            <span className="num font-extrabold text-[#C9A6FF]">{formatPoints(points)} pts</span>
+            <span className="num font-extrabold text-[#7A12F5] dark:text-[#C9A6FF] tabular-nums">
+              <AnimatedCounter target={points} suffix=" pts" durationMs={1100} />
+            </span>
           </div>
         </section>
 

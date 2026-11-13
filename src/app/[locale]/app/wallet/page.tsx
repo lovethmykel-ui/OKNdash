@@ -503,7 +503,7 @@ export default function WalletPage() {
               </span>
             ) : (
               <span className="num text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight tabular-nums">
-                $<AnimatedCounter target={1428} durationMs={950} />.50
+                <AnimatedCounter target={1428.5} decimals={2} prefix="$" durationMs={1200} />
               </span>
             )}
             <span className="inline-flex items-center gap-1 rounded-full border border-[#34D399]/40 bg-[#10B981]/25 px-2.5 py-0.5 text-xs font-extrabold text-[#6EE7B7] tabular-nums backdrop-blur-sm">
@@ -515,17 +515,20 @@ export default function WalletPage() {
           </div>
         </div>
 
-        {/* Bottom Row: 4-Action Glassmorphic Dock */}
+        {/* Bottom Row: 4-Action Uniform White Dock */}
         <div className="relative z-10 mt-6 pt-4 border-t border-white/15 grid grid-cols-4 gap-2 sm:gap-3">
           <button
             type="button"
             onClick={() => setShowDepositModal(true)}
-            className="group flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 rounded-2xl border border-white/20 bg-white/12 py-2.5 sm:py-3 px-2 text-xs font-extrabold text-white hover:bg-white/22 active:scale-95 transition-all cursor-pointer backdrop-blur-md"
+            className="group flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 rounded-2xl border border-white/40 bg-white text-[#5B0AC2] py-2.5 sm:py-3 px-2 text-xs font-extrabold shadow-md hover:bg-purple-50 active:scale-95 transition-all cursor-pointer"
+            style={{ backgroundColor: '#ffffff', color: '#5B0AC2' }}
           >
-            <span className="flex size-8 sm:size-7 items-center justify-center rounded-xl bg-[#38BDF8]/25 text-[#7DD3FC] group-hover:scale-105 transition-transform">
+            <span className="flex size-8 sm:size-7 items-center justify-center rounded-full bg-[#7A12F5]/12 text-[#7A12F5] group-hover:scale-105 transition-transform">
               <ArrowDownLeft className="size-4 stroke-[2.5]" />
             </span>
-            <span className="text-[11px] sm:text-xs whitespace-nowrap">Deposit</span>
+            <span className="text-[11px] sm:text-xs font-extrabold text-[#5B0AC2] whitespace-nowrap">
+              Deposit
+            </span>
           </button>
 
           <button
@@ -534,32 +537,41 @@ export default function WalletPage() {
               setWithdrawReceipt(null);
               setShowWithdrawModal(true);
             }}
-            className="group flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 rounded-2xl border border-white/20 bg-white/12 py-2.5 sm:py-3 px-2 text-xs font-extrabold text-white hover:bg-white/22 active:scale-95 transition-all cursor-pointer backdrop-blur-md"
+            className="group flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 rounded-2xl border border-white/40 bg-white text-[#5B0AC2] py-2.5 sm:py-3 px-2 text-xs font-extrabold shadow-md hover:bg-purple-50 active:scale-95 transition-all cursor-pointer"
+            style={{ backgroundColor: '#ffffff', color: '#5B0AC2' }}
           >
-            <span className="flex size-8 sm:size-7 items-center justify-center rounded-xl bg-[#FBBF24]/25 text-[#FDE68A] group-hover:scale-105 transition-transform">
+            <span className="flex size-8 sm:size-7 items-center justify-center rounded-full bg-[#7A12F5]/12 text-[#7A12F5] group-hover:scale-105 transition-transform">
               <ArrowUpRight className="size-4 stroke-[2.5]" />
             </span>
-            <span className="text-[11px] sm:text-xs whitespace-nowrap">Withdraw</span>
+            <span className="text-[11px] sm:text-xs font-extrabold text-[#5B0AC2] whitespace-nowrap">
+              Withdraw
+            </span>
           </button>
 
           <Link
             href="/app/buy"
-            className="group flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 rounded-2xl border border-white/30 bg-white text-[#5B0AC2] py-2.5 sm:py-3 px-2 text-xs font-extrabold shadow-md hover:bg-purple-50 active:scale-95 transition-all cursor-pointer"
+            className="group flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 rounded-2xl border border-white/40 bg-white text-[#5B0AC2] py-2.5 sm:py-3 px-2 text-xs font-extrabold shadow-md hover:bg-purple-50 active:scale-95 transition-all cursor-pointer"
+            style={{ backgroundColor: '#ffffff', color: '#5B0AC2' }}
           >
-            <span className="flex size-8 sm:size-7 items-center justify-center rounded-xl bg-[#7A12F5]/15 text-[#7A12F5] group-hover:scale-105 transition-transform">
+            <span className="flex size-8 sm:size-7 items-center justify-center rounded-full bg-[#7A12F5]/12 text-[#7A12F5] group-hover:scale-105 transition-transform">
               <ShoppingCart className="size-4 stroke-[2.4]" />
             </span>
-            <span className="text-[11px] sm:text-xs whitespace-nowrap">Buy $OKN</span>
+            <span className="text-[11px] sm:text-xs font-extrabold text-[#5B0AC2] whitespace-nowrap">
+              Buy $OKN
+            </span>
           </Link>
 
           <Link
             href="/app/claim"
-            className="group flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 rounded-2xl border border-white/20 bg-white/12 py-2.5 sm:py-3 px-2 text-xs font-extrabold text-white hover:bg-white/22 active:scale-95 transition-all cursor-pointer backdrop-blur-md"
+            className="group flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 rounded-2xl border border-white/40 bg-white text-[#5B0AC2] py-2.5 sm:py-3 px-2 text-xs font-extrabold shadow-md hover:bg-purple-50 active:scale-95 transition-all cursor-pointer"
+            style={{ backgroundColor: '#ffffff', color: '#5B0AC2' }}
           >
-            <span className="flex size-8 sm:size-7 items-center justify-center rounded-xl bg-[#34D399]/25 text-[#6EE7B7] group-hover:scale-105 transition-transform">
+            <span className="flex size-8 sm:size-7 items-center justify-center rounded-full bg-[#7A12F5]/12 text-[#7A12F5] group-hover:scale-105 transition-transform">
               <Gift className="size-4 stroke-[2.3]" />
             </span>
-            <span className="text-[11px] sm:text-xs whitespace-nowrap">Claim</span>
+            <span className="text-[11px] sm:text-xs font-extrabold text-[#5B0AC2] whitespace-nowrap">
+              Claim
+            </span>
           </Link>
         </div>
       </section>

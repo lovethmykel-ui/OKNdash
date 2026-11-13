@@ -29,7 +29,7 @@ interface AreaThemeContextValue {
 }
 
 const AreaThemeContext = createContext<AreaThemeContextValue>({
-  theme: 'dark',
+  theme: 'light',
   toggle: () => {},
   setTheme: () => {},
 });
@@ -62,13 +62,13 @@ export function AreaThemeProvider({
   children: React.ReactNode;
 }) {
   const hydrated = useHydrated();
-  const [theme, setThemeState] = useState<Theme>('dark');
+  const [theme, setThemeState] = useState<Theme>('light');
 
   useEffect(() => {
     if (!hydrated) return;
-    const stored = (window.localStorage.getItem('okn_theme') ||
-      window.localStorage.getItem(`okn-theme:${area}`)) as Theme | null;
-    const initial: Theme = stored === 'light' || stored === 'dark' ? stored : 'dark';
+    const stored = (window.localStorage.getItem('okn_theme_v2') ||
+      window.localStorage.getItem(`okn-theme-v2:${area}`)) as Theme | null;
+    const initial: Theme = stored === 'light' || stored === 'dark' ? stored : 'light';
     applyThemeToDOM(initial);
     setThemeState(initial);
   }, [area, hydrated]);
@@ -77,6 +77,8 @@ export function AreaThemeProvider({
     (newTheme: Theme) => {
       setThemeState(newTheme);
       if (typeof window !== 'undefined') {
+        window.localStorage.setItem('okn_theme_v2', newTheme);
+        window.localStorage.setItem(`okn-theme-v2:${area}`, newTheme);
         window.localStorage.setItem('okn_theme', newTheme);
         window.localStorage.setItem(`okn-theme:${area}`, newTheme);
         applyThemeToDOM(newTheme);
@@ -89,6 +91,8 @@ export function AreaThemeProvider({
     setThemeState((prev) => {
       const next: Theme = prev === 'dark' ? 'light' : 'dark';
       if (typeof window !== 'undefined') {
+        window.localStorage.setItem('okn_theme_v2', next);
+        window.localStorage.setItem(`okn-theme-v2:${area}`, next);
         window.localStorage.setItem('okn_theme', next);
         window.localStorage.setItem(`okn-theme:${area}`, next);
         applyThemeToDOM(next);
@@ -97,7 +101,7 @@ export function AreaThemeProvider({
     });
   }, [area]);
 
-  const activeTheme: Theme = hydrated ? theme : 'dark';
+  const activeTheme: Theme = hydrated ? theme : 'light';
 
   return (
     <AreaThemeContext.Provider value={{ theme: activeTheme, toggle, setTheme }}>

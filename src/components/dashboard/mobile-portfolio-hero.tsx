@@ -7,7 +7,7 @@ import { useClaimEligibility } from '@/lib/hooks/use-claim';
 import { useStreak } from '@/lib/hooks/use-rewards';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { OknWatermark } from '@/components/ui/okn-watermark';
-import { formatPoints } from '@/lib/utils';
+import { AnimatedCounter } from '@/components/ui/animated-counter';
 
 /**
  * MobilePortfolioHero — Card 1 on mobile portfolio.
@@ -54,8 +54,8 @@ export function MobilePortfolioHero() {
         </span>
       </div>
 
-      <div className="relative z-10 num text-4xl font-extrabold tracking-tight mb-3.5">
-        {formatPoints(points)}
+      <div className="relative z-10 num text-4xl font-extrabold tracking-tight mb-3.5 tabular-nums">
+        <AnimatedCounter target={points} durationMs={1100} />
       </div>
 
       {/* Nested Frosted Glass Total Asset Value Card */}
@@ -73,8 +73,12 @@ export function MobilePortfolioHero() {
                 {hideBalance ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
               </button>
             </div>
-            <div className="num text-2xl font-extrabold text-white leading-tight mt-0.5">
-              {hideBalance ? '••••••••' : '$1,428.50'}
+            <div className="num text-2xl font-extrabold text-white leading-tight mt-0.5 tabular-nums">
+              {hideBalance ? (
+                '••••••••'
+              ) : (
+                <AnimatedCounter target={1428.5} decimals={2} prefix="$" durationMs={1200} />
+              )}
             </div>
           </div>
           <span className="rounded-xl border border-[#2FBD8E]/40 bg-[#2FBD8E]/20 px-2.5 py-1 text-xs font-extrabold text-[#4EEDB2] whitespace-nowrap">
@@ -97,8 +101,12 @@ export function MobilePortfolioHero() {
               <div className="text-[11px] font-semibold text-[#E9DAFF]">
                 Referral Earnings
               </div>
-              <div className="num text-sm font-extrabold text-white mt-0.5">
-                {hideBalance ? '••••••' : '$142.50'}
+              <div className="num text-sm font-extrabold text-white mt-0.5 tabular-nums">
+                {hideBalance ? (
+                  '••••••'
+                ) : (
+                  <AnimatedCounter target={142.5} decimals={2} prefix="$" durationMs={1150} />
+                )}
               </div>
             </div>
           </div>
