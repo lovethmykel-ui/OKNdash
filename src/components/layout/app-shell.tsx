@@ -74,7 +74,7 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
       <SidebarProvider open={hydrated ? open : true} onOpenChange={setOpen}>
         <OknSidebar area={area} navItems={navItems} isAdmin={isAdmin} roleLabel={roleLabel} />
         <SidebarInset className="bg-[var(--bg)] transition-colors duration-200">
-          <header className="sticky top-0 z-40 flex h-14 md:h-16 shrink-0 items-center justify-between gap-2 border-b border-[var(--line)] bg-[var(--s1)]/85 px-3 backdrop-blur-xl md:px-6">
+          <header className="sticky top-0 z-50 flex h-14 md:h-16 shrink-0 items-center justify-between gap-2 border-b border-[var(--line)] bg-[var(--s1)]/85 px-3 backdrop-blur-xl md:px-6">
             <div className="flex items-center gap-2.5 min-w-0">
               <SidebarTrigger className="size-9 md:size-10 shrink-0 rounded-xl border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] hover:bg-[var(--s1)] transition-colors" />
               <Separator orientation="vertical" className="hidden md:block h-5 bg-[var(--line)]" />
