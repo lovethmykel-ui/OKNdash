@@ -11,5 +11,15 @@
 import { createNavigation } from 'next-intl/navigation';
 import { routing } from './routing';
 
-export const { Link, redirect, usePathname, useRouter, getPathname } =
-  createNavigation(routing);
+const nav = createNavigation(routing);
+
+export const { Link, redirect, useRouter, getPathname } = nav;
+
+export function usePathname(): string {
+  const pathname = nav.usePathname();
+  if (pathname === '/' || pathname === '/app' || pathname === '/en' || pathname === '/en/app') {
+    return '/app/portfolio';
+  }
+  return pathname;
+}
+

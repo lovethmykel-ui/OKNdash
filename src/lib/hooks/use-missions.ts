@@ -3,6 +3,7 @@
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
+import { useHydrated } from './use-hydrated';
 import type { CreateMissionInput } from '@okn/shared';
 
 const MISSIONS_KEY = ['missions'] as const;
@@ -10,12 +11,44 @@ const ADMIN_MISSIONS_KEY = ['admin', 'missions'] as const;
 
 /** User-facing mission list with live progress + the viewer's eligibility. */
 export function useMissions() {
-  return useQuery({ queryKey: MISSIONS_KEY, queryFn: api.getMissions });
+  const hydrated = useHydrated();
+  const query = useQuery({
+    queryKey: MISSIONS_KEY,
+    queryFn: api.getMissions,
+    enabled: hydrated,
+  });
+  if (!hydrated) {
+    return {
+      ...query,
+      data: undefined,
+      isLoading: true,
+      isPending: true,
+      isError: false,
+      error: null,
+    } as typeof query;
+  }
+  return query;
 }
 
 /** Admin list with metric values + payout projections. */
 export function useAdminMissions() {
-  return useQuery({ queryKey: ADMIN_MISSIONS_KEY, queryFn: api.getAdminMissions });
+  const hydrated = useHydrated();
+  const query = useQuery({
+    queryKey: ADMIN_MISSIONS_KEY,
+    queryFn: api.getAdminMissions,
+    enabled: hydrated,
+  });
+  if (!hydrated) {
+    return {
+      ...query,
+      data: undefined,
+      isLoading: true,
+      isPending: true,
+      isError: false,
+      error: null,
+    } as typeof query;
+  }
+  return query;
 }
 
 export function useCreateMission() {

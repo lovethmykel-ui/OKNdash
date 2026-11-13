@@ -23,6 +23,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { triggerConfetti } from '@/lib/confetti';
 import { api } from '@/lib/api/client';
+import { OknWatermark } from '@/components/ui/okn-watermark';
 import { toast } from 'sonner';
 
 interface TaskItem {
@@ -211,10 +212,11 @@ export default function TasksPage() {
     <main className="space-y-6">
       {/* 1. Earn OK Points Hero Banner */}
       <section className="relative overflow-hidden rounded-[28px] bg-[#7A12F5] p-7 md:p-9 text-white shadow-xl">
-        <div className="text-[12px] md:text-[13px] font-bold uppercase tracking-[0.1em] text-white/80 mb-1.5">
+        <OknWatermark variant="hero" size="md" />
+        <div className="relative z-10 text-[12px] md:text-[13px] font-bold uppercase tracking-[0.1em] text-white/80 mb-1.5">
           Earn OK Points
         </div>
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <div className="text-xs md:text-sm font-medium text-white/85">Available to earn</div>
             <div className="num mt-1 text-3xl md:text-5xl font-extrabold tracking-tight">

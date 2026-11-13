@@ -53,6 +53,7 @@ import {
   useVerifyEmail,
 } from '@/lib/hooks/use-me';
 import type { MeUser } from '@/lib/api/client';
+import { OknWatermark } from '@/components/ui/okn-watermark';
 import { cn } from '@/lib/utils';
 
 const TERMS_URL = '/terms';
@@ -163,8 +164,9 @@ export default function SettingsPage() {
 
       {/* Top Account Identity & Readiness Banner */}
       {user && !showGuest ? (
-        <section className="rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-4 sm:p-6 shadow-sm">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-6">
+        <section className="relative overflow-hidden rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-4 sm:p-6 shadow-sm">
+          <OknWatermark variant="card" size="sm" />
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-6">
             {/* Left: Avatar + Name + Unboxed Metadata */}
             <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
               <div className="relative flex size-13 sm:size-15 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7A12F5] to-[#09B4FF] text-base sm:text-lg font-extrabold text-white shadow-[0_6px_20px_rgba(122,18,245,0.3)]">
@@ -191,9 +193,10 @@ export default function SettingsPage() {
                   {user.username ? <span aria-hidden="true">·</span> : null}
                   <span>
                     {t('joinedOkn')}{' '}
-                    {new Date(user.createdAt).toLocaleDateString(undefined, {
+                    {new Date(user.createdAt).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'short',
+                      timeZone: 'UTC',
                     })}
                   </span>
                   <span aria-hidden="true">·</span>

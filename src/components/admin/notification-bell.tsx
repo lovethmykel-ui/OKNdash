@@ -20,6 +20,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Bell, CheckCheck, Loader2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 
@@ -35,6 +36,7 @@ interface Notification {
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
+  const hydrated = useHydrated();
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const qc = useQueryClient();
@@ -42,6 +44,7 @@ export function NotificationBell() {
   const { data, isLoading } = useQuery<{ notifications: Notification[]; unreadCount: number }>({
     queryKey: ['notifications'],
     queryFn: () => api.getNotifications() as Promise<{ notifications: Notification[]; unreadCount: number }>,
+    enabled: hydrated,
     refetchInterval: 30_000,
     // Also refetch on window focus
     refetchOnWindowFocus: true,
@@ -65,8 +68,8 @@ export function NotificationBell() {
     return () => document.removeEventListener('pointerdown', handleClick);
   }, []);
 
-  const notifications = data?.notifications ?? [];
-  const unread = data?.unreadCount ?? 0;
+  const notifications = hydrated ? (data?.notifications ?? []) : [];
+  const unread = hydrated ? (data?.unreadCount ?? 0) : 0;
 
   const handleClick = (notif: Notification) => {
     if (!notif.read) {

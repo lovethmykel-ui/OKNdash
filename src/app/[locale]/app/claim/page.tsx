@@ -25,6 +25,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useClaimEligibility } from '@/lib/hooks/use-claim';
+import { OknWatermark } from '@/components/ui/okn-watermark';
 import { formatPoints } from '@/lib/utils';
 
 export default function ClaimPage() {
@@ -38,7 +39,8 @@ export default function ClaimPage() {
       <PageHeader title={t('title')} description={t('description')} />
 
       {/* Celebratory Web3 hero banner: the user's earned OK Points. */}
-      <div className="web3-hero p-8 text-center">
+      <div className="web3-hero relative overflow-hidden p-8 text-center">
+        <OknWatermark variant="hero" size="lg" />
         <div className="relative z-10 flex flex-col items-center gap-2">
           <span className="flex size-14 items-center justify-center rounded-2xl bg-white/15 text-white backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.2)]">
             <PartyPopper className="size-7" />

@@ -15,6 +15,7 @@ import { useTranslations } from 'next-intl';
 import { AreaThemeSwitch, useDarkClass } from '@/components/layout/area-theme';
 import { SocialIconRow } from '@/components/landing/social-sidebar';
 import { useMe } from '@/lib/hooks/use-me';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { LogOut, Settings, Users, Wallet } from 'lucide-react';
 import type { MeUser } from '@/lib/api/client';
 import { cn } from '@/lib/utils';
@@ -54,9 +55,10 @@ const DEV_PLACEHOLDER_USER: MeUser = {
 export function UserMenu() {
   const t = useTranslations('dashboard.userMenu');
   const tSocial = useTranslations('socialSidebar');
+  const hydrated = useHydrated();
   const { data } = useMe();
   const darkClass = useDarkClass();
-  const realUser = data?.user ?? null;
+  const realUser = hydrated ? (data?.user ?? null) : null;
   const user = realUser ?? DEV_PLACEHOLDER_USER;
 
   const [open, setOpen] = useState(false);

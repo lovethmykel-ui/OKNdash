@@ -7,6 +7,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
+import { useHydrated } from './use-hydrated';
 import type { LeaderboardCategory, LeaderboardPeriod } from '@okn/shared';
 
 export function useLeaderboard(
@@ -14,17 +15,43 @@ export function useLeaderboard(
   period: LeaderboardPeriod,
   limit = 50,
 ) {
-  return useQuery({
+  const hydrated = useHydrated();
+  const query = useQuery({
     queryKey: ['leaderboard', category, period, limit],
     queryFn: () => api.getLeaderboard({ category, period, limit }),
+    enabled: hydrated,
   });
+  if (!hydrated) {
+    return {
+      ...query,
+      data: undefined,
+      isLoading: true,
+      isPending: true,
+      isError: false,
+      error: null,
+    } as typeof query;
+  }
+  return query;
 }
 
 export function useLeaderboardWinners(
   params: { period?: LeaderboardPeriod; category?: LeaderboardCategory; limit?: number } = {},
 ) {
-  return useQuery({
+  const hydrated = useHydrated();
+  const query = useQuery({
     queryKey: ['leaderboard', 'winners', params.period ?? 'all', params.category ?? 'all', params.limit ?? 50],
     queryFn: () => api.getLeaderboardWinners(params),
+    enabled: hydrated,
   });
+  if (!hydrated) {
+    return {
+      ...query,
+      data: undefined,
+      isLoading: true,
+      isPending: true,
+      isError: false,
+      error: null,
+    } as typeof query;
+  }
+  return query;
 }

@@ -18,6 +18,7 @@ import {
 } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 
 export type Theme = 'light' | 'dark';
 
@@ -60,17 +61,17 @@ export function AreaThemeProvider({
   area: 'app' | 'admin';
   children: React.ReactNode;
 }) {
+  const hydrated = useHydrated();
   const [theme, setThemeState] = useState<Theme>('dark');
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    if (!hydrated) return;
     const stored = (window.localStorage.getItem('okn_theme') ||
       window.localStorage.getItem(`okn-theme:${area}`)) as Theme | null;
     const initial: Theme = stored === 'light' || stored === 'dark' ? stored : 'dark';
-    setThemeState(initial);
     applyThemeToDOM(initial);
-  }, [area]);
+    setThemeState(initial);
+  }, [area, hydrated]);
 
   const setTheme = useCallback(
     (newTheme: Theme) => {
@@ -96,9 +97,11 @@ export function AreaThemeProvider({
     });
   }, [area]);
 
+  const activeTheme: Theme = hydrated ? theme : 'dark';
+
   return (
-    <AreaThemeContext.Provider value={{ theme, toggle, setTheme }}>
-      <div suppressHydrationWarning className={`w-full ${theme === 'dark' ? 'dark' : 'light'}`}>
+    <AreaThemeContext.Provider value={{ theme: activeTheme, toggle, setTheme }}>
+      <div suppressHydrationWarning className={`w-full ${activeTheme === 'dark' ? 'dark' : 'light'}`}>
         {children}
       </div>
     </AreaThemeContext.Provider>

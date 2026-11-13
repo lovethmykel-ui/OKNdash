@@ -88,8 +88,14 @@ function SidebarProvider({
     [setOpenProp, open]
   )
 
-  // Helper to toggle the sidebar.
+  // Helper to toggle the sidebar without auto-launching mobile/tablet keyboards.
   const toggleSidebar = React.useCallback(() => {
+    if (typeof document !== "undefined") {
+      const active = document.activeElement as HTMLElement | null
+      if (active && typeof active.blur === "function") {
+        active.blur()
+      }
+    }
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open)
   }, [isMobile, setOpen, setOpenMobile])
 
@@ -187,6 +193,10 @@ function Sidebar({
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
         <SheetContent
           dir={dir}
+          tabIndex={-1}
+          onOpenAutoFocus={(e) => {
+            e.preventDefault()
+          }}
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"

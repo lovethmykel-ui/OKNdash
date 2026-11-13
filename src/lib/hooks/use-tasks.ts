@@ -4,9 +4,26 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
+import { useHydrated } from './use-hydrated';
 
 export function useTasks() {
-  return useQuery({ queryKey: ['tasks'], queryFn: api.getTasks });
+  const hydrated = useHydrated();
+  const query = useQuery({
+    queryKey: ['tasks'],
+    queryFn: api.getTasks,
+    enabled: hydrated,
+  });
+  if (!hydrated) {
+    return {
+      ...query,
+      data: undefined,
+      isLoading: true,
+      isPending: true,
+      isError: false,
+      error: null,
+    } as typeof query;
+  }
+  return query;
 }
 
 export function useCompleteTask() {

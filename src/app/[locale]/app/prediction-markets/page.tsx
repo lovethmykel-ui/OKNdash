@@ -8,6 +8,7 @@
 import { useTranslations } from 'next-intl';
 import { BarChart3, Clock, ShieldCheck } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
+import { OknWatermark } from '@/components/ui/okn-watermark';
 
 export default function PredictionMarketsPage() {
   const t = useTranslations('dashboard.predictionMarkets');
@@ -33,6 +34,7 @@ export default function PredictionMarketsPage() {
 
       {/* Main Coming Soon Space */}
       <section className="relative overflow-hidden rounded-[28px] border border-[var(--line)] bg-[var(--s1)] p-6 sm:p-10 md:p-14 text-center shadow-sm">
+        <OknWatermark variant="card" size="lg" />
         <div className="mx-auto max-w-2xl space-y-5 relative z-10">
           <div className="mx-auto flex size-16 items-center justify-center rounded-3xl border border-[#09B4FF]/35 bg-[#09B4FF]/15 text-[#09B4FF] shadow-[0_8px_28px_rgba(9,180,255,0.2)]">
             <BarChart3 className="size-7 stroke-[2.2]" />

@@ -797,7 +797,7 @@ function buildLeaderboardEntries(category: LeaderboardCategory, period: Leaderbo
   return { entries, myRank };
 }
 
-export const api = {
+const rawApi = {
   // Auth & Binding
   loginWithWallet: async (input: { address: string; message: string; signature: string }) => {
     demoState.user = {
@@ -1711,4 +1711,19 @@ export const api = {
     return { walletAddress: nextWallet };
   },
 };
+
+const waitMacrotask = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+export const api: typeof rawApi = new Proxy(rawApi, {
+  get(target, prop, receiver) {
+    const value = Reflect.get(target, prop, receiver);
+    if (typeof value === 'function') {
+      return async (...args: unknown[]) => {
+        await waitMacrotask();
+        return (value as (...a: unknown[]) => unknown).apply(target, args);
+      };
+    }
+    return value;
+  },
+});
 

@@ -29,6 +29,8 @@ import { useReferral } from '@/lib/hooks/use-referral';
 import { useOknBalance } from '@/lib/hooks/use-wallet';
 import { useSalePrice } from '@/lib/hooks/use-sale';
 import { useStreak } from '@/lib/hooks/use-rewards';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
+import { OknWatermark } from '@/components/ui/okn-watermark';
 import { formatPoints, formatWei } from '@/lib/utils';
 import { useAccount } from 'wagmi';
 
@@ -42,19 +44,21 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
   const streak = useStreak();
   const { address } = useAccount();
 
-  const [mounted, setMounted] = useState(false);
-  const [hideBalance, setHideBalance] = useState(false);
+  const hydrated = useHydrated();
+  const [hideBalanceState, setHideBalanceState] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    if (!hydrated) return;
     try {
       const stored = localStorage.getItem('okn_hide_balance') === 'true';
-      setHideBalance(stored);
+      setHideBalanceState(stored);
     } catch {}
-  }, []);
+  }, [hydrated]);
+
+  const hideBalance = hydrated && hideBalanceState;
 
   const toggleBalance = () => {
-    setHideBalance((prev) => {
+    setHideBalanceState((prev) => {
       const next = !prev;
       try {
         localStorage.setItem('okn_hide_balance', next ? 'true' : 'false');
@@ -63,12 +67,14 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
     });
   };
 
-  const points = mounted ? (eligibility.data?.points ?? 135) : 135;
-  const isClaimOpen = mounted ? eligibility.data?.latestRootVersion != null : false;
-  const taskList = mounted ? (tasks.data ?? []) : [];
-  const doneCount = taskList.filter((t) => t.completionStatus != null).length;
-  const currentDays = mounted ? (streak.data?.currentStreak ?? 6) : 6;
-  const longestStreak = mounted ? (streak.data?.longestStreak ?? 6) : 6;
+  const points = eligibility.data?.points ?? 135;
+  const isClaimOpen = eligibility.data?.latestRootVersion != null;
+  const taskList = tasks.data ?? [];
+  const totalTasks = taskList.length > 0 ? taskList.length : 4;
+  const doneCount =
+    taskList.length > 0 ? taskList.filter((t) => t.completionStatus != null).length : 2;
+  const currentDays = streak.data?.currentStreak ?? 6;
+  const longestStreak = streak.data?.longestStreak ?? 6;
 
   return (
     <div className="space-y-6">
@@ -78,14 +84,15 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
       <div className="hidden md:block space-y-6">
         {/* Account Total Asset Valuation Hero Card with Hide/Unhide Toggle */}
         <div
-          className="flex flex-wrap items-center justify-between gap-4.5 rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-6 shadow-sm transition-all"
+          className="relative overflow-hidden flex flex-wrap items-center justify-between gap-4.5 rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-6 shadow-sm transition-all"
           style={{
             background:
               'linear-gradient(135deg, rgba(122, 18, 245, 0.22) 0%, rgba(9, 180, 255, 0.12) 100%), var(--s1)',
             boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
           }}
         >
-          <div className="flex items-center gap-5">
+          <OknWatermark variant="card" size="md" />
+          <div className="relative z-10 flex items-center gap-5">
             <div
               className="flex size-[54px] shrink-0 items-center justify-center rounded-[16px] text-white shadow-[0_0_20px_rgba(122,18,245,0.4)]"
               style={{ background: 'var(--vio, #7A12F5)' }}
@@ -120,7 +127,7 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
           {/* Referral Earnings Summary Badge */}
           <Link
             href="/app/referral"
-            className="flex items-center gap-3.5 rounded-[18px] border border-[var(--line)] bg-[var(--s2)] px-5 py-3.5 hover:scale-[1.02] active:scale-98 transition-all"
+            className="relative z-10 flex items-center gap-3.5 rounded-[18px] border border-[var(--line)] bg-[var(--s2)]/95 backdrop-blur-sm px-5 py-3.5 hover:scale-[1.02] active:scale-98 transition-all"
           >
             <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[rgba(255,214,10,0.15)] text-[#FFD60A]">
               <Users className="size-5" />
@@ -163,7 +170,7 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
             icon={ListChecks}
             tint="green"
             label="Tasks done"
-            value={`${doneCount} / ${taskList.length || 11}`}
+            value={`${doneCount} / ${totalTasks}`}
             hint="555 points available"
           />
           <Link href="/app/referral" className="block text-inherit">
@@ -292,8 +299,9 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
             </div>
 
             {/* Buy $OKN with BNB Card */}
-            <div className="rounded-[20px] border border-[var(--line)] bg-[var(--s1)] p-6 shadow-sm">
-              <div className="mb-4">
+            <div className="relative overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--s1)] p-6 shadow-sm">
+              <OknWatermark variant="card" size="sm" />
+              <div className="relative z-10 mb-4">
                 <h3 className="text-lg font-extrabold text-[var(--tx)]">Buy $OKN with BNB</h3>
                 <p className="text-xs text-[var(--mut)] mt-1">
                   Fixed rate: {sale.data ? `1 BNB = ${formatWei(sale.data.rate)} $OKN` : '1 BNB = 1,000,000 $OKN'}
@@ -301,7 +309,7 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
               </div>
               <Link
                 href="/app/buy"
-                className="inline-flex items-center gap-2.5 h-11 px-5 rounded-xl border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] font-extrabold text-xs shadow-sm hover:border-[#7A12F5]/50 transition-colors"
+                className="relative z-10 inline-flex items-center gap-2.5 h-11 px-5 rounded-xl border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] font-extrabold text-xs shadow-sm hover:border-[#7A12F5]/50 transition-colors"
               >
                 <ShoppingCart className="size-4 text-[#09B4FF]" />
                 <span>Open the sale</span>
@@ -396,9 +404,6 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
           MOBILE VIEW (< 768px)
           ========================================================================= */}
       <div className="block md:hidden space-y-4">
-        {/* Mobile Announcement Carousel (Slider directly underneath Card 2) */}
-        <AnnouncementCarousel id="mobile-ann-carousel" />
-
         {/* 4 Quick Actions Row — Vibrant #7A12F5 purple background with pure white text and icon */}
         <div className="grid grid-cols-4 gap-2.5">
           <Link
@@ -423,11 +428,11 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
           </Link>
           <Link
             href="/app/buy"
-            className="flex flex-col items-center justify-center gap-2 h-[84px] rounded-2xl bg-gradient-to-b from-[#7A12F5] to-[#660CD9] text-white shadow-[0_4px_14px_rgba(122,18,245,0.35)] border border-white/20 active:scale-95 transition-transform"
+            className="flex flex-col items-center justify-center gap-2 h-[88px] rounded-2xl bg-gradient-to-b from-[#7A12F5] to-[#660CD9] text-white shadow-[0_4px_14px_rgba(122,18,245,0.35)] border border-white/20 active:scale-95 transition-transform"
             style={{ backgroundColor: '#7A12F5', color: '#ffffff' }}
           >
-            <span className="flex size-9 items-center justify-center rounded-full bg-white/20 text-white shadow-inner">
-              <ShoppingCart className="size-4.5 stroke-[2.4] text-white stroke-white" style={{ color: '#ffffff', stroke: '#ffffff' }} />
+            <span className="flex size-10 items-center justify-center rounded-full bg-white/20 text-white shadow-inner">
+              <ShoppingCart className="size-5 stroke-[2.4] text-white stroke-white" style={{ color: '#ffffff', stroke: '#ffffff' }} />
             </span>
             <span className="text-xs font-extrabold text-white !text-white" style={{ color: '#ffffff' }}>Buy</span>
           </Link>
@@ -443,33 +448,39 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
           </Link>
         </div>
 
+        {/* Mobile Announcement Carousel */}
+        <AnnouncementCarousel id="mobile-ann-carousel" />
+
         {/* 2-Column Summary Cards */}
         <div className="grid grid-cols-2 gap-3">
-          {/* White Tasks Card */}
+          {/* Tasks Summary Card */}
           <Link
             href="/app/tasks"
-            className="flex flex-col justify-between h-[148px] rounded-[24px] bg-white text-black p-4 shadow-sm hover:scale-[1.02] active:scale-98 transition-all"
+            className="flex flex-col justify-between h-[148px] rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-4 shadow-sm hover:scale-[1.02] active:scale-98 transition-all"
           >
-            <div className="flex items-center gap-2 text-sm font-extrabold text-black">
-              <Check className="size-4 stroke-[3]" />
-              <span>Tasks</span>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm font-extrabold text-[var(--tx)]">Tasks</span>
+              <span className="flex size-7 items-center justify-center rounded-full bg-[#7A12F5]/20 text-[#7A12F5] dark:text-[#C084FC]">
+                <Check className="size-4 stroke-[2.8]" />
+              </span>
             </div>
             <div>
-              <div className="num text-3xl font-extrabold leading-none text-black">
-                {doneCount}/{taskList.length || 11}
+              <div className="num text-3xl font-extrabold leading-none text-[var(--tx)]">
+                {doneCount}/{totalTasks}
               </div>
-              <div className="text-[11px] font-semibold text-zinc-500 mt-1">
-                555 points available
+              <div className="inline-flex items-center gap-1 text-xs font-bold text-[#7A12F5] dark:text-[#C084FC] mt-2">
+                <span>Earn OK Points</span>
+                <ArrowRight className="size-3.5" />
               </div>
             </div>
           </Link>
 
-          {/* Dark Check-in Card with 7 Capsules */}
+          {/* Check-in Card with 7 Capsules */}
           <div className="flex flex-col justify-between h-[148px] rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-4 shadow-sm">
             <div>
               <div className="text-sm font-extrabold text-[var(--tx)]">Check-in</div>
-              <div className="text-[11px] font-semibold text-[var(--mut)] mt-0.5">
-                {currentDays} days. Longest: {longestStreak}
+              <div className="text-xs font-medium text-[var(--mut)] mt-0.5">
+                {currentDays}-day streak
               </div>
             </div>
             <div className="flex items-end gap-1.5 h-12">
@@ -478,14 +489,35 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
                 return (
                   <span
                     key={day}
-                    className={`flex-1 h-full rounded-md transition-all ${
-                      isFilled ? 'bg-[#A66BFF]' : 'bg-[var(--line)] opacity-30'
+                    className={`flex-1 h-full rounded-lg transition-all ${
+                      isFilled
+                        ? 'bg-gradient-to-b from-[#8C38F7] to-[#7A12F5]'
+                        : 'border border-[var(--line)] bg-[var(--s2)]/60'
                     }`}
                   />
                 );
               })}
             </div>
           </div>
+        </div>
+
+        {/* Buy $OKN Token CTA Card */}
+        <div className="relative overflow-hidden flex items-center justify-between gap-3 rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-4 shadow-sm">
+          <OknWatermark variant="card" size="sm" />
+          <div className="relative z-10 min-w-0">
+            <div className="text-sm font-extrabold text-[var(--tx)]">Buy $OKN Token</div>
+            <div className="text-xs font-medium text-[var(--mut)] mt-0.5">
+              Presale Stage 2 · $0.00060
+            </div>
+          </div>
+          <Link
+            href="/app/buy"
+            className="relative z-10 inline-flex h-10 shrink-0 items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-[#7A12F5] to-[#8C38F7] px-4 text-xs font-extrabold !text-white shadow-[0_4px_14px_rgba(122,18,245,0.35)] active:scale-95 transition-all whitespace-nowrap"
+            style={{ color: '#ffffff' }}
+          >
+            <span>Buy Now</span>
+            <ChevronRight className="size-3.5 stroke-[2.5]" />
+          </Link>
         </div>
 
         {/* Account Summary Card — Matching Reference 1:1 */}

@@ -23,6 +23,7 @@ import { LanguageSwitcher } from '@/components/landing/language-switcher';
 import { DevRoleToggle } from '@/components/admin/dev-role-toggle';
 import { SilentRefresher } from './silent-refresher';
 import { DailyCheckIn } from '@/components/dashboard/daily-check-in';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { cn } from '@/lib/utils';
 import { Cpu, Home, ShoppingCart, Users, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -51,21 +52,25 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
     ? (activeItem.labelKey ? t(`nav.${activeItem.labelKey}`) : (activeItem.label ?? ''))
     : (pathname.startsWith('/admin') ? t('shell.admin') : t('shell.dashboard'));
 
+  const hydrated = useHydrated();
   const [open, setOpen] = useState(true);
 
   useEffect(() => {
+    if (!hydrated) return;
     const handleResize = () => {
       setOpen(window.innerWidth >= 1024);
     };
     handleResize();
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [hydrated]);
 
   return (
     <AreaThemeProvider area={area}>
       <SilentRefresher />
-      <SidebarProvider open={open} onOpenChange={setOpen}>
+      <SidebarProvider open={hydrated ? open : true} onOpenChange={setOpen}>
         <OknSidebar area={area} navItems={navItems} isAdmin={isAdmin} roleLabel={roleLabel} />
         <SidebarInset className="bg-[var(--bg)] transition-colors duration-200">
           <header className="sticky top-0 z-40 flex h-14 md:h-16 shrink-0 items-center justify-between gap-2 border-b border-[var(--line)] bg-[var(--s1)]/85 px-3 backdrop-blur-xl md:px-6">
@@ -129,11 +134,17 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
                     >
                       {isBuy ? (
                         <motion.div
-                          animate={{
-                            y: [0, -2, 0],
-                            rotate: [0, -8, 8, 0],
-                            scale: [1, 1.08, 1],
-                          }}
+                          suppressHydrationWarning
+                          initial={false}
+                          animate={
+                            hydrated
+                              ? {
+                                  y: [0, -2, 0],
+                                  rotate: [0, -8, 8, 0],
+                                  scale: [1, 1.08, 1],
+                                }
+                              : undefined
+                          }
                           transition={{
                             duration: 2.2,
                             repeat: Infinity,

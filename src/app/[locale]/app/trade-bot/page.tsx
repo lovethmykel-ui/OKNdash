@@ -9,6 +9,7 @@
 import { useTranslations } from 'next-intl';
 import { Activity, Bot, Clock, Gauge, ShieldCheck, Target } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
+import { OknWatermark } from '@/components/ui/okn-watermark';
 
 const CAPABILITY_ICONS = [Activity, Target, Gauge, ShieldCheck];
 
@@ -36,6 +37,7 @@ export default function TradeBotPage() {
 
       {/* Main Coming Soon Space */}
       <section className="relative overflow-hidden rounded-[28px] border border-[var(--line)] bg-[var(--s1)] p-6 sm:p-10 md:p-14 text-center shadow-sm">
+        <OknWatermark variant="card" size="lg" />
         <div className="mx-auto max-w-2xl space-y-5 relative z-10">
           <div className="mx-auto flex size-16 items-center justify-center rounded-3xl border border-[#7A12F5]/35 bg-[#7A12F5]/15 text-[#C9A6FF] shadow-[0_8px_28px_rgba(122,18,245,0.25)]">
             <Bot className="size-7 stroke-[2.2]" />

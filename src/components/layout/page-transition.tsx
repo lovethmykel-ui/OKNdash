@@ -17,7 +17,7 @@
  *   - Reduced-motion users get an instant swap (opacity only, 0s duration).
  */
 import { motion, useReducedMotion } from 'framer-motion';
-import { usePathname } from 'next/navigation';
+import { usePathname } from '@/i18n/navigation';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -28,6 +28,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   return (
     <motion.div
       key={pathname}
+      suppressHydrationWarning
       initial={false}
       animate={{ opacity: 1, y: 0 }}
       transition={reduceMotion ? { duration: 0 } : { duration: 0.32, ease: EASE }}

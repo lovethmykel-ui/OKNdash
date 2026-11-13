@@ -17,6 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { useMissions } from '@/lib/hooks/use-missions';
 import type { CommunityMetric, MissionWithProgress } from '@okn/shared';
+import { OknWatermark } from '@/components/ui/okn-watermark';
 import { cn, formatPoints } from '@/lib/utils';
 
 const METRIC_KEY: Record<CommunityMetric, 'metricMembers' | 'metricTelegram' | 'metricBnb' | 'metricOkn'> = {
@@ -103,8 +104,9 @@ function formatThreshold(value: string, metric: CommunityMetric): string {
 function ActiveMissionCard({ mission }: { mission: MissionWithProgress }) {
   const t = useTranslations('dashboard.missions');
   return (
-    <Card>
-      <CardHeader>
+    <Card className="relative overflow-hidden">
+      <OknWatermark variant="card" size="sm" />
+      <CardHeader className="relative z-10">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
             <CardTitle className="flex items-center gap-2">
@@ -118,7 +120,7 @@ function ActiveMissionCard({ mission }: { mission: MissionWithProgress }) {
           <Badge className="bg-ios-indigo/10 text-ios-indigo">{t('rewardLabel', { reward: formatPoints(mission.rewardPerUser) })}</Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="relative z-10 space-y-3">
         <div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">{t(METRIC_KEY[mission.metric])}</span>

@@ -16,6 +16,7 @@ import { Clock } from 'lucide-react';
 import { PageHeader } from '@/components/dashboard/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { OknWatermark } from '@/components/ui/okn-watermark';
 
 export interface ComingSoonFeature {
   icon: LucideIcon;
@@ -64,8 +65,9 @@ export function ComingSoonPage({
       />
 
       {/* Hero */}
-      <Card className="overflow-hidden">
-        <div className="bg-gradient-to-br from-ios-indigo/10 via-ios-blue/5 to-transparent p-5 md:p-6">
+      <Card className="relative overflow-hidden">
+        <OknWatermark variant="card" size="sm" />
+        <div className="relative z-10 bg-gradient-to-br from-ios-indigo/10 via-ios-blue/5 to-transparent p-5 md:p-6">
           <div className="flex items-start gap-4">
             <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-ios-indigo/10 text-ios-indigo">
               <Icon className="size-6" />

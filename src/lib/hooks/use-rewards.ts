@@ -7,11 +7,28 @@
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
+import { useHydrated } from './use-hydrated';
 
 const STREAK_KEY = ['rewards', 'streak'] as const;
 
 export function useStreak() {
-  return useQuery({ queryKey: STREAK_KEY, queryFn: api.getStreak });
+  const hydrated = useHydrated();
+  const query = useQuery({
+    queryKey: STREAK_KEY,
+    queryFn: api.getStreak,
+    enabled: hydrated,
+  });
+  if (!hydrated) {
+    return {
+      ...query,
+      data: undefined,
+      isLoading: true,
+      isPending: true,
+      isError: false,
+      error: null,
+    } as typeof query;
+  }
+  return query;
 }
 
 export function useCheckIn() {

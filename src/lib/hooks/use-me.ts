@@ -4,9 +4,26 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UpdateProfileInput } from '@okn/shared';
 import { api } from '../api/client';
+import { useHydrated } from './use-hydrated';
 
 export function useMe() {
-  return useQuery({ queryKey: ['me'], queryFn: api.getMe });
+  const hydrated = useHydrated();
+  const query = useQuery({
+    queryKey: ['me'],
+    queryFn: api.getMe,
+    enabled: hydrated,
+  });
+  if (!hydrated) {
+    return {
+      ...query,
+      data: undefined,
+      isLoading: true,
+      isPending: true,
+      isError: false,
+      error: null,
+    } as typeof query;
+  }
+  return query;
 }
 
 /**

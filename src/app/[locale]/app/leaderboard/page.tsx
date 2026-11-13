@@ -17,6 +17,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLeaderboard } from '@/lib/hooks/use-leaderboard';
 import type { LeaderboardCategory, LeaderboardEntry, LeaderboardPeriod } from '@okn/shared';
+import { OknWatermark } from '@/components/ui/okn-watermark';
 import { cn, formatPoints } from '@/lib/utils';
 
 const CATEGORIES: { key: LeaderboardCategory; labelKey: 'catReferrers' | 'catTasks' | 'catBuyers'; unitKey: 'unitRefs' | 'unitPts' | 'unitBnb'; icon: typeof Users }[] = [
@@ -196,18 +197,19 @@ function PodiumCard({
   return (
     <div
       className={cn(
-        'web3-card flex flex-col items-center justify-center p-4 text-center transition-all',
+        'web3-card relative overflow-hidden flex flex-col items-center justify-center p-4 text-center transition-all',
         isFirst && 'border-[#FFAA00]/40 bg-gradient-to-b from-[#FFAA00]/10 via-[var(--s1)] to-[var(--s1)]',
         sizeCls,
       )}
     >
-      <span className={cn('mx-auto flex size-10 items-center justify-center rounded-full', tint)}>
+      {isFirst && <OknWatermark variant="card" size="sm" />}
+      <span className={cn('relative z-10 mx-auto flex size-10 items-center justify-center rounded-full', tint)}>
         {isFirst ? <Crown className="size-5" /> : <span className="num text-sm font-extrabold">{place}</span>}
       </span>
-      <p className="mt-2.5 max-w-[120px] truncate text-sm font-bold text-[var(--tx)]">
+      <p className="relative z-10 mt-2.5 max-w-[120px] truncate text-sm font-bold text-[var(--tx)]">
         {entry.firstName ?? entry.username ?? t('anonymous')}
       </p>
-      <p className="num mt-0.5 text-xs font-bold text-[var(--mut)]">{formatScore(entry.score, unit)}</p>
+      <p className="relative z-10 num mt-0.5 text-xs font-bold text-[var(--mut)]">{formatScore(entry.score, unit)}</p>
     </div>
   );
 }

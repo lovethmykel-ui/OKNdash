@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useReferral } from '@/lib/hooks/use-referral';
 import { useMe } from '@/lib/hooks/use-me';
+import { OknWatermark } from '@/components/ui/okn-watermark';
 import { toast } from 'sonner';
 
 interface InvitedFriendRow {
@@ -188,6 +189,7 @@ export default function ReferralPage() {
     <main className="space-y-6 pb-12">
       {/* 1. Hero Banner: Partner package */}
       <section className="relative overflow-hidden rounded-[26px] sm:rounded-[28px] bg-gradient-to-br from-[#7A12F5] via-[#6D0ED8] to-[#5106B3] p-4 sm:p-8 text-white shadow-xl">
+        <OknWatermark variant="hero" size="md" />
         <div className="relative z-10 flex flex-col justify-between">
           <div className="px-0.5">
             <span className="inline-block text-[10.5px] sm:text-[11px] font-extrabold tracking-widest text-purple-200/90 uppercase">

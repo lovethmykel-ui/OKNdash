@@ -14,7 +14,7 @@
  * soft-tint active pill (solid fill in the collapsed icon rail), promo card,
  * area switch, and a light/dark pill in the footer.
  */
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
@@ -65,6 +65,7 @@ import {
 import { Link, usePathname } from '@/i18n/navigation';
 import { appOrigin, adminOrigin, bareAppHref } from '@/lib/domains';
 import { ModerationQueueBadge } from '@/components/admin/queue-badge';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { cn } from '@/lib/utils';
 
 export interface OknNavItem {
@@ -125,8 +126,31 @@ interface OknSidebarProps {
 export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarProps) {
   const t = useTranslations('dashboard');
   const pathname = usePathname();
+  const hydrated = useHydrated();
   const [query, setQuery] = useState('');
-  const { setOpenMobile } = useSidebar();
+  const [searchArmed, setSearchArmed] = useState(false);
+  const [compactViewport, setCompactViewport] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const { open, openMobile, setOpenMobile } = useSidebar();
+
+  useEffect(() => {
+    if (!hydrated || typeof window === 'undefined') return;
+    const mql = window.matchMedia('(max-width: 1023px)');
+    const sync = () => setCompactViewport(mql.matches);
+    sync();
+    mql.addEventListener('change', sync);
+    return () => mql.removeEventListener('change', sync);
+  }, [hydrated]);
+
+  // On mobile & tablet (< 1024px), keep the filter input readOnly until explicitly tapped
+  // so opening the top-left menu never triggers an unwanted soft-keyboard launch.
+  const isCompactViewport = hydrated && compactViewport;
+
+  useEffect(() => {
+    if (!openMobile && !open) {
+      setSearchArmed(false);
+    }
+  }, [openMobile, open]);
 
   // Resolve a nav item's display label (translation key for app, literal for admin).
   const resolveLabel = (item: OknNavItem) =>
@@ -168,6 +192,7 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
                     alt="$OKN"
                     width={28}
                     height={28}
+                    priority
                     className="size-7 object-contain drop-shadow-[0_2px_6px_rgba(122,18,245,0.35)]"
                   />
                 </div>
@@ -188,8 +213,27 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
         <div className="relative px-1 group-data-[collapsible=icon]:hidden">
           <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
           <input
+            ref={searchInputRef}
             type="text"
             value={query}
+            readOnly={isCompactViewport && !searchArmed}
+            inputMode={isCompactViewport && !searchArmed ? 'none' : 'search'}
+            onPointerDown={() => {
+              if (isCompactViewport && !searchArmed) {
+                setSearchArmed(true);
+              }
+            }}
+            onClick={() => {
+              if (isCompactViewport && !searchArmed) {
+                setSearchArmed(true);
+                window.requestAnimationFrame(() => searchInputRef.current?.focus());
+              }
+            }}
+            onBlur={() => {
+              if (isCompactViewport) {
+                setSearchArmed(false);
+              }
+            }}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t('shell.search')}
             aria-label={t('shell.filterNav')}
@@ -236,11 +280,17 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
                           />
                         ) : isBuy ? (
                           <motion.span
-                            animate={{
-                              y: [0, -2, 0],
-                              rotate: [0, -10, 10, 0],
-                              scale: [1, 1.1, 1],
-                            }}
+                            suppressHydrationWarning
+                            initial={false}
+                            animate={
+                              hydrated
+                                ? {
+                                    y: [0, -2, 0],
+                                    rotate: [0, -10, 10, 0],
+                                    scale: [1, 1.1, 1],
+                                  }
+                                : undefined
+                            }
                             transition={{
                               duration: 2.2,
                               repeat: Infinity,

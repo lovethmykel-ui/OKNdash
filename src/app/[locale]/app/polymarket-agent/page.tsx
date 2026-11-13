@@ -9,6 +9,7 @@
 import { useTranslations } from 'next-intl';
 import { Activity, Clock, Gauge, ShieldCheck, Target } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
+import { OknWatermark } from '@/components/ui/okn-watermark';
 
 const CAPABILITY_ICONS = [Activity, Target, Gauge, ShieldCheck];
 
@@ -36,6 +37,7 @@ export default function PolymarketAgentPage() {
 
       {/* Main Coming Soon Space */}
       <section className="relative overflow-hidden rounded-[28px] border border-[var(--line)] bg-[var(--s1)] p-6 sm:p-10 md:p-14 text-center shadow-sm">
+        <OknWatermark variant="card" size="lg" />
         <div className="mx-auto max-w-2xl space-y-5 relative z-10">
           <div className="mx-auto flex size-16 items-center justify-center rounded-3xl border border-[#1652F0]/45 bg-[var(--s2)] shadow-[0_8px_28px_rgba(22,82,240,0.3)]">
             <img src="/polymarket.png" alt="Polymarket" className="size-10 rounded-xl object-contain" />

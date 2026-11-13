@@ -18,6 +18,7 @@ import {
   ChevronRight,
   ShieldCheck,
 } from 'lucide-react';
+import { OknWatermark } from '@/components/ui/okn-watermark';
 
 const STAKING_PERIODS: { label: string; apy: string }[] = [
   { label: '30d', apy: '14% APY' },
@@ -33,6 +34,7 @@ export default function AgentsPage() {
     <main className="space-y-4 md:space-y-6 max-w-4xl mx-auto pb-12">
       {/* Hero Banner — Autonomous Protocol Suite */}
       <section className="relative overflow-hidden rounded-[28px] md:rounded-[32px] bg-gradient-to-br from-[#7A12F5] via-[#660CD9] to-[#4A00A8] p-6 md:p-8 text-white shadow-xl">
+        <OknWatermark variant="hero" size="md" />
         <div className="relative z-10 max-w-2xl">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-extrabold backdrop-blur-md mb-3">
             <ShieldCheck className="size-3.5" />
@@ -51,8 +53,9 @@ export default function AgentsPage() {
       </section>
 
       {/* Feature Card 1: Staking */}
-      <section className="rounded-[24px] bg-[var(--inv-bg)] text-[var(--inv-tx)] p-5 md:p-6 shadow-sm border border-[var(--line)]">
-        <div className="flex items-center justify-between gap-3">
+      <section className="relative overflow-hidden rounded-[24px] bg-[var(--inv-bg)] text-[var(--inv-tx)] p-5 md:p-6 shadow-sm border border-[var(--line)]">
+        <OknWatermark variant="inverse" size="sm" />
+        <div className="relative z-10 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3.5 min-w-0">
             <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--inv-tx)] text-[var(--inv-bg)] shadow-inner">
               <Lock className="size-5 stroke-[2.5]" />
@@ -81,7 +84,7 @@ export default function AgentsPage() {
         </div>
 
         {/* Duration Pills */}
-        <div className="grid grid-cols-4 gap-2.5 mt-4 pt-3 border-t border-[var(--line)]/40">
+        <div className="relative z-10 grid grid-cols-4 gap-2.5 mt-4 pt-3 border-t border-[var(--line)]/40">
           {STAKING_PERIODS.map((period) => (
             <button
               key={period.label}

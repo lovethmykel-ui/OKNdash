@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from '@/i18n/navigation';
 import { ArrowRight } from 'lucide-react';
+import { OknWatermark } from '@/components/ui/okn-watermark';
 
 /**
  * AnnouncementCarousel — Pure Graphic announcement slider.
@@ -157,6 +158,7 @@ export function AnnouncementCarousel({ id = 'ann-carousel' }: { id?: string }) {
               className="group relative block overflow-hidden p-4 sm:p-5 md:px-6 md:py-5 text-[var(--tx)] transition-all hover:bg-[var(--s2)]/50"
               aria-label="Buy $OKN Presale"
             >
+              <OknWatermark variant="card" size="sm" />
               {/* Pure Graphic Background: Fine SVG Blockchain Orbital Vector Lines */}
               <svg
                 className="absolute inset-0 size-full pointer-events-none opacity-[0.07] text-[var(--tx)]"
