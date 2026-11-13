@@ -117,7 +117,7 @@ export function useTheme() {
   return useContext(AreaThemeContext);
 }
 
-/** 40x40 Circular Theme Toggle matching the reference live design */
+/** 40x40 Circular Theme Toggle — hidden on mobile top bar, visible on desktop (md+) */
 export function AreaThemeToggle() {
   const { theme, toggle } = useContext(AreaThemeContext);
   const isLight = theme === 'light';
@@ -128,12 +128,12 @@ export function AreaThemeToggle() {
       onClick={toggle}
       aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
       title={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
-      className="flex size-9 md:size-10 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] transition-all duration-200 hover:border-[#7A12F5]/50 hover:scale-105 active:scale-95 shadow-sm cursor-pointer"
+      className="hidden md:flex size-10 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] transition-all duration-200 hover:border-[#7A12F5]/50 hover:scale-105 active:scale-95 shadow-sm cursor-pointer"
     >
       {isLight ? (
-        <Moon className="size-4 md:size-[18px] text-[var(--tx)] transition-transform duration-200" />
+        <Moon className="size-[18px] text-[var(--tx)] transition-transform duration-200" />
       ) : (
-        <Sun className="size-4 md:size-[18px] text-[#7A12F5] transition-transform duration-200" />
+        <Sun className="size-[18px] text-[#7A12F5] transition-transform duration-200" />
       )}
     </button>
   );
