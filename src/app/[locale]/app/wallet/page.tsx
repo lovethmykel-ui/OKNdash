@@ -34,10 +34,12 @@ import { useMe } from '@/lib/hooks/use-me';
 import { api } from '@/lib/api/client';
 import { AnimatePresence, motion } from 'motion/react';
 import { OknWatermark } from '@/components/ui/okn-watermark';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { formatPoints, formatWei } from '@/lib/utils';
 import { toast } from 'sonner';
 
 export default function WalletPage() {
+  const hydrated = useHydrated();
   const { address } = useAccount();
   const qc = useQueryClient();
   const me = useMe();
@@ -96,6 +98,8 @@ export default function WalletPage() {
       toast.success(
         `Switched demo wallet to ${res.walletAddress.slice(0, 6)}...${res.walletAddress.slice(-4)}`,
       );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Unable to switch demo wallet.');
     } finally {
       setSwitchingWallet(false);
     }
@@ -103,11 +107,16 @@ export default function WalletPage() {
 
   const handleWithdrawSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!withdrawAddress) {
-      toast.error('Please enter a destination address');
+    if (!withdrawAddress || !withdrawAddress.startsWith('0x') || withdrawAddress.length < 10) {
+      toast.error('Please enter a valid 0x destination address');
       return;
     }
-    toast.success(`Withdrawal request for ${withdrawAmount || '0.1'} ${withdrawAsset} submitted!`);
+    const parsedAmt = parseFloat(withdrawAmount || '0.1');
+    if (Number.isNaN(parsedAmt) || parsedAmt <= 0) {
+      toast.error('Please enter a valid withdrawal amount');
+      return;
+    }
+    toast.success(`Withdrawal request for ${parsedAmt} ${withdrawAsset} submitted!`);
     setShowWithdrawModal(false);
     setWithdrawAmount('');
     setWithdrawAddress('');
@@ -554,7 +563,7 @@ export default function WalletPage() {
       </div>
 
       {/* Deposit Modal — Centered on Web & Mobile */}
-      {typeof document !== 'undefined' &&
+      {hydrated &&
         createPortal(
           <AnimatePresence>
             {showDepositModal && (
@@ -627,7 +636,7 @@ export default function WalletPage() {
         )}
 
       {/* Withdraw Modal — Centered on Web & Mobile */}
-      {typeof document !== 'undefined' &&
+      {hydrated &&
         createPortal(
           <AnimatePresence>
             {showWithdrawModal && (

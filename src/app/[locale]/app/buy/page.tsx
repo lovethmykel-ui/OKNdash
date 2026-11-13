@@ -9,7 +9,7 @@
  *   - Multi-currency selector with authentic vector crypto badges
  *   - Focused Deposit Invoice modal & motion-blur Payment Successful screen
  */
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from '@/i18n/navigation';
 import {
@@ -31,7 +31,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { parseEther } from 'viem';
 import { api, getDemoWalletAddress } from '@/lib/api/client';
 import { formatPoints } from '@/lib/utils';
-import { triggerConfetti } from '@/lib/confetti';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
 import { OknWatermark } from '@/components/ui/okn-watermark';
 import { toast } from 'sonner';
@@ -86,6 +86,7 @@ const HOW_TO_STEPS = [
 ];
 
 function CryptoBadge({ ticker, size = 'md' }: { ticker: CryptoOption['ticker']; size?: 'sm' | 'md' | 'lg' }) {
+  const solGradId = useId();
   const dim = size === 'sm' ? 'size-5' : size === 'lg' ? 'size-10' : 'size-8';
   const iconDim = size === 'sm' ? 'size-3' : size === 'lg' ? 'size-5' : 'size-4';
 
@@ -124,12 +125,12 @@ function CryptoBadge({ ticker, size = 'md' }: { ticker: CryptoOption['ticker']; 
       <span className={`${dim} rounded-full bg-[#14161D] border border-white/15 flex items-center justify-center shrink-0 shadow-xs`}>
         <svg viewBox="0 0 24 24" className={iconDim} fill="none" aria-hidden="true">
           <defs>
-            <linearGradient id="sol-grad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+            <linearGradient id={solGradId} x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#00FFA3" />
               <stop offset="100%" stopColor="#DC1FFF" />
             </linearGradient>
           </defs>
-          <path d="M6.5 7.5h10.2l1.8-2H8.3l-1.8 2zm11 3.5H7.3l-1.8 2h10.2l1.8-2zm-11 5.5h10.2l1.8-2H8.3l-1.8 2z" fill="url(#sol-grad)" />
+          <path d="M6.5 7.5h10.2l1.8-2H8.3l-1.8 2zm11 3.5H7.3l-1.8 2h10.2l1.8-2zm-11 5.5h10.2l1.8-2H8.3l-1.8 2z" fill={`url(#${solGradId})`} />
         </svg>
       </span>
     );
@@ -152,6 +153,7 @@ interface SuccessReceipt {
 
 export default function BuyPage() {
   const router = useRouter();
+  const hydrated = useHydrated();
   const { address } = useAccount();
   const qc = useQueryClient();
   const activeAddress = address ?? getDemoWalletAddress();
@@ -191,24 +193,29 @@ export default function BuyPage() {
 
     setIsSubmittingWeb3(true);
     setTimeout(async () => {
-      const bnbWei = parseEther(String(numBnb));
-      const oknWei = BigInt(oknFromBnb) * 10n ** 18n;
-      await api.recordDemoPurchase(bnbWei, oknWei);
-      await Promise.all([
-        qc.invalidateQueries({ queryKey: ['demo-okn-balance'] }),
-        qc.invalidateQueries({ queryKey: ['demo-purchased-bnb'] }),
-        qc.invalidateQueries({ queryKey: ['purchase-history'] }),
-        qc.invalidateQueries({ queryKey: ['portfolio'] }),
-        qc.invalidateQueries({ queryKey: ['notifications'] }),
-      ]);
-      setIsSubmittingWeb3(false);
-      triggerConfetti();
-      setSuccessReceipt({
-        oknAmount: oknFromBnb,
-        paidLabel: `${bnbAmount} BNB`,
-        networkLabel: 'BNB Smart Chain',
-      });
-    }, 650);
+      try {
+        const bnbWei = parseEther(String(numBnb));
+        const oknWei = BigInt(oknFromBnb) * 10n ** 18n;
+        await api.recordDemoPurchase(bnbWei, oknWei);
+        await Promise.all([
+          qc.invalidateQueries({ queryKey: ['demo-okn-balance'] }),
+          qc.invalidateQueries({ queryKey: ['demo-purchased-bnb'] }),
+          qc.invalidateQueries({ queryKey: ['purchase-history'] }),
+          qc.invalidateQueries({ queryKey: ['portfolio'] }),
+          qc.invalidateQueries({ queryKey: ['notifications'] }),
+        ]);
+        setSuccessReceipt({
+          oknAmount: oknFromBnb,
+          paidLabel: `${bnbAmount} BNB`,
+          networkLabel: 'BNB Smart Chain',
+        });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unable to process BNB purchase.';
+        toast.error(msg);
+      } finally {
+        setIsSubmittingWeb3(false);
+      }
+    }, 550);
   };
 
   const handleGenerateInvoice = () => {
@@ -220,24 +227,28 @@ export default function BuyPage() {
   };
 
   const handleSimulateInvoicePaid = async () => {
-    const bnbEquivalent = Math.max(0.01, numUsd / BNB_USD_ESTIMATE);
-    const bnbWei = parseEther(bnbEquivalent.toFixed(4));
-    const oknWei = BigInt(oknFromUsd) * 10n ** 18n;
-    await api.recordDemoPurchase(bnbWei, oknWei);
-    await Promise.all([
-      qc.invalidateQueries({ queryKey: ['demo-okn-balance'] }),
-      qc.invalidateQueries({ queryKey: ['demo-purchased-bnb'] }),
-      qc.invalidateQueries({ queryKey: ['purchase-history'] }),
-      qc.invalidateQueries({ queryKey: ['portfolio'] }),
-      qc.invalidateQueries({ queryKey: ['notifications'] }),
-    ]);
-    setShowInvoiceModal(false);
-    triggerConfetti();
-    setSuccessReceipt({
-      oknAmount: oknFromUsd,
-      paidLabel: `$${usdAmount} USD (${selectedCrypto.ticker})`,
-      networkLabel: `${selectedCrypto.name} · ${selectedCrypto.network}`,
-    });
+    try {
+      const bnbEquivalent = Math.max(0.01, numUsd / BNB_USD_ESTIMATE);
+      const bnbWei = parseEther(bnbEquivalent.toFixed(4));
+      const oknWei = BigInt(oknFromUsd) * 10n ** 18n;
+      await api.recordDemoPurchase(bnbWei, oknWei);
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ['demo-okn-balance'] }),
+        qc.invalidateQueries({ queryKey: ['demo-purchased-bnb'] }),
+        qc.invalidateQueries({ queryKey: ['purchase-history'] }),
+        qc.invalidateQueries({ queryKey: ['portfolio'] }),
+        qc.invalidateQueries({ queryKey: ['notifications'] }),
+      ]);
+      setShowInvoiceModal(false);
+      setSuccessReceipt({
+        oknAmount: oknFromUsd,
+        paidLabel: `$${usdAmount} USD (${selectedCrypto.ticker})`,
+        networkLabel: `${selectedCrypto.name} · ${selectedCrypto.network}`,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unable to confirm deposit invoice.';
+      toast.error(msg);
+    }
   };
 
   const copyInvoiceAddress = async () => {
@@ -567,7 +578,7 @@ export default function BuyPage() {
       </div>
 
       {/* 3. Live Deposit Invoice Modal */}
-      {typeof document !== 'undefined' &&
+      {hydrated &&
         createPortal(
           <AnimatePresence>
             {showInvoiceModal && (
@@ -683,7 +694,7 @@ export default function BuyPage() {
         )}
 
       {/* 4. Payment Successful Modal with Animated Motion-Blur Checkmark & Soft-Blur Token Counter */}
-      {typeof document !== 'undefined' &&
+      {hydrated &&
         createPortal(
           <AnimatePresence>
             {successReceipt && (

@@ -9,19 +9,17 @@
  */
 import { useState } from 'react';
 import { Link } from '@/i18n/navigation';
-import { useTranslations } from 'next-intl';
 import {
-  Check,
-  ChevronDown,
+  AlertCircle,
   Flame,
   Globe,
-  ListChecks,
+  RefreshCw,
   Share2,
   Users,
   Wallet,
 } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useQueryClient } from '@tanstack/react-query';
-import { triggerConfetti } from '@/lib/confetti';
 import { api } from '@/lib/api/client';
 import { OknWatermark } from '@/components/ui/okn-watermark';
 import { toast } from 'sonner';
@@ -176,36 +174,41 @@ export default function TasksPage() {
   const qc = useQueryClient();
   const [filter, setFilter] = useState<'all' | 'social' | 'daily' | 'referral'>('all');
   const [completedIds, setCompletedIds] = useState<string[]>(['t-checkin']);
+  const [justCompletedId, setJustCompletedId] = useState<string | null>(null);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [taskError, setTaskError] = useState<{ task: TaskItem; message: string } | null>(null);
 
   const filteredTasks = ALL_TASKS.filter((t) => {
     if (filter === 'all') return true;
     return t.category === filter;
   });
 
-  const totalPoints = ALL_TASKS.reduce((acc, t) => acc + t.points, 0); // 555 pts
-  const earnedPoints = ALL_TASKS.filter((t) => completedIds.includes(t.id)).reduce(
-    (acc, t) => acc + t.points,
-    0,
-  );
   const progressPercent = Math.round((completedIds.length / ALL_TASKS.length) * 100);
 
   const handleClaim = (task: TaskItem) => {
-    if (completedIds.includes(task.id)) return;
+    if (completedIds.includes(task.id) || loadingId === task.id) return;
+    setTaskError(null);
     setLoadingId(task.id);
 
     setTimeout(async () => {
-      await api.addDemoPoints(task.points, `Verified task: ${task.title}`);
-      await Promise.all([
-        qc.invalidateQueries({ queryKey: ['claim-eligibility'] }),
-        qc.invalidateQueries({ queryKey: ['portfolio'] }),
-        qc.invalidateQueries({ queryKey: ['notifications'] }),
-      ]);
-      setCompletedIds((prev) => [...prev, task.id]);
-      setLoadingId(null);
-      triggerConfetti();
-      toast.success(`Demo verified! +${task.points} OK Points added to your account.`);
-    }, 600);
+      try {
+        await api.addDemoPoints(task.points, `Verified task: ${task.title}`);
+        await Promise.all([
+          qc.invalidateQueries({ queryKey: ['claim-eligibility'] }),
+          qc.invalidateQueries({ queryKey: ['portfolio'] }),
+          qc.invalidateQueries({ queryKey: ['notifications'] }),
+        ]);
+        setCompletedIds((prev) => (prev.includes(task.id) ? prev : [...prev, task.id]));
+        setJustCompletedId(task.id);
+        toast.success(`+${task.points} OK Points credited to your account.`);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unable to verify task right now.';
+        setTaskError({ task, message });
+        toast.error(message);
+      } finally {
+        setLoadingId(null);
+      }
+    }, 450);
   };
 
   return (
@@ -239,6 +242,27 @@ export default function TasksPage() {
         </div>
       </section>
 
+      {/* Inline Error Banner with One-Click Retry */}
+      {taskError && (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#EF4444]/35 bg-[#EF4444]/10 px-4 py-3 text-xs sm:text-sm text-[#EF4444]"
+        >
+          <div className="flex items-center gap-2 font-bold">
+            <AlertCircle className="size-4 shrink-0" />
+            <span>{taskError.message}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleClaim(taskError.task)}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#EF4444] px-3 py-1.5 text-xs font-extrabold text-white hover:opacity-90 transition-opacity cursor-pointer"
+          >
+            <RefreshCw className="size-3.5" />
+            <span>Retry</span>
+          </button>
+        </div>
+      )}
+
       {/* 2. Filter Tabs / Pills */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         {(['all', 'social', 'daily', 'referral'] as const).map((cat) => (
@@ -261,13 +285,14 @@ export default function TasksPage() {
         {filteredTasks.map((task) => {
           const isDone = completedIds.includes(task.id);
           const isLoading = loadingId === task.id;
+          const isFreshlyDone = justCompletedId === task.id;
 
           return (
             <div
               key={task.id}
               className={`rounded-[20px] border p-4.5 md:p-5 flex items-center justify-between gap-4 transition-all duration-200 ${
                 isDone
-                  ? 'border-[var(--line)] bg-[var(--s1)]/60 opacity-80'
+                  ? 'border-[#2FBD8E]/30 bg-[var(--s1)]/85'
                   : 'border-[var(--line)] bg-[var(--s1)] shadow-sm hover:-translate-y-0.5 hover:border-[#7A12F5]/35 hover:shadow-md'
               }`}
             >
@@ -290,24 +315,71 @@ export default function TasksPage() {
                 type="button"
                 onClick={() => handleClaim(task)}
                 disabled={isDone || isLoading}
-                className={`h-9 px-4 rounded-xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                className={`relative overflow-hidden h-9 min-w-[92px] px-4 rounded-xl text-xs font-extrabold transition-all whitespace-nowrap flex items-center justify-center gap-1.5 ${
                   isDone
-                    ? 'bg-[#2FBD8E]/15 text-[#2FBD8E] border border-[#2FBD8E]/30 cursor-default'
+                    ? 'bg-[#2FBD8E]/15 text-[#2FBD8E] border border-[#2FBD8E]/35 cursor-default shadow-[0_0_16px_rgba(47,189,142,0.18)]'
                     : isLoading
-                    ? 'bg-[#7A12F5]/70 text-white animate-pulse'
-                    : 'bg-[#7A12F5] text-white shadow-md hover:bg-[#8C38F7] active:scale-95'
+                      ? 'bg-[#7A12F5]/75 text-white cursor-wait'
+                      : 'bg-[#7A12F5] text-white shadow-md hover:bg-[#8C38F7] active:scale-95 cursor-pointer'
                 }`}
               >
-                {isDone ? (
-                  <>
-                    <Check className="size-3.5 stroke-[3]" />
-                    <span>Done</span>
-                  </>
-                ) : isLoading ? (
-                  <span>Verifying...</span>
-                ) : (
-                  <span>Claim</span>
-                )}
+                <AnimatePresence mode="wait" initial={false}>
+                  {isDone ? (
+                    <motion.span
+                      key="done"
+                      initial={
+                        isFreshlyDone
+                          ? { opacity: 0, scale: 0.65, y: 6, filter: 'blur(6px)' }
+                          : false
+                      }
+                      animate={{ opacity: 1, scale: [0.85, 1.08, 1], y: 0, filter: 'blur(0px)' }}
+                      transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+                      className="inline-flex items-center gap-1.5"
+                    >
+                      <span className="relative flex size-4 items-center justify-center rounded-full bg-[#2FBD8E] text-white shadow-[0_0_10px_rgba(47,189,142,0.55)]">
+                        <svg
+                          viewBox="0 0 24 24"
+                          className="size-2.5"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={3.5}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <motion.path
+                            d="M5 13l4 4L19 7"
+                            initial={isFreshlyDone ? { pathLength: 0 } : false}
+                            animate={{ pathLength: 1 }}
+                            transition={{ duration: 0.32, delay: 0.06, ease: 'easeOut' }}
+                          />
+                        </svg>
+                      </span>
+                      <span>Done</span>
+                    </motion.span>
+                  ) : isLoading ? (
+                    <motion.span
+                      key="verifying"
+                      initial={{ opacity: 0, y: 5, filter: 'blur(4px)' }}
+                      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                      exit={{ opacity: 0, y: -5, filter: 'blur(4px)' }}
+                      transition={{ duration: 0.18 }}
+                      className="inline-flex items-center gap-1.5"
+                    >
+                      <span className="size-3 rounded-full border-2 border-white/35 border-t-white animate-spin" />
+                      <span>Verifying...</span>
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="claim"
+                      initial={false}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.88, filter: 'blur(4px)' }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      Claim
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </button>
             </div>
           );

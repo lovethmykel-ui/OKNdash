@@ -23,6 +23,7 @@ import { LanguageSwitcher } from '@/components/landing/language-switcher';
 import { DevRoleToggle } from '@/components/admin/dev-role-toggle';
 import { SilentRefresher } from './silent-refresher';
 import { DailyCheckIn } from '@/components/dashboard/daily-check-in';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { cn } from '@/lib/utils';
 import { Cpu, Home, ShoppingCart, Users, Zap } from 'lucide-react';
@@ -102,7 +103,7 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
                   : 'max-w-[96rem] pb-8',
               )}
             >
-              {children}
+              <ErrorBoundary key={pathname}>{children}</ErrorBoundary>
             </div>
           </div>
 

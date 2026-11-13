@@ -16,13 +16,15 @@
  *     the animation (only an actual route change does).
  *   - Reduced-motion users get an instant swap (opacity only, 0s duration).
  */
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { usePathname } from '@/i18n/navigation';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const hydrated = useHydrated();
   const reduceMotion = useReducedMotion();
 
   return (
@@ -31,7 +33,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       suppressHydrationWarning
       initial={false}
       animate={{ opacity: 1, y: 0 }}
-      transition={reduceMotion ? { duration: 0 } : { duration: 0.32, ease: EASE }}
+      transition={hydrated && reduceMotion ? { duration: 0 } : { duration: 0.32, ease: EASE }}
     >
       {children}
     </motion.div>

@@ -8,6 +8,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
 
 export default function Error({
   error,
@@ -37,52 +38,33 @@ export default function Error({
 
   return (
     <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '60vh',
-        padding: '2rem',
-        textAlign: 'center',
-        fontFamily: 'system-ui, sans-serif',
-      }}
+      role="alert"
+      className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-4 px-6 py-16 text-center"
     >
-      <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>
+      <div className="flex size-14 items-center justify-center rounded-2xl border border-[#EF4444]/30 bg-[#EF4444]/12 text-[#EF4444]">
+        <AlertTriangle className="size-7" />
+      </div>
+      <h2 className="text-xl font-extrabold tracking-tight text-foreground">
         Something went wrong
       </h2>
-      <p style={{ color: '#8e8e93', marginBottom: '1.5rem', maxWidth: '28rem' }}>
-        We hit an unexpected error while loading this page. The error has been logged.
+      <p className="max-w-sm text-sm text-muted-foreground">
+        We hit an unexpected error while loading this page. Your account data is safe.
       </p>
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
+      <div className="mt-2 flex items-center gap-3">
         <button
           type="button"
           onClick={reset}
-          style={{
-            padding: '0.6rem 1.25rem',
-            borderRadius: '12px',
-            border: 'none',
-            background: '#007aff',
-            color: 'white',
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#7A12F5] px-5 text-sm font-extrabold text-white shadow-sm hover:bg-[#8C38F7] transition-all cursor-pointer"
         >
-          Try again
+          <RefreshCw className="size-4" />
+          <span>Try again</span>
         </button>
         <Link
-          href="/"
-          style={{
-            padding: '0.6rem 1.25rem',
-            borderRadius: '12px',
-            border: '1px solid #d1d1d6',
-            background: 'transparent',
-            color: '#000',
-            fontWeight: 600,
-            textDecoration: 'none',
-          }}
+          href="/app/portfolio"
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm font-bold text-foreground hover:bg-muted transition-colors"
         >
-          Go home
+          <Home className="size-4" />
+          <span>Go home</span>
         </Link>
       </div>
     </div>
