@@ -429,50 +429,25 @@
 }
 
 .light, [data-theme="light"] {
-  --bg: #F4F1FF;
+  --bg: #F5F3FA;
   --s1: #FFFFFF;
-  --s2: #F2ECFF;
-  --line: #DCD2F8;
-  --tx: #110B29;
-  --mut: #4B3F72;
+  --s2: #EFEBF8;
+  --line: #E2DDEE;
+  --tx: #15121F;
+  --mut: #5C5870;
   --vio: #7A12F5;
   --vio2: #8C38F7;
-  --vio-l: #6D08E8;
-  --cyan: #0284C7;
-  --cyan-t: #0369A1;
-  --yel-t: #B45309;
-  --org-t: #C2410C;
+  --vio-l: #6A0FD4;
+  --cyan: #0A84C6;
+  --cyan-t: #0A6FA6;
+  --yel-t: #8A6500;
+  --org-t: #9A5A00;
   --inv-bg: #17141F;
   --inv-tx: #FFFFFF;
   --inv-mut: #B9B5C9;
   --inv-chip: #2C2838;
-  --dash: #C4B5FD;
-  --ok: #059669;
-}
-
-/* Vibrant Light Mode overrides so pastel dark-mode utility classes never look washed out */
-.light .text-\[\#C9A6FF\],
-[data-theme="light"] .text-\[\#C9A6FF\] {
-  color: #6D08E8 !important;
-}
-
-.light .text-\[\#2FBD8E\],
-[data-theme="light"] .text-\[\#2FBD8E\] {
-  color: #059669 !important;
-}
-
-.light .text-\[\#09B4FF\],
-[data-theme="light"] .text-\[\#09B4FF\] {
-  color: #0284C7 !important;
-}
-
-.light :not(.web3-hero) > .text-\[\#FFD60A\],
-[data-theme="light"] :not(.web3-hero) > .text-\[\#FFD60A\],
-.light .text-\[\#ffb800\],
-[data-theme="light"] .text-\[\#ffb800\],
-.light .text-\[\#FFAA00\],
-[data-theme="light"] .text-\[\#FFAA00\] {
-  color: #D97706 !important;
+  --dash: #CBC5DB;
+  --ok: #0B8F63;
 }
 
 /* Tabular Numbers */

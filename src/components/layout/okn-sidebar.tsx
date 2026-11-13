@@ -76,7 +76,6 @@ export interface OknNavItem {
 const ICONS: Record<string, LucideIcon> = {
   '/app': Home,
   '/app/portfolio': PieChart,
-  '/app/analytics': Activity,
   '/app/leaderboard': Trophy,
   '/app/missions': Target,
   '/app/tasks': ListTodo,
@@ -211,9 +210,7 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
                 const label = resolveLabel(item);
                 const isPolymarket = item.href === '/app/polymarket-agent';
                 const isBuy = item.href === '/app/buy';
-                const isActive =
-                  pathname === item.href ||
-                  (item.href === '/app/portfolio' && (pathname === '/' || pathname === '/app'));
+                const isActive = pathname === item.href;
 
                 return (
                   <SidebarMenuItem key={item.href}>
