@@ -19,19 +19,8 @@ import { Check, ChevronDown } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { routing, type Locale } from '@/i18n/routing';
+import { LocaleFlag } from '@/components/ui/locale-flag';
 import { cn } from '@/lib/utils';
-
-const LOCALE_FLAGS: Record<Locale, string> = {
-  en: '🇬🇧',
-  zh: '🇨🇳',
-  es: '🇪🇸',
-  pt: '🇵🇹',
-  ru: '🇷🇺',
-  vi: '🇻🇳',
-  id: '🇮🇩',
-  tr: '🇹🇷',
-  fr: '🇫🇷',
-};
 
 export function LanguageSwitcher() {
   const t = useTranslations('languageSwitcher');
@@ -56,9 +45,6 @@ export function LanguageSwitcher() {
   function selectLocale(next: Locale) {
     setOpen(false);
     if (next === locale) return;
-    // Navigate to the same pathname under the new locale. next-intl's router
-    // handles the prefix swap and sets the NEXT_LOCALE cookie so the choice
-    // persists.
     router.replace(pathname, { locale: next });
   }
 
@@ -72,9 +58,7 @@ export function LanguageSwitcher() {
         aria-expanded={open}
         className="inline-flex h-9 md:h-10 items-center justify-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--s2)] px-2.5 md:px-3 text-xs md:text-[13px] font-bold text-[var(--tx)] transition-all hover:bg-[var(--s1)] active:scale-[0.98] cursor-pointer shadow-2xs"
       >
-        <span className="text-[17px] leading-none shrink-0" aria-hidden="true">
-          {LOCALE_FLAGS[locale]}
-        </span>
+        <LocaleFlag locale={locale} size="md" />
         <ChevronDown
           className={cn(
             'size-3.5 text-[var(--mut)] shrink-0 transition-transform duration-200',
@@ -84,14 +68,12 @@ export function LanguageSwitcher() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-[100] mt-2 w-52 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--s1)] p-1.5 text-[var(--tx)] shadow-[0_16px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+        <div className="absolute right-0 top-full z-[100] mt-2 w-56 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--s1)] p-1.5 text-[var(--tx)] shadow-[0_16px_40px_rgba(0,0,0,0.22)] backdrop-blur-xl">
           <div className="px-3 py-1.5 border-b border-[var(--line)] mb-1 flex items-center justify-between">
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--mut)]">
               {t('label')}
             </span>
-            <span className="text-xs leading-none" aria-hidden="true">
-              {LOCALE_FLAGS[locale]}
-            </span>
+            <LocaleFlag locale={locale} size="sm" />
           </div>
           <ul role="listbox" aria-label={t('label')} className="space-y-0.5">
             {routing.locales.map((l) => {
@@ -115,9 +97,7 @@ export function LanguageSwitcher() {
                       {isSelected && (
                         <Check className="size-3.5 stroke-[2.6] text-[#7A12F5] dark:text-[#C9A6FF]" />
                       )}
-                      <span className="text-base leading-none" aria-hidden="true">
-                        {LOCALE_FLAGS[l]}
-                      </span>
+                      <LocaleFlag locale={l} size="md" />
                     </span>
                   </button>
                 </li>

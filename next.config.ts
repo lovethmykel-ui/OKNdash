@@ -25,6 +25,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
+    dangerouslyAllowSVG: true,
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 86400,
     remotePatterns: [

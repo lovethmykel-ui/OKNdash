@@ -17,8 +17,10 @@
  *       6. Session    — Community channels, legal links, and session sign-out
  */
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
+import { useLocale, useTranslations } from 'next-intl';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
+import { routing, type Locale } from '@/i18n/routing';
+import { LocaleFlag } from '@/components/ui/locale-flag';
 import {
   AtSign,
   Bell,
@@ -942,6 +944,10 @@ function WalletTab({ user, isLoading, showGuest }: TabStateProps) {
 
 function AppearanceTab() {
   const t = useTranslations('dashboard.settings');
+  const tLang = useTranslations('languageSwitcher');
+  const locale = useLocale() as Locale;
+  const router = useRouter();
+  const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const [prefs, setPrefs] = useState<NotificationPrefs>(DEFAULT_NOTIFS);
@@ -1038,6 +1044,57 @@ function AppearanceTab() {
               </span>
             ) : null}
           </button>
+        </div>
+      </section>
+
+      {/* Language Selector Card */}
+      <section className="rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between gap-3 pb-4 border-b border-[var(--line)]">
+          <div>
+            <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--tx)]">
+              {tLang('label')}
+            </h2>
+            <p className="mt-0.5 text-xs sm:text-sm text-[var(--mut)]">
+              {tLang('current', { name: tLang(`languages.${locale}`) })}
+            </p>
+          </div>
+          <LocaleFlag locale={locale} size="lg" />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+          {routing.locales.map((l) => {
+            const isSelected = l === locale;
+            return (
+              <button
+                key={l}
+                type="button"
+                onClick={() => {
+                  if (l !== locale) {
+                    router.replace(pathname, { locale: l });
+                  }
+                }}
+                aria-pressed={isSelected}
+                className={cn(
+                  'flex items-center justify-between gap-3 rounded-2xl border px-3.5 py-2.5 text-left transition-all cursor-pointer',
+                  isSelected
+                    ? 'border-[#7A12F5] bg-[#7A12F5]/12 text-[#7A12F5] dark:text-[#C9A6FF] shadow-2xs'
+                    : 'border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] hover:border-[#7A12F5]/40',
+                )}
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <LocaleFlag locale={l} size="md" />
+                  <span className="truncate text-xs sm:text-[13px] font-bold">
+                    {tLang(`languages.${l}`)}
+                  </span>
+                </div>
+                {isSelected ? (
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#7A12F5] text-white">
+                    <Check className="size-3 stroke-[2.8]" />
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
         </div>
       </section>
 
