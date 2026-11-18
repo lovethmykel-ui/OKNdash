@@ -211,13 +211,13 @@ export default function BuyPage() {
 
   return (
     <main className="space-y-5 md:space-y-6 pb-10">
-      {/* 1. Compact Stage 2 Presale Banner */}
+      {/* 1. Compact Stage 1 Presale Banner */}
       <section className="relative overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-6 shadow-sm">
         <OknWatermark variant="tinted" size="md" />
         <div className="relative z-10 flex items-start justify-between gap-4">
           <div>
             <span className="inline-flex items-center rounded-full bg-[#7A12F5]/20 border border-[#7A12F5]/30 px-3 py-1 text-xs font-bold text-[#7A12F5] dark:text-[#C084FC]">
-              Presale Stage 2
+              Presale Stage 1
             </span>
             <h1 className="mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--tx)]">
               Buy $OKN Token
@@ -226,17 +226,17 @@ export default function BuyPage() {
 
           <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)]/90 backdrop-blur-sm px-4 py-2.5 text-right shrink-0">
             <div className="text-[11px] font-semibold text-[var(--mut)] whitespace-nowrap">
-              Token Price
+              Starting Price
             </div>
             <div className="font-mono text-base sm:text-lg font-extrabold text-[#7A12F5] dark:text-[#C084FC] tabular-nums mt-0.5 whitespace-nowrap">
-              $0.00060
+              $0.05
             </div>
           </div>
         </div>
 
         <div className="relative z-10 mt-5 space-y-2">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-semibold text-[var(--mut)]">Stage 2 Progress</span>
+            <span className="font-semibold text-[var(--mut)]">Stage 1 Progress</span>
             <span className="font-bold text-[var(--tx)] tabular-nums">68.4% Sold</span>
           </div>
           <div className="h-2.5 w-full rounded-full bg-[var(--s2)] overflow-hidden">

@@ -568,10 +568,11 @@ function ProfileTab({ user, isLoading, showGuest }: TabStateProps) {
           <ReadonlyRow
             icon={CalendarClock}
             label={t('joinedOkn')}
-            value={new Date(user.createdAt).toLocaleDateString(undefined, {
+            value={new Date(user.createdAt).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'short',
               day: 'numeric',
+              timeZone: 'UTC',
             })}
           />
           {user.adminRole ? (
@@ -888,10 +889,11 @@ function WalletTab({ user, isLoading, showGuest }: TabStateProps) {
               <ReadonlyRow
                 icon={CalendarClock}
                 label={t('boundSince')}
-                value={new Date(user.walletBoundAt).toLocaleDateString(undefined, {
+                value={new Date(user.walletBoundAt).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'short',
                   day: 'numeric',
+                  timeZone: 'UTC',
                 })}
               />
             ) : null}

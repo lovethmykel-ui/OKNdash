@@ -193,10 +193,10 @@ export function AnnouncementCarousel({ id = 'ann-carousel' }: { id?: string }) {
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-extrabold bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/25">
                         <span className="size-1.5 rounded-full bg-[#F59E0B] animate-pulse" />
-                        PRESALE · STAGE 2
+                        PRESALE · STAGE 1
                       </span>
                       <span className="px-2.5 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-bold bg-[var(--s2)] text-[var(--tx)] border border-[var(--line)]">
-                        1 BNB = 1,000,000 $OKN · $0.0006
+                        1 BNB = 12,000 $OKN · Starts at $0.05
                       </span>
                     </div>
 

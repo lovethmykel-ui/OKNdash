@@ -757,3 +757,61 @@ body::before {
   );
 }
 
+/* 3D $OKN Coin Continuous Bouncing Animation */
+@keyframes oknCoinBounce {
+  0%,
+  100% {
+    transform: translate3d(0, 3px, 0) scaleX(1.04) scaleY(0.95) rotate(0deg);
+  }
+  16% {
+    transform: translate3d(0, -3px, 0) scaleX(0.97) scaleY(1.03) rotate(-2.5deg);
+  }
+  42% {
+    transform: translate3d(0, -10px, 0) scaleX(1) scaleY(1) rotate(2deg);
+  }
+  68% {
+    transform: translate3d(0, 3px, 0) scaleX(1.05) scaleY(0.94) rotate(-1deg);
+  }
+  82% {
+    transform: translate3d(0, -4px, 0) scaleX(0.99) scaleY(1.01) rotate(1.5deg);
+  }
+}
+
+@keyframes oknCoinShadow {
+  0%,
+  100% {
+    transform: scaleX(1.08) scaleY(1);
+    opacity: 0.42;
+  }
+  42% {
+    transform: scaleX(0.68) scaleY(0.85);
+    opacity: 0.18;
+  }
+  68% {
+    transform: scaleX(1.12) scaleY(1.02);
+    opacity: 0.46;
+  }
+  82% {
+    transform: scaleX(0.84) scaleY(0.92);
+    opacity: 0.26;
+  }
+}
+
+.okn-coin-bounce {
+  animation: oknCoinBounce var(--okn-coin-duration, 2.2s) cubic-bezier(0.37, 0, 0.63, 1) infinite;
+  will-change: transform;
+  transform-origin: center bottom;
+}
+
+.okn-coin-shadow {
+  animation: oknCoinShadow var(--okn-coin-duration, 2.2s) cubic-bezier(0.37, 0, 0.63, 1) infinite;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .okn-coin-bounce,
+  .okn-coin-shadow {
+    animation: none !important;
+  }
+}
+

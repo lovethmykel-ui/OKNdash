@@ -63,9 +63,9 @@ const INITIAL_VAULT_ACTIVITY: VaultActivityItem[] = [
   {
     id: 'va-1',
     type: 'presale',
-    title: 'Stage 2 Presale Allocation',
+    title: 'Stage 1 Presale Allocation',
     subtitle: 'Instant custody credit · BEP-20',
-    amountLabel: '+416,666 $OKN',
+    amountLabel: '+5,000 $OKN',
     usdLabel: '$250.00',
     positive: true,
     timeAgo: '1h ago',
@@ -241,7 +241,7 @@ export default function WalletPage() {
       withdrawAsset === 'BNB'
         ? `$${(parsedAmt * 600).toFixed(2)}`
         : withdrawAsset === 'OKN'
-          ? `$${(parsedAmt * 0.0006).toFixed(2)}`
+          ? `$${(parsedAmt * 0.05).toFixed(2)}`
           : `$${parsedAmt.toFixed(2)}`;
 
     setActivityList((prev) => [
@@ -290,8 +290,8 @@ export default function WalletPage() {
       id: 'okn',
       category: 'onchain' as const,
       name: '$OKN Token',
-      subtitle: 'Stage 2 Presale Allocation · 0% Tax',
-      badge: 'Stage 2 · $0.0006',
+      subtitle: 'Stage 1 Presale Allocation · 0% Tax',
+      badge: 'Stage 1 · $0.05',
       badgeTone: 'text-[#7A12F5] dark:text-[#C9A6FF] bg-[#7A12F5]/12 border-[#7A12F5]/30',
       amount: oknDisplay,
       usd: '$416.00',

@@ -142,8 +142,8 @@ export function HoldingsView() {
           icon={Activity}
           tint="indigo"
           label="Presale Rate"
-          value="1 BNB = 1,000,000 $OKN"
-          hint="Fixed on-chain rate"
+          value="1 BNB = 12,000 $OKN"
+          hint="Presale starts at $0.05"
         />
         <StatCard
           icon={ShoppingCart}

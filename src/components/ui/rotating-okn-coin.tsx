@@ -1,7 +1,7 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import Image from 'next/image';
-import { motion, useReducedMotion } from 'motion/react';
 import coinAsset from '../../../public/brand/OKN_coin_transparent_padded.png';
 import { cn } from '@/lib/utils';
 
@@ -12,56 +12,35 @@ interface RotatingOknCoinProps {
 }
 
 /**
- * Displays the 3D $OKN coin PNG asset with a continuous slow 3D rotation.
+ * Displays the 3D $OKN coin PNG asset with a continuous bouncing animation
+ * and a reactive floor shadow (SSR-safe via CSS keyframes, zero hydration mismatch).
  */
 export function RotatingOknCoin({
   size = 52,
   className,
-  durationSec = 9,
+  durationSec = 2.2,
 }: RotatingOknCoinProps) {
-  const prefersReduced = useReducedMotion();
-  const disableMotion = prefersReduced === true;
+  const durationStyle = {
+    width: size,
+    height: size,
+    '--okn-coin-duration': `${durationSec}s`,
+  } as CSSProperties;
 
   return (
     <div
-      style={{ width: size, height: size, perspective: 640 }}
+      style={durationStyle}
       className={cn(
         'relative shrink-0 select-none pointer-events-none flex items-center justify-center',
         className,
       )}
     >
-      <motion.div
-        initial={{ rotate: 0, rotateY: -12 }}
-        animate={
-          disableMotion
-            ? { rotate: 0, rotateY: 0 }
-            : {
-                rotate: [0, 360],
-                rotateY: [-14, 14, -14],
-              }
-        }
-        transition={
-          disableMotion
-            ? undefined
-            : {
-                rotate: {
-                  duration: durationSec,
-                  repeat: Infinity,
-                  ease: 'linear',
-                },
-                rotateY: {
-                  duration: durationSec * 0.5,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                },
-              }
-        }
-        style={{
-          width: size,
-          height: size,
-          transformStyle: 'preserve-3d',
-        }}
-        className="drop-shadow-[0_6px_14px_rgba(122,18,245,0.28)]"
+      <div
+        aria-hidden="true"
+        className="okn-coin-shadow absolute -bottom-1 h-2 w-[66%] rounded-full bg-[#7A12F5]/40 blur-[4px] dark:bg-[#09B4FF]/35"
+      />
+      <div
+        style={{ width: size, height: size }}
+        className="okn-coin-bounce relative drop-shadow-[0_6px_14px_rgba(122,18,245,0.28)]"
       >
         <Image
           src={coinAsset}
@@ -72,7 +51,7 @@ export function RotatingOknCoin({
           referrerPolicy="no-referrer"
           className="size-full object-contain"
         />
-      </motion.div>
+      </div>
     </div>
   );
 }

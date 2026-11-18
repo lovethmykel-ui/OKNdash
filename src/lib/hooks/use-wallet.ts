@@ -142,7 +142,7 @@ export function useSaleStatus() {
 
   return useMemo(
     () => ({
-      rate: asBigInt(rate.data) ?? 1_000_000n * 10n ** 18n,
+      rate: asBigInt(rate.data) ?? 12_000n * 10n ** 18n,
       capPerWallet: asBigInt(cap.data) ?? 50n * 10n ** 18n,
       paused: asBool(paused.data) ?? false,
       totalBnbRaised: asBigInt(raised.data) ?? 342_500_000_000_000_000_000n,

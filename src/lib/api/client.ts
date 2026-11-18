@@ -580,28 +580,28 @@ const demoState = {
       userId: '00000000-0000-0000-0000-000000000000',
       buyerWallet: '0xBF6B0312f52fa8390Ec9393A9375BF05c8E40377',
       bnbAmount: 1000000000000000000n,
-      oknAmount: 1000000000000000000000000n,
-      rate: 1000000000000000000000000n,
+      oknAmount: 12000000000000000000000n,
+      rate: 12000000000000000000000n,
       txHash: '0x3a4b881928019a7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a9f12',
       blockNumber: 41892104n,
-      createdAt: new Date(Date.now() - 3600 * 1000 * 4),
+      createdAt: new Date('2026-11-18T10:00:00.000Z'),
     },
     {
       id: '44444444-4444-4444-8444-444444444402',
       userId: '00000000-0000-0000-0000-000000000000',
       buyerWallet: '0xBF6B0312f52fa8390Ec9393A9375BF05c8E40377',
       bnbAmount: 500000000000000000n,
-      oknAmount: 500000000000000000000000n,
-      rate: 1000000000000000000000000n,
+      oknAmount: 6000000000000000000000n,
+      rate: 12000000000000000000000n,
       txHash: '0x88f1c9a0b2d4e6f813579bdf02468ace13579bdf02468ace13579bdf024611a2',
       blockNumber: 41850219n,
-      createdAt: new Date(Date.now() - 3600 * 1000 * 48),
+      createdAt: new Date('2026-11-16T14:00:00.000Z'),
     },
   ] satisfies Purchase[],
   streak: {
     currentStreak: 6,
     longestStreak: 12,
-    lastLoginDate: new Date(Date.now() - 86400 * 1000).toISOString().slice(0, 10),
+    lastLoginDate: '2026-11-17',
     totalLogins: 24,
     checkedInToday: true,
     nextReward: 100,
@@ -658,8 +658,8 @@ const demoState = {
     },
     {
       id: '11111111-1111-4111-8111-111111111104',
-      title: 'Retweet Presale Stage 2 Announcement',
-      description: 'Share the Stage 2 fixed-rate presale announcement with your followers.',
+      title: 'Retweet Presale Stage 1 Announcement',
+      description: 'Share the Stage 1 ($0.05) fixed-rate presale announcement with your followers.',
       type: 'social_post' as TaskType,
       rewardPoints: 65,
       config: {
@@ -730,11 +730,11 @@ const demoState = {
     {
       id: 'notif-1',
       type: 'presale',
-      title: 'Presale Stage 2 Live',
-      body: 'Fixed-rate allocation (1 BNB = 1,000,000 $OKN) is active with a 5% whale bonus on 1+ BNB.',
+      title: 'Presale Stage 1 Live',
+      body: 'Fixed-rate allocation ($0.05 / $OKN · 1 BNB = 12,000 $OKN) is active with a 5% whale bonus on 1+ BNB.',
       link: '/app/buy',
       read: false,
-      createdAt: new Date(Date.now() - 3600 * 1000 * 3).toISOString(),
+      createdAt: '2026-11-18T11:00:00.000Z',
     },
     {
       id: 'notif-2',
@@ -743,7 +743,7 @@ const demoState = {
       body: 'Your Telegram community verification task was confirmed.',
       link: '/app/tasks',
       read: true,
-      createdAt: new Date(Date.now() - 3600 * 1000 * 26).toISOString(),
+      createdAt: '2026-11-17T12:00:00.000Z',
     },
   ],
 };
@@ -1042,18 +1042,18 @@ const rawApi = {
   // Sale
   getSalePrice: async (): Promise<SalePriceResponse | null> => ({
     id: 1,
-    rate: '1000000000000000000000000', // 1,000,000 OKN per 1 BNB
+    rate: '12000000000000000000000', // 12,000 OKN per 1 BNB ($0.05 / $OKN)
     capPerWallet: '50000000000000000000', // 50 BNB
     minPurchase: '10000000000000000', // 0.01 BNB
     bnbHardCap: '500000000000000000000', // 500 BNB
     treasury: '0x46fC09a84C23c94Ea6853450253C050be44dB751',
-    saleStart: new Date(Date.now() - 86400 * 1000 * 7),
-    saleEnd: new Date(Date.now() + 86400 * 1000 * 30),
+    saleStart: new Date('2026-11-11T00:00:00.000Z'),
+    saleEnd: new Date('2026-12-18T00:00:00.000Z'),
     isPaused: false,
-    priceUsd: '60000', // $0.00060 in 8 decimals
+    priceUsd: '5000000', // $0.05 in 8 decimals
     minPurchaseUsd: '1000000000', // $10
     saleMode: 'public',
-    updatedAt: new Date(),
+    updatedAt: new Date('2026-11-18T12:00:00.000Z'),
     bnbUsd8: '60000000000', // $600.00
     bnbUsdUpdatedAt: Math.floor(Date.now() / 1000) - 30,
     bnbUsdStale: false,
@@ -1109,7 +1109,7 @@ const rawApi = {
       admin: 0,
     },
     referralLevels: { l1: 8, l2: 4, l3: 2 },
-    saleRate: '1000000000000000000000000',
+    saleRate: '12000000000000000000000',
   }),
 
   // Leaderboard
@@ -1617,12 +1617,12 @@ const rawApi = {
       oldestQueuedAgeMinutes: null,
     },
     saleConfig: {
-      rate: '1000000000000000000000000',
-      priceUsd: '60000',
+      rate: '12000000000000000000000',
+      priceUsd: '5000000',
       minPurchase: '10000000000000000',
       capPerWallet: '50000000000000000000',
       isPaused: false,
-      updatedAt: new Date().toISOString(),
+      updatedAt: '2026-11-18T12:00:00.000Z',
     },
   }),
 
@@ -1648,7 +1648,7 @@ const rawApi = {
       buyerWallet: demoState.user.walletAddress ?? '0xBF6B0312f52fa8390Ec9393A9375BF05c8E40377',
       bnbAmount: bnbAmountWei,
       oknAmount: oknAmountWei,
-      rate: 1000000000000000000000000n,
+      rate: 12000000000000000000000n,
       txHash,
       blockNumber: 41895000n,
       createdAt: new Date(),

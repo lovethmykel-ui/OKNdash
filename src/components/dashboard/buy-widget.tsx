@@ -18,7 +18,7 @@
  * chain-pinned writes, full on-chain gating, hard-cap headroom capping,
  * success only after the receipt confirms, reverts decode to real reasons.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useAccount, useBalance, usePublicClient, useWriteContract } from 'wagmi';
@@ -98,6 +98,13 @@ export function BuyWidget() {
   const [confirming, setConfirming] = useState(false);
   // Gap 7: receipt wait timed out but the tx may still mine — persistent state.
   const [pendingHash, setPendingHash] = useState<`0x${string}` | null>(null);
+  const [nowSeconds, setNowSeconds] = useState<number | null>(null);
+
+  useEffect(() => {
+    setNowSeconds(Math.floor(Date.now() / 1000));
+    const timer = setInterval(() => setNowSeconds(Math.floor(Date.now() / 1000)), 15_000);
+    return () => clearInterval(timer);
+  }, []);
 
   const rawRate = rateOverride ?? chain.rate ?? toBigInt(sale.data?.rate);
   // A zero rate means the sale is not priced yet (e.g. setRate still pending
@@ -144,7 +151,7 @@ export function BuyWidget() {
   const spendUsd8 = bnb != null && bnb > 0n && bnbUsd8 != null ? bnbWeiToUsd8(bnb, bnbUsd8) : null;
   const pricePerOknUsd8 = rate != null && bnbUsd8 != null ? rateWeiToImpliedUsd8(rate, bnbUsd8) : null;
   const priceAgeSeconds =
-    bnbUsdUpdatedAt != null ? Math.max(0, Math.floor(Date.now() / 1000) - bnbUsdUpdatedAt) : null;
+    bnbUsdUpdatedAt != null && nowSeconds != null ? Math.max(0, nowSeconds - bnbUsdUpdatedAt) : null;
   const remaining = cap != null && purchased.data != null ? cap - purchased.data : null;
   const allowanceAfter =
     remaining != null && bnb != null && bnb > 0n ? (remaining - bnb > 0n ? remaining - bnb : 0n) : null;
@@ -160,6 +167,7 @@ export function BuyWidget() {
   // enforces) THEN the client-only wallet-balance pre-check. The draft
   // visibility gate runs first (inside buyBlockReason) so a hidden sale is
   // never buyable even when the test-unpaused contract would accept it.
+  const currentSec = nowSeconds ?? 0;
   const blockReason: BuyBlockReason | null =
     bnb != null && bnb > 0n
       ? buyBlockReason(
@@ -175,7 +183,7 @@ export function BuyWidget() {
             totalBnbRaised: chain.totalBnbRaised,
           },
           bnb,
-          Math.floor(Date.now() / 1000),
+          currentSec,
           balance,
         )
       : draftLocked
@@ -229,13 +237,12 @@ export function BuyWidget() {
     !isPending &&
     !confirming;
   // MAX is only offered while the sale itself is open (window/paused/caps/draft).
-  const nowSeconds = Math.floor(Date.now() / 1000);
   const saleAvailable =
     saleConfigured &&
     !paused &&
     !draftLocked &&
-    (chain.saleStart === undefined || chain.saleStart === 0n || nowSeconds >= chain.saleStart) &&
-    (chain.saleEnd === undefined || chain.saleEnd === 0n || nowSeconds <= chain.saleEnd);
+    (chain.saleStart === undefined || chain.saleStart === 0n || currentSec >= chain.saleStart) &&
+    (chain.saleEnd === undefined || chain.saleEnd === 0n || currentSec <= chain.saleEnd);
   const showMax = saleAvailable && maxBnb !== null && maxBnb > 0n;
 
   // Gap 1: fill the input with the EXACT on-chain headroom. formatEther keeps

@@ -321,7 +321,7 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
                 <div className="mb-4">
                   <h3 className="text-lg font-extrabold text-[var(--tx)]">Buy $OKN with BNB</h3>
                   <p className="text-xs text-[var(--mut)] mt-1">
-                    Fixed rate: {sale.data ? `1 BNB = ${formatWei(sale.data.rate)} $OKN` : '1 BNB = 1,000,000 $OKN'}
+                    Fixed rate: {sale.data ? `1 BNB = ${formatWei(sale.data.rate)} $OKN` : '1 BNB = 12,000 $OKN'} · Starts at $0.05
                   </p>
                 </div>
                 <Link
@@ -332,7 +332,7 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
                   <span>Open the sale</span>
                 </Link>
               </div>
-              <RotatingOknCoin size={72} className="relative z-10 shrink-0" />
+              <RotatingOknCoin size={72} durationSec={2.2} className="relative z-10 shrink-0" />
             </div>
           </div>
 
@@ -526,10 +526,10 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
           <div className="relative z-10 min-w-0 flex-1">
             <div className="text-sm font-extrabold text-[var(--tx)]">Buy $OKN Token</div>
             <div className="text-xs font-medium text-[var(--mut)] mt-0.5">
-              Presale Stage 2 · $0.00060
+              Presale Stage 1 · $0.05
             </div>
           </div>
-          <RotatingOknCoin size={50} className="relative z-10 shrink-0" />
+          <RotatingOknCoin size={50} durationSec={2.2} className="relative z-10 shrink-0" />
           <Link
             href="/app/buy"
             className="relative z-10 inline-flex h-10 shrink-0 items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-[#7A12F5] to-[#8C38F7] px-4 text-xs font-extrabold !text-white shadow-[0_4px_14px_rgba(122,18,245,0.35)] active:scale-95 transition-all whitespace-nowrap"

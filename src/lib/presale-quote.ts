@@ -1,8 +1,8 @@
 export type DepositTicker = 'USDT' | 'BTC' | 'ETH' | 'SOL' | 'BNB';
 
-export const PRESALE_TOKEN_PRICE_USD = 0.0006;
-export const RATE_PER_BNB = 1_000_000;
+export const PRESALE_TOKEN_PRICE_USD = 0.05;
 export const BNB_USD_ESTIMATE = 600;
+export const RATE_PER_BNB = Math.round(BNB_USD_ESTIMATE / PRESALE_TOKEN_PRICE_USD); // 12,000 $OKN per BNB
 
 export const REFERENCE_USD_PRICE: Record<DepositTicker, number> = {
   USDT: 1,
@@ -37,7 +37,7 @@ export function calculatePresaleQuote(
     };
   }
 
-  const oknTokens = Math.round((parsed / BNB_USD_ESTIMATE) * RATE_PER_BNB);
+  const oknTokens = Math.round(parsed / PRESALE_TOKEN_PRICE_USD);
   const priceUsd = REFERENCE_USD_PRICE[ticker] ?? 1;
   const cryptoAmount = parsed / priceUsd;
   const decimals = ticker === 'USDT' ? 2 : ticker === 'BTC' ? 6 : ticker === 'ETH' ? 5 : 4;

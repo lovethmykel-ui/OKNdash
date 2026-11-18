@@ -154,7 +154,7 @@ const copierDemo = {
         maxOrderSizeUsd: 250,
         minOrderSizeUsd: 10,
       },
-      createdAt: new Date(Date.now() - 86400 * 1000 * 5).toISOString(),
+      createdAt: '2026-11-13T10:15:00.000Z',
     },
     {
       id: 'sub-demo-2',
@@ -168,7 +168,7 @@ const copierDemo = {
         maxOrderSizeUsd: 150,
         minOrderSizeUsd: 25,
       },
-      createdAt: new Date(Date.now() - 86400 * 1000 * 2).toISOString(),
+      createdAt: '2026-11-16T10:15:00.000Z',
     },
   ] as CopierSubscription[],
   executions: [
@@ -185,7 +185,7 @@ const copierDemo = {
         finalAmount: 225,
         reasoning: '15% proportional copy of whale entry ($1,500 USDC)',
       },
-      createdAt: new Date(Date.now() - 3600 * 1000 * 2).toISOString(),
+      createdAt: '2026-11-18T11:30:00.000Z',
     },
     {
       id: 'exec-demo-2',
@@ -200,7 +200,7 @@ const copierDemo = {
         finalAmount: 120,
         reasoning: '15% proportional copy of whale entry ($800 USDC)',
       },
-      createdAt: new Date(Date.now() - 3600 * 1000 * 9).toISOString(),
+      createdAt: '2026-11-18T04:30:00.000Z',
     },
     {
       id: 'exec-demo-3',
@@ -215,7 +215,7 @@ const copierDemo = {
         finalAmount: 50,
         reasoning: 'Preview mode simulation ($50 fixed order)',
       },
-      createdAt: new Date(Date.now() - 3600 * 1000 * 18).toISOString(),
+      createdAt: '2026-11-17T19:30:00.000Z',
     },
   ] satisfies CopierExecution[],
   allowlist: [
@@ -223,7 +223,7 @@ const copierDemo = {
       id: 'allow-1',
       address: '0xBF6B0312f52fa8390Ec9393A9375BF05c8E40377',
       label: 'Primary BSC / Polygon Wallet',
-      effectiveAfter: new Date(Date.now() - 86400 * 1000 * 3).toISOString(),
+      effectiveAfter: '2026-11-15T10:00:00.000Z',
     },
   ] satisfies AllowlistAddress[],
   withdrawals: [
@@ -233,8 +233,8 @@ const copierDemo = {
       status: 'done' as const,
       address: '0xBF6B0312f52fa8390Ec9393A9375BF05c8E40377',
       txHash: '0x3a4b881928019a7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a9f12',
-      requestedAt: new Date(Date.now() - 86400 * 1000 * 4).toISOString(),
-      processedAt: new Date(Date.now() - 86400 * 1000 * 4 + 120_000).toISOString(),
+      requestedAt: '2026-11-14T10:00:00.000Z',
+      processedAt: '2026-11-14T10:02:00.000Z',
     },
   ] satisfies Withdrawal[],
   balances: {
@@ -243,10 +243,10 @@ const copierDemo = {
     pol: '18.40',
     allowance: {
       usdcApproved: true,
-      checkedAt: new Date().toISOString(),
+      checkedAt: '2026-11-18T12:00:00.000Z',
     },
     openTokens: '345.00',
-    updatedAt: new Date().toISOString(),
+    updatedAt: '2026-11-18T12:00:00.000Z',
   } satisfies CopierBalances,
   entitlement: {
     tier: 'free' as 'free' | 'pro',

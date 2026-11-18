@@ -186,7 +186,7 @@ function TreasuryAndFundingDesk({
   const [exportOpen, setExportOpen] = useState(false);
   const [balances, setBalances] = useState<CopierBalances | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [nowMs, setNowMs] = useState<number>(() => Date.now());
+  const [nowMs, setNowMs] = useState<number | null>(null);
   const [copiedWallet, setCopiedWallet] = useState(false);
 
   const [asset, setAsset] = useState<'USDC' | 'POL'>('USDC');
@@ -215,12 +215,14 @@ function TreasuryAndFundingDesk({
   }, [storeVersion]);
 
   useEffect(() => {
+    setNowMs(Date.now());
     const timer = setInterval(() => setNowMs(Date.now()), 5000);
     return () => clearInterval(timer);
   }, []);
 
   const updatedAt = balances ? new Date(balances.updatedAt).getTime() : null;
-  const agoSeconds = updatedAt ? Math.max(0, Math.round((nowMs - updatedAt) / 1000)) : null;
+  const agoSeconds =
+    updatedAt != null && nowMs != null ? Math.max(0, Math.round((nowMs - updatedAt) / 1000)) : null;
   const spendableNum = balances ? Number(balances.usdc) : 0;
 
   const copyAddress = async () => {
@@ -562,7 +564,14 @@ function BillingCard() {
         </div>
         {isPro && entitlement.periodEnd ? (
           <p className="text-xs text-[var(--mut)]">
-            {t('expiresOn', { date: new Date(entitlement.periodEnd).toLocaleDateString() })}
+            {t('expiresOn', {
+              date: new Date(entitlement.periodEnd).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                timeZone: 'UTC',
+              }),
+            })}
           </p>
         ) : entitlement.billingEnabled ? (
           <p className="text-xs text-[var(--mut)] leading-relaxed">
@@ -712,8 +721,9 @@ function ExportKeyDialog({
   );
 }
 
-function cooldownActive(effectiveAfter: string): boolean {
-  return new Date(effectiveAfter).getTime() > Date.now();
+function cooldownActive(effectiveAfter: string, nowMs: number | null): boolean {
+  if (nowMs === null) return false;
+  return new Date(effectiveAfter).getTime() > nowMs;
 }
 
 function WithdrawCard({ onChanged }: { onChanged: () => void }) {
@@ -722,6 +732,11 @@ function WithdrawCard({ onChanged }: { onChanged: () => void }) {
   const [allowlist, setAllowlist] = useState<AllowlistAddress[]>([]);
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [reloadKey, setReloadKey] = useState(0);
+  const [nowMs, setNowMs] = useState<number | null>(null);
+
+  useEffect(() => {
+    setNowMs(Date.now());
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -759,7 +774,7 @@ function WithdrawCard({ onChanged }: { onChanged: () => void }) {
           ) : (
             <ul className="divide-y divide-[var(--line)] border-t border-[var(--line)] mt-2">
               {allowlist.map((a) => {
-                const cooling = cooldownActive(a.effectiveAfter);
+                const cooling = cooldownActive(a.effectiveAfter, nowMs);
                 return (
                   <li
                     key={a.id}
@@ -772,7 +787,9 @@ function WithdrawCard({ onChanged }: { onChanged: () => void }) {
                     {cooling ? (
                       <span className="text-xs font-semibold text-[#D97706] dark:text-[#FBBF24]">
                         {t('cooldownUntil', {
-                          time: new Date(a.effectiveAfter).toLocaleString(),
+                          time: new Date(a.effectiveAfter).toLocaleString('en-US', {
+                            timeZone: 'UTC',
+                          }),
                         })}
                       </span>
                     ) : (
@@ -789,7 +806,7 @@ function WithdrawCard({ onChanged }: { onChanged: () => void }) {
 
         <section className="p-5 sm:px-6">
           <RequestWithdrawalRow
-            allowlist={allowlist.filter((a) => !cooldownActive(a.effectiveAfter))}
+            allowlist={allowlist.filter((a) => !cooldownActive(a.effectiveAfter, nowMs))}
             onRequested={refresh}
           />
         </section>
