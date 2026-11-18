@@ -32,6 +32,7 @@ import { useStreak } from '@/lib/hooks/use-rewards';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { OknWatermark } from '@/components/ui/okn-watermark';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
+import { RotatingOknCoin } from '@/components/ui/rotating-okn-coin';
 import { formatPoints, formatWei } from '@/lib/utils';
 import { useAccount } from 'wagmi';
 
@@ -314,21 +315,24 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
             </div>
 
             {/* Buy $OKN with BNB Card */}
-            <div className="relative overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--s1)] p-6 shadow-sm">
+            <div className="relative overflow-hidden flex items-center justify-between gap-4 rounded-[20px] border border-[var(--line)] bg-[var(--s1)] p-6 shadow-sm">
               <OknWatermark variant="card" size="sm" />
-              <div className="relative z-10 mb-4">
-                <h3 className="text-lg font-extrabold text-[var(--tx)]">Buy $OKN with BNB</h3>
-                <p className="text-xs text-[var(--mut)] mt-1">
-                  Fixed rate: {sale.data ? `1 BNB = ${formatWei(sale.data.rate)} $OKN` : '1 BNB = 1,000,000 $OKN'}
-                </p>
+              <div className="relative z-10 min-w-0">
+                <div className="mb-4">
+                  <h3 className="text-lg font-extrabold text-[var(--tx)]">Buy $OKN with BNB</h3>
+                  <p className="text-xs text-[var(--mut)] mt-1">
+                    Fixed rate: {sale.data ? `1 BNB = ${formatWei(sale.data.rate)} $OKN` : '1 BNB = 1,000,000 $OKN'}
+                  </p>
+                </div>
+                <Link
+                  href="/app/buy"
+                  className="inline-flex items-center gap-2.5 h-11 px-5 rounded-xl border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] font-extrabold text-xs shadow-sm hover:border-[#7A12F5]/50 transition-colors"
+                >
+                  <ShoppingCart className="size-4 text-[#09B4FF]" />
+                  <span>Open the sale</span>
+                </Link>
               </div>
-              <Link
-                href="/app/buy"
-                className="relative z-10 inline-flex items-center gap-2.5 h-11 px-5 rounded-xl border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] font-extrabold text-xs shadow-sm hover:border-[#7A12F5]/50 transition-colors"
-              >
-                <ShoppingCart className="size-4 text-[#09B4FF]" />
-                <span>Open the sale</span>
-              </Link>
+              <RotatingOknCoin size={72} className="relative z-10 shrink-0" />
             </div>
           </div>
 
@@ -517,14 +521,15 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
         </div>
 
         {/* Buy $OKN Token CTA Card */}
-        <div className="relative overflow-hidden flex items-center justify-between gap-3 rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-4 shadow-sm">
+        <div className="relative overflow-hidden flex items-center justify-between gap-2.5 rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-4 shadow-sm">
           <OknWatermark variant="card" size="sm" />
-          <div className="relative z-10 min-w-0">
+          <div className="relative z-10 min-w-0 flex-1">
             <div className="text-sm font-extrabold text-[var(--tx)]">Buy $OKN Token</div>
             <div className="text-xs font-medium text-[var(--mut)] mt-0.5">
               Presale Stage 2 · $0.00060
             </div>
           </div>
+          <RotatingOknCoin size={50} className="relative z-10 shrink-0" />
           <Link
             href="/app/buy"
             className="relative z-10 inline-flex h-10 shrink-0 items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-[#7A12F5] to-[#8C38F7] px-4 text-xs font-extrabold !text-white shadow-[0_4px_14px_rgba(122,18,245,0.35)] active:scale-95 transition-all whitespace-nowrap"

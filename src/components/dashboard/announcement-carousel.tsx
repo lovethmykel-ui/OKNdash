@@ -202,12 +202,12 @@ export function AnnouncementCarousel({ id = 'ann-carousel' }: { id?: string }) {
 
                     {/* Tier 2: Headline */}
                     <h3 className="text-sm sm:text-base md:text-lg font-extrabold tracking-tight text-[var(--tx)] leading-snug">
-                      Buy $OKN Presale — <span className="text-[#F59E0B] dark:text-[#FBBF24]">Multi-Gateway</span> Live
+                      Buy $OKN Presale — <span className="text-[#F59E0B] dark:text-[#FBBF24]">Crypto Deposit</span> Live
                     </h3>
 
                     {/* Tier 3: Supporting Description */}
                     <p className="text-xs sm:text-[13px] text-[var(--mut)] font-medium line-clamp-2 sm:line-clamp-1">
-                      Connect Wallet, 300+ Crypto, or Card with instant allocation.
+                      Deposit USDT, BTC, ETH, SOL, or BNB with instant presale allocation.
                     </p>
                   </div>
                 </div>

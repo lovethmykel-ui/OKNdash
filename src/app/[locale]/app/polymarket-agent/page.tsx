@@ -1,100 +1,87 @@
 'use client';
 
 /**
- * /app/polymarket-agent — Polymarket Agent ("Coming Soon" state).
+ * /app/polymarket-agent — Polymarket Agent Copier (Agent / Copy / Fund).
  *
- * Displays a clean, minimalist Coming Soon state for the Polymarket Copy Agent
- * along with its planned whale-mirroring capabilities.
+ *   - Agent: Landing command screen connecting funding, guardrails, and whale signals.
+ *   - Copy: Polymarket Leaderboard mirror (polymarket.com/leaderboard) + 1-click trader copying.
+ *   - Fund: Funding of Agent wallet (USDC.e & POL) before engaging live copy trades.
  */
+import { Suspense, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Activity, Clock, Gauge, ShieldCheck, Target } from 'lucide-react';
-import { Link } from '@/i18n/navigation';
-import { OknWatermark } from '@/components/ui/okn-watermark';
+import { useRouter } from '@/i18n/navigation';
+import { AgentCopierTabs } from '@/components/polymarket-agent/agent-copier-tabs';
+import { AgentPanel } from '@/components/polymarket-agent/agent-panel';
+import { CopierPanel } from '@/components/polymarket-agent/copier-panel';
+import { FundsPanel } from '@/components/polymarket-agent/funds-panel';
+import { RiskDisclosure } from '@/components/polymarket-agent/risk-disclosure';
+import { parseAgentTab, type AgentTab } from '@/components/polymarket-agent/tab-param';
 
-const CAPABILITY_ICONS = [Activity, Target, Gauge, ShieldCheck];
+function PolymarketAgentWorkspace() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const activeTab = parseAgentTab(searchParams.get('tab'));
+
+  const handleTabChange = useCallback(
+    (nextTab: AgentTab) => {
+      const target = nextTab === 'agent' ? '/app/polymarket-agent' : `/app/polymarket-agent?tab=${nextTab}`;
+      router.replace(target as never, { scroll: false });
+    },
+    [router],
+  );
+
+  return (
+    <AgentCopierTabs
+      value={activeTab}
+      onValueChange={handleTabChange}
+      agent={<AgentPanel onNavigateTab={handleTabChange} />}
+      copy={<CopierPanel onNavigateTab={handleTabChange} />}
+      fund={<FundsPanel onNavigateTab={handleTabChange} />}
+    />
+  );
+}
 
 export default function PolymarketAgentPage() {
   const t = useTranslations('dashboard.polymarketAgent');
-  const capabilities = t.raw('capabilities') as unknown as string[];
 
   return (
-    <main className="space-y-6 pb-12">
-      {/* Page Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--tx)]">
-            {t('title')}
-          </h1>
-          <p className="mt-1 text-xs sm:text-sm text-[var(--mut)]">
-            {t('description')}
-          </p>
-        </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#FFD60A]/40 bg-[#FFD60A]/15 px-3.5 py-1.5 text-xs font-extrabold text-[#FFD60A]">
-          <Clock className="size-3.5" />
-          <span>Coming Soon</span>
-        </span>
-      </div>
-
-      {/* Main Coming Soon Space */}
-      <section className="relative overflow-hidden rounded-[28px] border border-[var(--line)] bg-[var(--s1)] p-6 sm:p-10 md:p-14 text-center shadow-sm">
-        <OknWatermark variant="card" size="lg" />
-        <div className="mx-auto max-w-2xl space-y-5 relative z-10">
-          <div className="mx-auto flex size-16 items-center justify-center rounded-3xl border border-[#1652F0]/45 bg-[var(--s2)] shadow-[0_8px_28px_rgba(22,82,240,0.3)]">
-            <img src="/polymarket.png" alt="Polymarket" className="size-10 rounded-xl object-contain" />
+    <main className="space-y-6 pb-24 md:pb-12">
+      {/* Editorial Terminal Header */}
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between border-b border-[var(--line)] pb-5">
+        <div className="flex items-start gap-3.5 min-w-0">
+          <div className="flex size-11 sm:size-12 shrink-0 items-center justify-center rounded-2xl border border-[#2E5CFF]/25 bg-[#2E5CFF]/10">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/polymarket.png" alt="Polymarket" className="size-6 sm:size-7 object-contain" />
           </div>
-
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-[#FFD60A]/35 bg-[#FFD60A]/12 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-[#FFD60A]">
-            <Clock className="size-3.5" />
-            <span>Coming Soon</span>
-          </div>
-
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[var(--tx)]">
-            Polymarket Copy Agent — Coming Soon
-          </h2>
-
-          <p className="text-xs sm:text-sm md:text-base text-[var(--mut)] leading-relaxed max-w-xl mx-auto">
-            {t('body')}
-          </p>
-
-          {/* Planned Capabilities Preview */}
-          <div className="pt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
-            {capabilities.map((label, i) => {
-              const Icon = CAPABILITY_ICONS[i] ?? Activity;
-              return (
-                <div
-                  key={label}
-                  className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-3.5 flex items-center gap-3"
-                >
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#09B4FF]/15 text-[#09B4FF]">
-                    <Icon className="size-4" />
-                  </span>
-                  <span className="text-xs sm:text-sm font-bold text-[var(--tx)]">
-                    {label}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="pt-3 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/app/buy"
-              className="inline-flex h-11 items-center justify-center rounded-xl bg-[#7A12F5] px-6 text-xs sm:text-sm font-extrabold text-white shadow-md shadow-[#7A12F5]/25 hover:bg-[#8C38F7] transition-all"
-            >
-              Buy $OKN Presale
-            </Link>
-            <Link
-              href="/app/tasks"
-              className="inline-flex h-11 items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--s2)] px-5 text-xs sm:text-sm font-bold text-[var(--tx)] hover:bg-[var(--line)]/50 transition-all"
-            >
-              Earn Free OK Points
-            </Link>
+          <div className="min-w-0">
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--tx)] text-balance">
+              {t('title')}
+            </h1>
+            <p className="mt-1 text-xs sm:text-sm text-[var(--mut)] max-w-2xl">
+              {t('description')}
+            </p>
           </div>
         </div>
 
-        {/* Ambient lighting */}
-        <div className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 size-80 rounded-full bg-[#1652F0]/15 blur-3xl" />
-      </section>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--mut)] font-medium shrink-0">
+          <span className="font-semibold text-[var(--tx)]">Polygon PoS</span>
+          <span aria-hidden="true">·</span>
+          <span>USDC.e Collateral</span>
+          <span aria-hidden="true">·</span>
+          <span>Automated Whale Mirroring</span>
+        </div>
+      </header>
+
+      <Suspense
+        fallback={
+          <div className="h-56 rounded-2xl border border-[var(--line)] bg-[var(--s1)] animate-pulse" />
+        }
+      >
+        <PolymarketAgentWorkspace />
+      </Suspense>
+
+      <RiskDisclosure />
     </main>
   );
 }

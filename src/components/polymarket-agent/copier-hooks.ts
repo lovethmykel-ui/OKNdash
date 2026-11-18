@@ -5,6 +5,8 @@
  * for the Polymarket Copy Agent, Subscriptions, Executions, and Funds panels.
  */
 
+import { useEffect, useState } from 'react';
+
 export interface CopierWallet {
   id: string;
   address: string;
@@ -18,6 +20,8 @@ export interface CopierWallet {
 export interface CopierSubscription {
   id: string;
   traderAddress: string;
+  traderHandle?: string;
+  specialty?: string;
   status: 'preview' | 'live' | 'paused' | 'stopped';
   strategyConfig: {
     strategy: 'PERCENTAGE' | 'FIXED' | 'ADAPTIVE';
@@ -141,6 +145,8 @@ const copierDemo = {
     {
       id: 'sub-demo-1',
       traderAddress: '0x7b3291a4c8d1e0f23456789abcdef012345691a4',
+      traderHandle: '@Theo4',
+      specialty: 'Politics',
       status: 'live' as const,
       strategyConfig: {
         strategy: 'PERCENTAGE' as const,
@@ -153,6 +159,8 @@ const copierDemo = {
     {
       id: 'sub-demo-2',
       traderAddress: '0x4c19e08b91a2b3c4d5e6f708192a3b4c5d6ee08b',
+      traderHandle: '@Fredi9999',
+      specialty: 'Economics',
       status: 'preview' as const,
       strategyConfig: {
         strategy: 'FIXED' as const,
@@ -162,7 +170,7 @@ const copierDemo = {
       },
       createdAt: new Date(Date.now() - 86400 * 1000 * 2).toISOString(),
     },
-  ] satisfies CopierSubscription[],
+  ] as CopierSubscription[],
   executions: [
     {
       id: 'exec-demo-1',
@@ -258,6 +266,31 @@ const copierDemo = {
   } satisfies CopierEntitlement,
 };
 
+const copierListeners = new Set<() => void>();
+
+function notifyCopierListeners() {
+  copierListeners.forEach((cb) => {
+    try {
+      cb();
+    } catch {
+      // Ignore individual subscriber errors
+    }
+  });
+}
+
+export function subscribeCopierStore(listener: () => void): () => void {
+  copierListeners.add(listener);
+  return () => {
+    copierListeners.delete(listener);
+  };
+}
+
+export function useCopierStoreVersion(): number {
+  const [version, setVersion] = useState(0);
+  useEffect(() => subscribeCopierStore(() => setVersion((v) => v + 1)), []);
+  return version;
+}
+
 export function getInitialCopierSnapshot() {
   return {
     wallet: { ...copierDemo.wallet },
@@ -286,7 +319,29 @@ export async function activateWallet(
     proxyWallet: 'proxyWallet' in body ? body.proxyWallet : copierDemo.wallet.proxyWallet,
     createdAt: new Date().toISOString(),
   };
+  notifyCopierListeners();
   return { ok: true, status: 200, data: { ...copierDemo.wallet } };
+}
+
+export async function fundAgentWallet(body: { asset: 'USDC' | 'POL'; amount: number }) {
+  const safeAmount = Number.isFinite(body.amount) && body.amount > 0 ? body.amount : 0;
+  if (safeAmount <= 0) {
+    return {
+      ok: false as const,
+      status: 400,
+      error: { code: 'invalid_amount', message: 'Enter a deposit amount greater than 0.' },
+    };
+  }
+  if (body.asset === 'USDC') {
+    const nextUsdc = parseFloat(copierDemo.balances.usdc) + safeAmount;
+    copierDemo.balances.usdc = nextUsdc.toFixed(2);
+  } else {
+    const nextPol = parseFloat(copierDemo.balances.pol) + safeAmount;
+    copierDemo.balances.pol = nextPol.toFixed(2);
+  }
+  copierDemo.balances.updatedAt = new Date().toISOString();
+  notifyCopierListeners();
+  return { ok: true as const, status: 200, data: { ...copierDemo.balances } };
 }
 
 export async function fetchSubscriptions() {
@@ -295,16 +350,35 @@ export async function fetchSubscriptions() {
 
 export async function createSubscription(body: {
   traderAddress: string;
+  traderHandle?: string;
+  specialty?: string;
+  initialStatus?: CopierSubscription['status'];
   strategyConfig: CopierSubscription['strategyConfig'];
 }) {
+  const normalizedAddr = body.traderAddress.trim().toLowerCase();
+  const existing = copierDemo.subscriptions.find(
+    (s) => s.traderAddress.toLowerCase() === normalizedAddr && s.status !== 'stopped',
+  );
+  if (existing) {
+    existing.strategyConfig = body.strategyConfig;
+    if (body.initialStatus) existing.status = body.initialStatus;
+    if (body.traderHandle) existing.traderHandle = body.traderHandle;
+    if (body.specialty) existing.specialty = body.specialty;
+    notifyCopierListeners();
+    return { ok: true, status: 200, data: { ...existing } };
+  }
+
   const created: CopierSubscription = {
     id: `sub-${Date.now()}`,
-    traderAddress: body.traderAddress,
-    status: 'preview',
+    traderAddress: body.traderAddress.trim(),
+    traderHandle: body.traderHandle,
+    specialty: body.specialty,
+    status: body.initialStatus ?? 'preview',
     strategyConfig: body.strategyConfig,
     createdAt: new Date().toISOString(),
   };
   copierDemo.subscriptions.unshift(created);
+  notifyCopierListeners();
   return { ok: true, status: 201, data: created };
 }
 
@@ -316,6 +390,7 @@ export async function updateSubscription(
   if (body.status) {
     sub.status = body.status;
   }
+  notifyCopierListeners();
   return { ok: true, status: 200, data: { ...sub } };
 }
 
@@ -374,6 +449,8 @@ export async function requestWithdrawal(body: { address: string; amountUsdc: num
   copierDemo.withdrawals.unshift(item);
   const currentUsdc = Math.max(0, parseFloat(copierDemo.balances.usdc) - body.amountUsdc);
   copierDemo.balances.usdc = currentUsdc.toFixed(2);
+  copierDemo.balances.updatedAt = new Date().toISOString();
+  notifyCopierListeners();
   return { ok: true, status: 201, data: item };
 }
 
@@ -424,6 +501,7 @@ export async function subscribePro(body: {
     slots: 15,
     periodEnd,
   };
+  notifyCopierListeners();
   return {
     ok: true,
     status: 200,

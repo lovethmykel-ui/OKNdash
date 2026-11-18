@@ -1,27 +1,30 @@
 'use client';
 
 /**
- * polymarket-agent/funds-panel.tsx — the Funds tab content.
+ * polymarket-agent/funds-panel.tsx — the Fund tab content.
  *
- * Everything about adding or withdrawing funds for the copier wallet:
- * the deposit address (add funds), one-time private key export
- * (self-custody), and the withdrawal flow (allowlist with 24h cooldown,
- * request form, history). Activation of the wallet itself happens on the
- * Copier tab; without a wallet this tab explains that first step.
+ * Unified Treasury & Funding Desk for the Polymarket Copy Agent:
+ *   - Left: Spendable USDC.e + Gas (POL) wallet overview + Polygon Deposit QR & Address
+ *   - Right: Interactive Asset Switcher (USDC.e / POL), Presets, & Fund Agent CTA
+ *   - Below: PRO Membership + Copier Fees + Allowlisted Withdrawals
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
-  Wallet,
-  Plus,
-  KeyRound,
-  Copy,
-  Check,
   ArrowDownToLine,
+  ArrowRight,
+  Check,
+  CheckCircle2,
+  Copy,
+  KeyRound,
   Landmark,
-  TriangleAlert,
+  Plus,
+  QrCode,
   RotateCw,
+  TriangleAlert,
+  Wallet,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -35,32 +38,41 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { AnimatedCounter } from '@/components/ui/animated-counter';
+import { cn } from '@/lib/utils';
+import type { AgentTab } from './tab-param';
 import { TwoFaChallenge } from './two-fa-challenge';
 import { UpgradeDialog } from './upgrade-dialog';
 import { FeeCard } from './fee-card';
-import { fetchBilling, type CopierEntitlement } from './copier-hooks';
-import { useRouter } from '@/i18n/navigation';
 import {
   addAllowlistAddress,
   exportWalletKey,
   fetchAllowlist,
+  fetchBalances,
+  fetchBilling,
   fetchFees,
   fetchWallet,
   fetchWithdrawals,
+  fundAgentWallet,
   getInitialCopierSnapshot,
   requestWithdrawal,
-  fetchBalances,
-  type CopierBalances,
+  useCopierStoreVersion,
   type AllowlistAddress,
+  type CopierBalances,
+  type CopierEntitlement,
   type CopierWallet,
   type Withdrawal,
 } from './copier-hooks';
 
 type LoadState = 'loading' | 'unconfigured' | 'active' | 'error';
 
-export function FundsPanel() {
+interface FundsPanelProps {
+  onNavigateTab?: (tab: AgentTab) => void;
+}
+
+export function FundsPanel({ onNavigateTab }: FundsPanelProps) {
   const t = useTranslations('dashboard.polymarketAgent.copier.funds');
-  const router = useRouter();
+  const storeVersion = useCopierStoreVersion();
   const initial = getInitialCopierSnapshot();
   const [state, setState] = useState<LoadState>('active');
   const [wallet, setWallet] = useState<CopierWallet | null>(initial.wallet);
@@ -85,35 +97,32 @@ export function FundsPanel() {
     return () => {
       cancelled = true;
     };
-  }, [reloadKey]);
+  }, [reloadKey, storeVersion]);
 
   const refresh = useCallback(() => setReloadKey((k) => k + 1), []);
-  const goCopier = useCallback(() => {
-    router.replace('/app/polymarket-agent?tab=copier', { scroll: false });
-  }, [router]);
 
   if (state === 'loading') {
     return (
-      <Card>
-        <CardContent className="p-6 text-sm text-muted-foreground">{t('loading')}</CardContent>
+      <Card className="rounded-2xl border-[var(--line)] bg-[var(--s1)]">
+        <CardContent className="p-6 text-sm text-[var(--mut)]">{t('loading')}</CardContent>
       </Card>
     );
   }
 
   if (state === 'unconfigured') {
     return (
-      <Card>
-        <CardContent className="p-6 text-sm text-muted-foreground">{t('unconfiguredBody')}</CardContent>
+      <Card className="rounded-2xl border-[var(--line)] bg-[var(--s1)]">
+        <CardContent className="p-6 text-sm text-[var(--mut)]">{t('unconfiguredBody')}</CardContent>
       </Card>
     );
   }
 
   if (state === 'error') {
     return (
-      <Card>
+      <Card className="rounded-2xl border-[var(--line)] bg-[var(--s1)]">
         <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
           <p className="text-sm font-medium">{t('loadErrorTitle')}</p>
-          <p className="text-xs text-muted-foreground">{t('loadErrorBody')}</p>
+          <p className="text-xs text-[var(--mut)]">{t('loadErrorBody')}</p>
           <Button variant="outline" size="sm" className="cursor-pointer" onClick={refresh}>
             {t('retry')}
           </Button>
@@ -124,15 +133,15 @@ export function FundsPanel() {
 
   if (!wallet) {
     return (
-      <Card>
+      <Card className="rounded-2xl border-[var(--line)] bg-[var(--s1)]">
         <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-          <span className="flex size-12 items-center justify-center rounded-xl bg-ios-blue/10 text-ios-blue">
+          <span className="flex size-12 items-center justify-center rounded-xl bg-[#2E5CFF]/10 text-[#2E5CFF]">
             <Landmark className="size-6" />
           </span>
           <p className="text-sm font-medium">{t('activateFirstTitle')}</p>
-          <p className="max-w-prose text-xs text-muted-foreground">{t('activateFirstBody')}</p>
-          <Button size="sm" className="cursor-pointer" onClick={goCopier}>
-            {t('goToCopier')}
+          <p className="max-w-prose text-xs text-[var(--mut)]">{t('activateFirstBody')}</p>
+          <Button size="sm" className="cursor-pointer" onClick={() => onNavigateTab?.('copy')}>
+            Go to Copy Tab
           </Button>
         </CardContent>
       </Card>
@@ -141,21 +150,389 @@ export function FundsPanel() {
 
   return (
     <div className="space-y-6">
-      <WalletCard wallet={wallet} onExported={refresh} />
-      <BillingCard />
-      <FeeCard />
+      <TreasuryAndFundingDesk
+        wallet={wallet}
+        onChanged={refresh}
+        onGoCopy={() => onNavigateTab?.('copy')}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        <BillingCard />
+        <FeeCard />
+      </div>
+
       <WithdrawCard onChanged={refresh} />
     </div>
   );
 }
 
 /**
- * PRO membership card: tier state, renewal/expiry, and the upgrade entry.
- * Billing disabled (canary shadow mode) shows an informational state so
- * pricing never surprises anyone.
+ * Unified Treasury & Funding Desk: merges Spendable Balance, Polygon Wallet Address,
+ * QR Code, and Interactive Deposit Controls into one crisp 12-column single-elevation unit.
  */
+function TreasuryAndFundingDesk({
+  wallet,
+  onChanged,
+  onGoCopy,
+}: {
+  wallet: CopierWallet;
+  onChanged: () => void;
+  onGoCopy: () => void;
+}) {
+  const t = useTranslations('dashboard.polymarketAgent.copier');
+  const tw = useTranslations('dashboard.polymarketAgent.copier.wallet');
+  const storeVersion = useCopierStoreVersion();
+
+  const [exportOpen, setExportOpen] = useState(false);
+  const [balances, setBalances] = useState<CopierBalances | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [nowMs, setNowMs] = useState<number>(() => Date.now());
+  const [copiedWallet, setCopiedWallet] = useState(false);
+
+  const [asset, setAsset] = useState<'USDC' | 'POL'>('USDC');
+  const [amount, setAmount] = useState('250');
+  const [busy, setBusy] = useState(false);
+  const [lastFundedMsg, setLastFundedMsg] = useState<string | null>(null);
+
+  const presets = asset === 'USDC' ? ['50', '100', '250', '500', '1000'] : ['5', '10', '25', '50'];
+
+  const loadBalances = useCallback(async () => {
+    setRefreshing(true);
+    const res = await fetchBalances();
+    setRefreshing(false);
+    if (res.ok) setBalances(res.data ?? null);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const res = await fetchBalances();
+      if (!cancelled && res.ok) setBalances(res.data ?? null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [storeVersion]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setNowMs(Date.now()), 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const updatedAt = balances ? new Date(balances.updatedAt).getTime() : null;
+  const agoSeconds = updatedAt ? Math.max(0, Math.round((nowMs - updatedAt) / 1000)) : null;
+  const spendableNum = balances ? Number(balances.usdc) : 0;
+
+  const copyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(wallet.address);
+      setCopiedWallet(true);
+      toast.success('Agent wallet address copied');
+      setTimeout(() => setCopiedWallet(false), 1800);
+    } catch {
+      toast.info(wallet.address);
+    }
+  };
+
+  const handleSelectAsset = (next: 'USDC' | 'POL') => {
+    setAsset(next);
+    setAmount(next === 'USDC' ? '250' : '10');
+    setLastFundedMsg(null);
+  };
+
+  const handleDeposit = async () => {
+    const num = Number.parseFloat(amount);
+    if (!Number.isFinite(num) || num <= 0) {
+      toast.error('Enter a valid deposit amount');
+      return;
+    }
+    setBusy(true);
+    const res = await fundAgentWallet({ asset, amount: num });
+    setBusy(false);
+    if (res.ok) {
+      const label = asset === 'USDC' ? `$${num.toFixed(2)} USDC.e` : `${num.toFixed(2)} POL`;
+      setLastFundedMsg(`Deposited ${label} into your Polymarket Agent wallet.`);
+      toast.success(`Funded Agent with ${label}`);
+      await loadBalances();
+      onChanged();
+    } else {
+      toast.error(res.error.message);
+    }
+  };
+
+  return (
+    <section className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--s1)]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[var(--line)] items-stretch">
+        {/* Left: Spendable Balance + Deposit Address + QR */}
+        <div className="lg:col-span-5 flex flex-col justify-between divide-y divide-[var(--line)]">
+          <div className="p-5 sm:p-6 space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#2E5CFF]/12 text-[#2E5CFF]">
+                  <Wallet className="size-5" />
+                </span>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--mut)]">
+                    {tw('spendable')}
+                  </p>
+                  <p className="text-xs text-[var(--mut)] tabular-nums">
+                    {t(`origin.${wallet.origin}`)}
+                    {balances?.allowance ? (
+                      <>
+                        {' · '}
+                        <span
+                          className={
+                            balances.allowance.usdcApproved ? 'text-[#10B981] font-semibold' : 'text-[#D97706]'
+                          }
+                        >
+                          {balances.allowance.usdcApproved ? tw('allowanceApproved') : tw('allowanceNeeded')}
+                        </span>
+                      </>
+                    ) : null}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label={tw('refreshAria')}
+                  className="size-8 cursor-pointer"
+                  disabled={refreshing}
+                  onClick={() => void loadBalances()}
+                >
+                  <RotateCw className={refreshing ? 'size-3.5 animate-spin' : 'size-3.5'} />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-8 cursor-pointer text-xs"
+                  onClick={() => setExportOpen(true)}
+                >
+                  <KeyRound data-icon="inline-start" />
+                  {t('export.exportKey')}
+                </Button>
+              </div>
+            </div>
+
+            <div>
+              <p className="font-display text-3xl sm:text-4xl font-extrabold tabular-nums text-[var(--tx)]" aria-live="polite">
+                {balances ? (
+                  <>
+                    <AnimatedCounter
+                      target={spendableNum}
+                      decimals={2}
+                      durationMs={650}
+                      className="tabular-nums"
+                    />{' '}
+                    <span className="text-base sm:text-lg font-bold text-[var(--mut)]">USDC.e</span>
+                  </>
+                ) : (
+                  '—'
+                )}
+              </p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--mut)] tabular-nums">
+                <span>
+                  {tw('gasLabel')}:{' '}
+                  <span className="font-mono font-bold text-[var(--tx)]">
+                    {balances ? `${Number(balances.pol).toFixed(3)} POL` : '—'}
+                  </span>
+                </span>
+                {agoSeconds !== null && (
+                  <span>· {tw('updatedAgo', { seconds: agoSeconds })}</span>
+                )}
+              </div>
+            </div>
+
+            {spendableNum >= 10 && (
+              <div>
+                <button
+                  type="button"
+                  onClick={onGoCopy}
+                  className="inline-flex items-center gap-1.5 text-xs font-extrabold text-[#2E5CFF] hover:underline cursor-pointer"
+                >
+                  <span>Copy Top Leaderboard Traders</span>
+                  <ArrowRight className="size-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Flush Polygon Deposit Address + QR */}
+          <div className="p-5 sm:p-6 bg-[var(--s2)]/40 space-y-3.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-[var(--mut)]">Polygon PoS Deposit</span>
+              <span className="font-mono font-bold text-[var(--tx)]">Chain 137 · {asset === 'USDC' ? 'USDC.e' : 'POL'}</span>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="shrink-0 rounded-xl bg-white p-2.5 border border-[var(--line)]">
+                <QrCode className="size-16 text-[#0A0A0C]" strokeWidth={1.75} />
+              </div>
+              <div className="min-w-0 flex-1 space-y-2">
+                <div className="text-[11px] font-semibold text-[var(--mut)]">
+                  Agent Deposit Address
+                </div>
+                <p className="font-mono text-xs font-bold text-[var(--tx)] break-all leading-relaxed">
+                  {wallet.address}
+                </p>
+                <button
+                  type="button"
+                  aria-label={tw('copyAddress')}
+                  onClick={() => void copyAddress()}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--line)] bg-[var(--s1)] px-2.5 py-1 text-xs font-bold text-[var(--tx)] hover:bg-[var(--s2)] cursor-pointer"
+                >
+                  {copiedWallet ? <Check className="size-3 text-[#10B981]" /> : <Copy className="size-3" />}
+                  <span>{copiedWallet ? 'Copied' : 'Copy Address'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Fund Agent Controls */}
+        <div className="lg:col-span-7 p-5 sm:p-6 flex flex-col justify-between gap-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--tx)]">
+                Fund Agent Before Trading
+              </h2>
+              <p className="text-xs text-[var(--mut)] mt-0.5">
+                Deposit Polygon USDC.e trading capital and POL gas into your dedicated Agent wallet.
+              </p>
+            </div>
+
+            <div
+              role="tablist"
+              aria-label="Funding asset"
+              className="inline-flex items-center gap-1 rounded-xl border border-[var(--line)] bg-[var(--s2)] p-1 self-start sm:self-auto"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={asset === 'USDC'}
+                onClick={() => handleSelectAsset('USDC')}
+                className={cn(
+                  'h-8 px-3.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap',
+                  asset === 'USDC' ? 'bg-[var(--s1)] text-[var(--tx)] shadow-xs' : 'text-[var(--mut)] hover:text-[var(--tx)]',
+                )}
+              >
+                USDC.e (Capital)
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={asset === 'POL'}
+                onClick={() => handleSelectAsset('POL')}
+                className={cn(
+                  'h-8 px-3.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap',
+                  asset === 'POL' ? 'bg-[var(--s1)] text-[var(--tx)] shadow-xs' : 'text-[var(--mut)] hover:text-[var(--tx)]',
+                )}
+              >
+                POL (Gas)
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-3.5">
+            <div className="flex items-center justify-between text-xs font-semibold text-[var(--mut)]">
+              <span>Deposit Amount ({asset === 'USDC' ? 'USDC.e' : 'POL'})</span>
+              <span className="font-mono text-[11px]">Min recommended: {asset === 'USDC' ? '$50' : '2 POL'}</span>
+            </div>
+
+            <div className="flex items-center rounded-xl border border-[var(--line)] bg-[var(--s2)]/60 px-4 py-3 focus-within:border-[#2E5CFF] transition-colors">
+              {asset === 'USDC' && (
+                <span className="text-2xl font-extrabold text-[var(--mut)] mr-1.5">$</span>
+              )}
+              <input
+                type="number"
+                min={asset === 'USDC' ? 10 : 1}
+                step={asset === 'USDC' ? 10 : 1}
+                value={amount}
+                onChange={(e) => {
+                  setAmount(e.target.value);
+                  setLastFundedMsg(null);
+                }}
+                aria-label="Agent deposit amount"
+                className="w-full bg-transparent text-2xl sm:text-3xl font-extrabold text-[var(--tx)] tabular-nums outline-none"
+              />
+              <span className="shrink-0 font-mono text-xs font-extrabold text-[#2E5CFF] ml-2">
+                {asset === 'USDC' ? 'USDC.e' : 'POL'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+              {presets.map((val) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => {
+                    setAmount(val);
+                    setLastFundedMsg(null);
+                  }}
+                  className={cn(
+                    'h-9 rounded-xl border text-xs font-extrabold transition-all cursor-pointer tabular-nums',
+                    amount === val
+                      ? 'border-[#2E5CFF] bg-[#2E5CFF] text-white'
+                      : 'border-[var(--line)] bg-[var(--s2)] text-[var(--tx)]/80 hover:text-[var(--tx)]',
+                  )}
+                >
+                  {asset === 'USDC' ? `$${val}` : `${val} POL`}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {lastFundedMsg && (
+            <div className="rounded-xl border border-[#10B981]/35 bg-[#10B981]/10 px-3.5 py-2.5 flex items-center justify-between gap-2 text-xs">
+              <span className="flex items-center gap-2 font-bold text-[#10B981]">
+                <CheckCircle2 className="size-4 shrink-0" />
+                {lastFundedMsg}
+              </span>
+              <button
+                type="button"
+                onClick={onGoCopy}
+                className="font-extrabold text-[#2E5CFF] hover:underline shrink-0 cursor-pointer inline-flex items-center gap-1"
+              >
+                <span>Copy Traders</span>
+                <ArrowRight className="size-3" />
+              </button>
+            </div>
+          )}
+
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void handleDeposit()}
+            className="w-full h-11 rounded-xl bg-[#2E5CFF] text-white text-sm font-extrabold hover:bg-[#1E4DF0] active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            <Plus className="size-4.5" />
+            <span>
+              {busy
+                ? 'Crediting Agent Wallet...'
+                : `Fund Agent (${asset === 'USDC' ? `$${amount || '0'} USDC.e` : `${amount || '0'} POL`})`}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <ExportKeyDialog
+        open={exportOpen}
+        onOpenChange={(o) => {
+          setExportOpen(o);
+          if (!o) onChanged();
+        }}
+      />
+    </section>
+  );
+}
+
 function BillingCard() {
   const t = useTranslations('dashboard.polymarketAgent.copier.billing');
+  const storeVersion = useCopierStoreVersion();
   const [entitlement, setEntitlement] = useState<CopierEntitlement | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
@@ -166,42 +543,43 @@ function BillingCard() {
 
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [load, storeVersion]);
 
   if (!entitlement) return null;
 
   const isPro = entitlement.tier === 'pro';
 
   return (
-    <Card>
-      <CardContent className="flex flex-col gap-3 p-5 md:flex-row md:items-center md:justify-between md:p-6">
-        <div className="space-y-1">
-          <p className="flex items-center gap-2 text-sm font-semibold">
-            {t('title')}
-            {isPro ? (
-              <Badge variant="secondary" className="bg-ios-gold/15 text-ios-gold">
-                {t('proActive')}
-              </Badge>
-            ) : null}
-          </p>
-          {isPro && entitlement.periodEnd ? (
-            <p className="text-xs text-muted-foreground">
-              {t('expiresOn', { date: new Date(entitlement.periodEnd).toLocaleDateString() })}
-            </p>
-          ) : entitlement.billingEnabled ? (
-            <p className="text-xs text-muted-foreground">
-              {t('priceLabel', {
-                price: `$${Number(entitlement.pricing.proPriceUsdc).toFixed(0)}`,
-                days: entitlement.pricing.proPeriodDays,
-              })}
-              {' · '}
-              {t('feeNow', { rate: entitlement.pricing.feeBpsPro / 100 })}
-            </p>
-          ) : (
-            <p className="text-xs text-muted-foreground">{t('comingSoon')}</p>
+    <section className="rounded-2xl border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-6 flex flex-col justify-between gap-4">
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm font-extrabold text-[var(--tx)]">{t('title')}</p>
+          {isPro && (
+            <span className="text-xs font-extrabold text-[#D97706] dark:text-[#FBBF24]">
+              {t('proActive')}
+            </span>
           )}
         </div>
-        {entitlement.billingEnabled ? (
+        {isPro && entitlement.periodEnd ? (
+          <p className="text-xs text-[var(--mut)]">
+            {t('expiresOn', { date: new Date(entitlement.periodEnd).toLocaleDateString() })}
+          </p>
+        ) : entitlement.billingEnabled ? (
+          <p className="text-xs text-[var(--mut)] leading-relaxed">
+            {t('priceLabel', {
+              price: `$${Number(entitlement.pricing.proPriceUsdc).toFixed(0)}`,
+              days: entitlement.pricing.proPeriodDays,
+            })}
+            {' · '}
+            {t('feeNow', { rate: entitlement.pricing.feeBpsPro / 100 })}
+          </p>
+        ) : (
+          <p className="text-xs text-[var(--mut)] leading-relaxed">{t('comingSoon')}</p>
+        )}
+      </div>
+
+      {entitlement.billingEnabled ? (
+        <div>
           <Button
             type="button"
             size="sm"
@@ -211,19 +589,19 @@ function BillingCard() {
           >
             {isPro ? t('renew') : t('upgradeCta')}
           </Button>
-        ) : null}
-      </CardContent>
+        </div>
+      ) : null}
+
       <UpgradeDialog
         open={upgradeOpen}
         onOpenChange={setUpgradeOpen}
         entitlement={entitlement}
         onSubscribed={() => void load()}
       />
-    </Card>
+    </section>
   );
 }
 
-/** Confirm + one-time reveal dialog for the wallet private key. */
 function ExportKeyDialog({
   open,
   onOpenChange,
@@ -255,15 +633,14 @@ function ExportKeyDialog({
     }
   };
 
-  const close = (open: boolean) => {
-    if (!open) {
-      // Reset so the key never lingers in component state after close.
+  const close = (openNext: boolean) => {
+    if (!openNext) {
       setStage('confirm');
       setKey(null);
       setCopied(false);
       setError(null);
     }
-    onOpenChange(open);
+    onOpenChange(openNext);
   };
 
   return (
@@ -278,9 +655,7 @@ function ExportKeyDialog({
               </DialogTitle>
               <DialogDescription>{t('confirmBody')}</DialogDescription>
             </DialogHeader>
-            {need2fa && (
-              <TwoFaChallenge onVerified={() => void reveal()} />
-            )}
+            {need2fa && <TwoFaChallenge onVerified={() => void reveal()} />}
             {error && (
               <p role="alert" className="text-sm text-ios-red">
                 {error}
@@ -337,152 +712,13 @@ function ExportKeyDialog({
   );
 }
 
-function WalletCard({
-  wallet,
-  onExported,
-}: {
-  wallet: CopierWallet;
-  onExported: () => void;
-}) {
-  const t = useTranslations('dashboard.polymarketAgent.copier');
-  const tw = useTranslations('dashboard.polymarketAgent.copier.wallet');
-  const [exportOpen, setExportOpen] = useState(false);
-  const [balances, setBalances] = useState<CopierBalances | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
-  const [, tickClock] = useState(0);
-  const [copied, setCopied] = useState(false);
-
-  const loadBalances = useCallback(async () => {
-    setRefreshing(true);
-    const res = await fetchBalances();
-    setRefreshing(false);
-    if (res.ok) setBalances(res.data ?? null);
-  }, []);
-
-  useEffect(() => {
-    void loadBalances();
-  }, [loadBalances]);
-
-  // Re-render every 5s so the updated-ago stamp stays honest.
-  useEffect(() => {
-    const timer = setInterval(() => tickClock((n) => n + 1), 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const updatedAt = balances ? new Date(balances.updatedAt).getTime() : null;
-  const agoSeconds = updatedAt ? Math.max(0, Math.round((Date.now() - updatedAt) / 1000)) : null;
-
-  const copyAddress = async () => {
-    try {
-      await navigator.clipboard.writeText(wallet.address);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Clipboard unavailable (permissions); the address is visible anyway.
-    }
-  };
-
-  return (
-    <Card className="overflow-hidden">
-      <div className="bg-gradient-to-br from-ios-blue/10 via-ios-green/5 to-transparent p-5 md:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex items-start gap-4">
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-ios-blue/10 text-ios-blue">
-              <Wallet className="size-6" />
-            </span>
-            <div className="min-w-0 space-y-1">
-              <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                {tw('spendable')}
-              </p>
-              <p className="font-display text-3xl font-bold tabular-nums md:text-4xl" aria-live="polite">
-                {balances ? `${Number(balances.usdc).toFixed(2)} USDC` : '—'}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {tw('gasLabel')}:{' '}
-                <span className="font-mono tabular-nums">
-                  {balances ? Number(balances.pol).toFixed(3) : '—'}
-                </span>
-              </p>
-              <p className="flex items-center gap-1 break-all pt-1 font-mono text-xs text-foreground/80">
-                {wallet.address}
-                <button
-                  type="button"
-                  aria-label={tw('copyAddress')}
-                  className="inline-flex size-6 cursor-pointer items-center justify-center rounded-md hover:bg-muted"
-                  onClick={() => void copyAddress()}
-                >
-                  <Check className={copied ? 'size-3.5 text-ios-green' : 'hidden'} aria-hidden="true" />
-                  <Copy className={copied ? 'hidden' : 'size-3.5'} aria-hidden="true" />
-                </button>
-                <span aria-live="polite" className="sr-only">
-                  {copied ? tw('copiedAddress') : ''}
-                </span>
-              </p>
-            </div>
-          </div>
-          <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
-            <div className="flex flex-wrap items-center justify-start gap-2 sm:justify-end">
-              <Badge variant="secondary" className="bg-ios-green/10 text-ios-green">
-                {t(`origin.${wallet.origin}`)}
-              </Badge>
-              {balances?.allowance && (
-                <Badge
-                  variant="secondary"
-                  className={
-                    balances.allowance.usdcApproved
-                      ? 'bg-ios-green/10 text-ios-green'
-                      : 'bg-ios-orange/10 text-ios-orange'
-                  }
-                >
-                  {balances.allowance.usdcApproved ? tw('allowanceApproved') : tw('allowanceNeeded')}
-                </Badge>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">
-                {agoSeconds !== null ? tw('updatedAgo', { seconds: agoSeconds }) : ''}
-              </span>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-label={tw('refreshAria')}
-                className="size-8 cursor-pointer"
-                disabled={refreshing}
-                onClick={() => void loadBalances()}
-              >
-                <RotateCw className={refreshing ? 'size-3.5 animate-spin' : 'size-3.5'} />
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="cursor-pointer"
-                onClick={() => setExportOpen(true)}
-              >
-                <KeyRound data-icon="inline-start" />
-                {t('export.exportKey')}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <ExportKeyDialog open={exportOpen} onOpenChange={(o) => { setExportOpen(o); if (!o) onExported(); }} />
-    </Card>
-  );
-}
-
-/** Allowlist cooldown state derived from effectiveAfter. */
 function cooldownActive(effectiveAfter: string): boolean {
   return new Date(effectiveAfter).getTime() > Date.now();
 }
 
-/**
- * Withdraw funds: allowlist management (24h anti-hijack cooldown), the
- * request form, and the withdrawal history with on-chain status.
- */
 function WithdrawCard({ onChanged }: { onChanged: () => void }) {
   const t = useTranslations('dashboard.polymarketAgent.copier.withdraw');
+  const storeVersion = useCopierStoreVersion();
   const [allowlist, setAllowlist] = useState<AllowlistAddress[]>([]);
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [reloadKey, setReloadKey] = useState(0);
@@ -498,51 +734,51 @@ function WithdrawCard({ onChanged }: { onChanged: () => void }) {
     return () => {
       cancelled = true;
     };
-  }, [reloadKey]);
+  }, [reloadKey, storeVersion]);
 
-  const refresh = useCallback(() => setReloadKey((k) => k + 1), []);
+  const refresh = useCallback(() => {
+    setReloadKey((k) => k + 1);
+    onChanged();
+  }, [onChanged]);
 
   return (
-    <Card>
-      <CardContent className="space-y-5 p-5 md:p-6">
-        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          <Landmark className="size-4" />
-          {t('title')}
+    <section className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--s1)]">
+      <div className="p-5 sm:px-6 border-b border-[var(--line)]">
+        <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--mut)]">
+          <Landmark className="size-3.5" />
+          <span>{t('title')}</span>
         </h2>
+      </div>
 
-        {/* Allowlist */}
-        <section className="space-y-2">
-          <p className="text-sm font-semibold">{t('allowlistTitle')}</p>
+      <div className="divide-y divide-[var(--line)]">
+        <section className="p-5 sm:px-6 space-y-2.5">
+          <p className="text-sm font-semibold text-[var(--tx)]">{t('allowlistTitle')}</p>
           <AddAllowlistRow onAdded={refresh} />
           {allowlist.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
-              {t('allowlistEmpty')}
-            </p>
+            <p className="pt-1 text-xs text-[var(--mut)]">{t('allowlistEmpty')}</p>
           ) : (
-            <ul className="space-y-1.5">
+            <ul className="divide-y divide-[var(--line)] border-t border-[var(--line)] mt-2">
               {allowlist.map((a) => {
                 const cooling = cooldownActive(a.effectiveAfter);
                 return (
                   <li
                     key={a.id}
-                    className="flex flex-col gap-1 rounded-lg border border-border/60 p-2.5 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-1 py-2.5 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="min-w-0">
-                      <p className="truncate font-mono text-xs">{a.address}</p>
-                      {a.label && (
-                        <p className="text-xs text-muted-foreground">{a.label}</p>
-                      )}
+                      <p className="truncate font-mono text-xs text-[var(--tx)]">{a.address}</p>
+                      {a.label && <p className="text-xs text-[var(--mut)]">{a.label}</p>}
                     </div>
                     {cooling ? (
-                      <Badge variant="secondary" className="bg-ios-orange/10 text-ios-orange">
+                      <span className="text-xs font-semibold text-[#D97706] dark:text-[#FBBF24]">
                         {t('cooldownUntil', {
                           time: new Date(a.effectiveAfter).toLocaleString(),
                         })}
-                      </Badge>
+                      </span>
                     ) : (
-                      <Badge variant="secondary" className="bg-ios-green/10 text-ios-green">
+                      <span className="text-xs font-bold text-[#10B981]">
                         {t('allowlistActive')}
-                      </Badge>
+                      </span>
                     )}
                   </li>
                 );
@@ -551,34 +787,30 @@ function WithdrawCard({ onChanged }: { onChanged: () => void }) {
           )}
         </section>
 
-        {/* Request */}
-        <RequestWithdrawalRow
-          allowlist={allowlist.filter((a) => !cooldownActive(a.effectiveAfter))}
-          onRequested={refresh}
-        />
+        <section className="p-5 sm:px-6">
+          <RequestWithdrawalRow
+            allowlist={allowlist.filter((a) => !cooldownActive(a.effectiveAfter))}
+            onRequested={refresh}
+          />
+        </section>
 
-        {/* History */}
-        <section aria-label={t('historyTitle')} className="space-y-2">
-          <p className="text-sm font-semibold">{t('historyTitle')}</p>
+        <section aria-label={t('historyTitle')} className="p-5 sm:px-6 space-y-2">
+          <p className="text-sm font-semibold text-[var(--tx)]">{t('historyTitle')}</p>
           {withdrawals.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
-              {t('historyEmpty')}
-            </p>
+            <p className="text-xs text-[var(--mut)]">{t('historyEmpty')}</p>
           ) : (
-            <ul className="space-y-1.5">
+            <ul className="divide-y divide-[var(--line)] border-t border-[var(--line)]">
               {withdrawals.map((w) => (
                 <li
                   key={w.id}
-                  className="flex flex-col gap-1 rounded-lg border border-border/60 p-2.5 text-xs sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-1 py-2.5 text-xs sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="min-w-0">
-                    <p className="truncate font-mono">{w.address}</p>
-                    {w.txHash && (
-                      <p className="truncate text-muted-foreground">tx: {w.txHash}</p>
-                    )}
+                    <p className="truncate font-mono text-[var(--tx)]">{w.address}</p>
+                    {w.txHash && <p className="truncate text-[var(--mut)]">tx: {w.txHash}</p>}
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono tabular-nums">
+                    <span className="font-mono tabular-nums font-bold text-[var(--tx)]">
                       ${Number(w.amountUsdc).toFixed(2)}
                     </span>
                     <WithdrawalStatusBadge status={w.status} />
@@ -588,8 +820,8 @@ function WithdrawCard({ onChanged }: { onChanged: () => void }) {
             </ul>
           )}
         </section>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }
 
@@ -635,7 +867,7 @@ function AddAllowlistRow({ onAdded }: { onAdded: () => void }) {
           {t('addAddress')}
         </Button>
       </div>
-      <p className="text-xs text-muted-foreground">{t('allowlistHelp')}</p>
+      <p className="text-xs text-[var(--mut)]">{t('allowlistHelp')}</p>
       {error && (
         <p role="alert" className="text-sm text-ios-red">
           {error}
@@ -663,8 +895,6 @@ function RequestWithdrawalRow({
   const amountNum = Number(amount);
   const valid = address !== '' && Number.isFinite(amountNum) && amountNum > 0;
 
-  // Fee transparency: show the exact net payout (requested minus
-  // outstanding fee debt) BEFORE the user submits.
   const [netEstimate, setNetEstimate] = useState<string | null>(null);
   useEffect(() => {
     if (!Number.isFinite(amountNum) || amountNum <= 0) {
@@ -696,6 +926,7 @@ function RequestWithdrawalRow({
       setSuccess(true);
       setNeed2fa(false);
       setAmount('');
+      toast.success(`Withdrawal of $${amountNum.toFixed(2)} processed`);
       onRequested();
     } else if (res.error?.code === '2fa_required') {
       setNeed2fa(true);
@@ -706,11 +937,9 @@ function RequestWithdrawalRow({
 
   return (
     <section aria-label={t('requestTitle')} className="space-y-2">
-      <p className="text-sm font-semibold">{t('requestTitle')}</p>
+      <p className="text-sm font-semibold text-[var(--tx)]">{t('requestTitle')}</p>
       {allowlist.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
-          {t('requestNoAddress')}
-        </p>
+        <p className="text-xs text-[var(--mut)]">{t('requestNoAddress')}</p>
       ) : (
         <div className="space-y-2">
           <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto] sm:items-center">
@@ -765,13 +994,13 @@ function RequestWithdrawalRow({
             </Button>
           </div>
           {netEstimate !== null && (
-            <p role="status" className="text-xs text-muted-foreground">
+            <p role="status" className="text-xs text-[var(--mut)]">
               {t('netEstimate', { net: `$${Number(netEstimate).toFixed(2)}` })}
             </p>
           )}
           {need2fa && <TwoFaChallenge onVerified={() => void submit()} />}
           {success && (
-            <p role="status" className="text-sm text-ios-green">
+            <p role="status" className="text-sm text-[#10B981]">
               {t('requestQueued')}
             </p>
           )}

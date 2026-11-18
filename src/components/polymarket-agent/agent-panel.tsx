@@ -1,16 +1,37 @@
 'use client';
 
 /**
- * polymarket-agent/agent-panel.tsx — Interactive Demo of the Polymarket Agent tab.
+ * polymarket-agent/agent-panel.tsx — Landing command overview of the Polymarket Agent.
  *
- * Allows users to inspect whale event positions and 1-click mirror YES/NO positions
- * in Demo Mode with clear visual hierarchy across desktop and mobile.
+ * Designed as a clean, single-elevation Polymarket execution terminal:
+ *   1. Command Hero + flush hairline-divided 4-column KPI strip
+ *   2. 3-Step Workflow (hairline columns) + Default Copy Guardrails
+ *   3. Live Polymarket Whale Signals with outcome cents pricing & YES/NO mirror controls
  */
-import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { Activity, CheckCircle2, Clock, Gauge, ShieldCheck, Target } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import {
+  ArrowRight,
+  CheckCircle2,
+  Copy,
+  Gauge,
+  Landmark,
+  ShieldCheck,
+  SlidersHorizontal,
+  Target,
+  Wallet,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { canEngageLiveCopy } from '@/lib/polymarket/leaderboard';
+import type { AgentTab } from './tab-param';
+import {
+  fetchBalances,
+  fetchSubscriptions,
+  getInitialCopierSnapshot,
+  useCopierStoreVersion,
+  type CopierBalances,
+  type CopierSubscription,
+} from './copier-hooks';
 
 interface EventPosition {
   id: string;
@@ -20,20 +41,18 @@ interface EventPosition {
   yesProbability: number;
   noProbability: number;
   conviction: number;
-  size: 'S' | 'M' | 'L';
   defaultSide: 'YES' | 'NO';
 }
 
 const SAMPLE_EVENTS: EventPosition[] = [
   {
     id: 'ev-1',
-    title: 'BTC above $100k before Q4 close',
+    title: 'BTC above $105k before month close',
     category: 'Crypto · Macro',
     volume: '$4.2M Vol',
     yesProbability: 64,
     noProbability: 36,
     conviction: 78,
-    size: 'M',
     defaultSide: 'YES',
   },
   {
@@ -44,7 +63,6 @@ const SAMPLE_EVENTS: EventPosition[] = [
     yesProbability: 22,
     noProbability: 78,
     conviction: 84,
-    size: 'S',
     defaultSide: 'NO',
   },
   {
@@ -55,7 +73,6 @@ const SAMPLE_EVENTS: EventPosition[] = [
     yesProbability: 71,
     noProbability: 29,
     conviction: 88,
-    size: 'L',
     defaultSide: 'YES',
   },
   {
@@ -66,18 +83,16 @@ const SAMPLE_EVENTS: EventPosition[] = [
     yesProbability: 58,
     noProbability: 42,
     conviction: 69,
-    size: 'M',
     defaultSide: 'YES',
   },
   {
     id: 'ev-5',
-    title: 'BNB reaches new all-time high this month',
-    category: 'BNB Ecosystem',
-    volume: '$2.1M Vol',
+    title: 'US CPI YoY under 2.7% next print',
+    category: 'Macro · Inflation',
+    volume: '$2.9M Vol',
     yesProbability: 62,
     noProbability: 38,
     conviction: 74,
-    size: 'M',
     defaultSide: 'YES',
   },
   {
@@ -88,106 +103,300 @@ const SAMPLE_EVENTS: EventPosition[] = [
     yesProbability: 31,
     noProbability: 69,
     conviction: 76,
-    size: 'L',
     defaultSide: 'NO',
   },
 ];
 
-const CAPABILITY_ICONS = [Activity, Target, Gauge, ShieldCheck];
+interface AgentPanelProps {
+  onNavigateTab?: (tab: AgentTab) => void;
+}
 
-export function AgentPanel() {
-  const t = useTranslations('dashboard.polymarketAgent');
-  const capabilities = t.raw('capabilities') as unknown as string[];
+export function AgentPanel({ onNavigateTab }: AgentPanelProps) {
+  const storeVersion = useCopierStoreVersion();
+  const initial = getInitialCopierSnapshot();
+  const [balances, setBalances] = useState<CopierBalances>(initial.balances);
+  const [subscriptions, setSubscriptions] = useState<CopierSubscription[]>(initial.subscriptions);
+  const [defaultCopyPct, setDefaultCopyPct] = useState<number>(15);
+  const [maxPerTradeUsd, setMaxPerTradeUsd] = useState<number>(250);
+  const [autoPauseLowBal, setAutoPauseLowBal] = useState<boolean>(true);
   const [mirrored, setMirrored] = useState<Record<string, 'YES' | 'NO'>>({
     'ev-3': 'YES',
     'ev-1': 'YES',
   });
 
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const [balRes, subRes] = await Promise.all([fetchBalances(), fetchSubscriptions()]);
+      if (cancelled) return;
+      if (balRes.ok && balRes.data) setBalances(balRes.data);
+      if (subRes.ok && subRes.data) setSubscriptions(subRes.data);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [storeVersion]);
+
+  const usdcBalance = Number(balances.usdc) || 0;
+  const polBalance = Number(balances.pol) || 0;
+  const fundingStatus = canEngageLiveCopy(usdcBalance, polBalance);
+  const activeSubs = subscriptions.filter((s) => s.status !== 'stopped');
+  const liveSubs = subscriptions.filter((s) => s.status === 'live');
+
   const handleMirror = (event: EventPosition, side: 'YES' | 'NO') => {
     setMirrored((prev) => ({ ...prev, [event.id]: side }));
-    toast.success(`Mirrored ${side} on "${event.title}" ($25 Demo Copy)`);
+    toast.success(`Mirrored ${side} on "${event.title}" ($${Math.min(25, maxPerTradeUsd)} Agent Order)`);
   };
 
   return (
     <div className="space-y-6">
-      {/* Level 1: Hero Overview Card with KPI Strip */}
-      <div className="rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-5 md:p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex items-start gap-4 min-w-0">
-            <div className="flex size-12 md:size-14 shrink-0 items-center justify-center rounded-2xl border border-[var(--line)] bg-[var(--s2)] shadow-sm">
-              <img src="/polymarket.png" alt="Polymarket" className="size-8 md:size-9 object-contain" />
-            </div>
-            <div className="min-w-0 space-y-1.5">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <h2 className="text-base sm:text-lg md:text-xl font-extrabold tracking-tight text-[var(--tx)]">
-                  Autonomous Whale Signal &amp; Copy Engine
-                </h2>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#09B4FF]/35 bg-[#09B4FF]/15 px-3 py-0.5 text-[11px] font-extrabold text-[#7DD3FC]">
-                  <Clock className="size-3" />
-                  <span>Market Preview — In Development</span>
-                </span>
-              </div>
-              <p className="max-w-2xl text-xs sm:text-sm text-[var(--mut)] leading-relaxed">
-                Monitors top 1% Polymarket whale wallets 24/7 and surfaces high-conviction event positions with probability edge scoring and 1-click copy execution.
-              </p>
-            </div>
-          </div>
-
-          {/* Capability chips in clean 2x2 grid on desktop */}
-          <div className="grid grid-cols-2 gap-2 shrink-0">
-            {capabilities.map((label, i) => {
-              const Icon = CAPABILITY_ICONS[i] ?? Activity;
-              return (
+      {/* 1. Command Hero + Hairline-Divided 4-Column KPI Strip */}
+      <section className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--s1)]">
+        <div className="p-5 sm:p-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0 space-y-1.5">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <h2 className="text-lg sm:text-xl font-extrabold tracking-tight text-[var(--tx)]">
+                Polymarket Autonomous Copy Agent
+              </h2>
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1.5 text-xs font-bold',
+                  fundingStatus.ready ? 'text-[#10B981]' : 'text-[#D97706] dark:text-[#FBBF24]',
+                )}
+              >
                 <span
-                  key={label}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--line)] bg-[var(--s2)] px-3 py-1.5 text-[11px] font-bold text-[var(--tx)] whitespace-nowrap"
-                >
-                  <Icon className="size-3.5 text-[#09B4FF] shrink-0" />
-                  <span>{label}</span>
+                  aria-hidden="true"
+                  className={cn(
+                    'size-1.5 rounded-full',
+                    fundingStatus.ready ? 'bg-[#10B981]' : 'bg-[#F59E0B]',
+                  )}
+                />
+                <span>
+                  {fundingStatus.ready
+                    ? liveSubs.length > 0
+                      ? 'Funded & Live Copying'
+                      : 'Funded · Ready to Copy'
+                    : 'Funding Required Before Live Trade'}
                 </span>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 4-Column KPI Metric Strip */}
-        <div className="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-[var(--line)]">
-          <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] px-4 py-3">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--mut)]">7-Day Whale ROI</div>
-            <div className="num text-lg sm:text-xl font-extrabold text-[#2FBD8E] mt-0.5">+38.4%</div>
-          </div>
-          <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] px-4 py-3">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--mut)]">Signal Win Rate</div>
-            <div className="num text-lg sm:text-xl font-extrabold text-[#09B4FF] mt-0.5">78.4%</div>
-          </div>
-          <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] px-4 py-3">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--mut)]">Tracked Whales</div>
-            <div className="num text-lg sm:text-xl font-extrabold text-[var(--tx)] mt-0.5">142 Wallets</div>
-          </div>
-          <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] px-4 py-3">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--mut)]">Active Copies</div>
-            <div className="num text-lg sm:text-xl font-extrabold text-[#C9A6FF] mt-0.5">
-              {Object.keys(mirrored).length} Positions
+              </span>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Level 2: High-Conviction Event Positions Grid */}
-      <section aria-label="High-Conviction Whale Event Signals" className="space-y-3.5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h3 className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--tx)]">
-              High-Conviction Whale Event Signals
-            </h3>
-            <p className="text-xs text-[var(--mut)]">
-              Select YES or NO on any prediction market below to simulate an instant $25 whale copy order.
+            <p className="max-w-2xl text-xs sm:text-sm text-[var(--mut)] leading-relaxed">
+              Fund your dedicated Polygon agent wallet, select top traders from the Polymarket leaderboard, and mirror outcome positions inside strict per-trade caps.
             </p>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-extrabold text-emerald-400">
-            <CheckCircle2 className="size-3.5" />
-            {Object.keys(mirrored).length} active mirrored {Object.keys(mirrored).length === 1 ? 'position' : 'positions'}
-          </span>
+
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => onNavigateTab?.('fund')}
+              className="h-10 px-4 rounded-xl border border-[var(--line)] bg-[var(--s2)] text-xs sm:text-sm font-bold text-[var(--tx)] hover:bg-[var(--line)]/50 active:scale-[0.98] transition-all cursor-pointer inline-flex items-center gap-2 whitespace-nowrap shrink-0"
+            >
+              <Landmark className="size-4 text-[#2E5CFF]" />
+              <span>Fund Agent</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigateTab?.('copy')}
+              className="h-10 px-4 rounded-xl bg-[#2E5CFF] text-white text-xs sm:text-sm font-extrabold shadow-xs hover:bg-[#1E4DF0] active:scale-[0.98] transition-all cursor-pointer inline-flex items-center gap-2 whitespace-nowrap shrink-0"
+            >
+              <Copy className="size-4" />
+              <span>Copy Top Traders</span>
+              <ArrowRight className="size-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Flush Hairline Metric Strip (Zero nested cards) */}
+        <dl className="grid grid-cols-2 lg:grid-cols-4 border-t border-[var(--line)] bg-[var(--s2)]/40 divide-y lg:divide-y-0 lg:divide-x divide-[var(--line)]">
+          <div className="px-5 py-4 border-r border-[var(--line)] lg:border-r-0">
+            <dt className="text-[11px] font-semibold text-[var(--mut)]">Agent Balance</dt>
+            <dd className="mt-1 font-mono text-lg sm:text-xl font-extrabold text-[var(--tx)] tabular-nums">
+              ${usdcBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </dd>
+          </div>
+          <div className="px-5 py-4">
+            <dt className="text-[11px] font-semibold text-[var(--mut)]">Copied Traders</dt>
+            <dd className="mt-1 font-mono text-lg sm:text-xl font-extrabold text-[#2E5CFF] dark:text-[#60A5FA] tabular-nums">
+              {liveSubs.length} Live · {activeSubs.length} Total
+            </dd>
+          </div>
+          <div className="px-5 py-4 border-r border-[var(--line)] lg:border-r-0">
+            <dt className="text-[11px] font-semibold text-[var(--mut)]">7-Day Copy ROI</dt>
+            <dd className="mt-1 font-mono text-lg sm:text-xl font-extrabold text-[#10B981] tabular-nums">
+              +38.4%
+            </dd>
+          </div>
+          <div className="px-5 py-4">
+            <dt className="text-[11px] font-semibold text-[var(--mut)]">Signal Win Rate</dt>
+            <dd className="mt-1 font-mono text-lg sm:text-xl font-extrabold text-[var(--tx)] tabular-nums">
+              76.4%
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      {/* 2. 3-Step Workflow + Default Copy Guardrails */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <section className="lg:col-span-7 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--s1)] flex flex-col justify-between">
+          <div className="p-5 sm:px-6 sm:pt-5 sm:pb-4 border-b border-[var(--line)]">
+            <h3 className="text-sm sm:text-base font-extrabold text-[var(--tx)]">
+              How the Copy Agent Works
+            </h3>
+            <p className="text-xs text-[var(--mut)] mt-0.5">
+              Three steps from wallet funding to automated whale mirroring.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[var(--line)] flex-1">
+            <button
+              type="button"
+              onClick={() => onNavigateTab?.('fund')}
+              className="p-5 text-left hover:bg-[var(--s2)]/60 transition-colors cursor-pointer flex flex-col justify-between gap-3"
+            >
+              <div className="flex items-center justify-between text-xs font-mono font-bold text-[#2E5CFF]">
+                <span>01.</span>
+                <Wallet className="size-4" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm font-extrabold text-[var(--tx)]">Fund Agent Wallet</div>
+                <p className="text-xs text-[var(--mut)] leading-relaxed">
+                  Deposit USDC.e capital and POL gas on Polygon before live execution starts.
+                </p>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onNavigateTab?.('copy')}
+              className="p-5 text-left hover:bg-[var(--s2)]/60 transition-colors cursor-pointer flex flex-col justify-between gap-3"
+            >
+              <div className="flex items-center justify-between text-xs font-mono font-bold text-[#7A12F5] dark:text-[#C084FC]">
+                <span>02.</span>
+                <Target className="size-4" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm font-extrabold text-[var(--tx)]">Pick Top Traders</div>
+                <p className="text-xs text-[var(--mut)] leading-relaxed">
+                  Mirror verified wallets directly from the Polymarket Leaderboard.
+                </p>
+              </div>
+            </button>
+
+            <div className="p-5 text-left flex flex-col justify-between gap-3">
+              <div className="flex items-center justify-between text-xs font-mono font-bold text-[#10B981]">
+                <span>03.</span>
+                <Gauge className="size-4" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm font-extrabold text-[var(--tx)]">Risk-Capped Sync</div>
+                <p className="text-xs text-[var(--mut)] leading-relaxed">
+                  Orders scale proportionally to your agent balance inside strict USD caps.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="lg:col-span-5 rounded-2xl border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-6 flex flex-col justify-between gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal className="size-4 text-[#2E5CFF]" />
+              <h3 className="text-sm sm:text-base font-extrabold text-[var(--tx)]">
+                Default Copy Guardrails
+              </h3>
+            </div>
+            <ShieldCheck className="size-4 text-[#10B981]" />
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <div className="flex items-center justify-between text-xs font-semibold text-[var(--mut)] mb-2">
+                <span>Proportional Copy Size</span>
+                <span className="font-mono font-bold text-[var(--tx)] tabular-nums">{defaultCopyPct}%</span>
+              </div>
+              <div className="grid grid-cols-4 gap-1.5 rounded-xl bg-[var(--s2)] p-1 border border-[var(--line)]">
+                {[5, 10, 15, 25].map((pct) => (
+                  <button
+                    key={pct}
+                    type="button"
+                    onClick={() => {
+                      setDefaultCopyPct(pct);
+                      toast.success(`Default copy size set to ${pct}%`);
+                    }}
+                    className={cn(
+                      'h-8 rounded-lg text-xs font-extrabold transition-all cursor-pointer tabular-nums',
+                      defaultCopyPct === pct
+                        ? 'bg-[var(--s1)] text-[#2E5CFF] shadow-xs border border-[var(--line)]'
+                        : 'text-[var(--mut)] hover:text-[var(--tx)]',
+                    )}
+                  >
+                    {pct}%
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between text-xs font-semibold text-[var(--mut)] mb-2">
+                <span>Max Order Cap (USD)</span>
+                <span className="font-mono font-bold text-[var(--tx)] tabular-nums">${maxPerTradeUsd}</span>
+              </div>
+              <div className="grid grid-cols-4 gap-1.5 rounded-xl bg-[var(--s2)] p-1 border border-[var(--line)]">
+                {[50, 100, 250, 500].map((cap) => (
+                  <button
+                    key={cap}
+                    type="button"
+                    onClick={() => {
+                      setMaxPerTradeUsd(cap);
+                      toast.success(`Max per-trade cap updated to $${cap}`);
+                    }}
+                    className={cn(
+                      'h-8 rounded-lg text-xs font-extrabold transition-all cursor-pointer tabular-nums',
+                      maxPerTradeUsd === cap
+                        ? 'bg-[var(--s1)] text-[#2E5CFF] shadow-xs border border-[var(--line)]'
+                        : 'text-[var(--mut)] hover:text-[var(--tx)]',
+                    )}
+                  >
+                    ${cap}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <label className="flex items-center justify-between gap-3 border-t border-[var(--line)] pt-3.5 cursor-pointer">
+            <span className="text-xs font-semibold text-[var(--tx)]">
+              Auto-pause if balance &lt; $25
+            </span>
+            <input
+              type="checkbox"
+              checked={autoPauseLowBal}
+              onChange={(e) => setAutoPauseLowBal(e.target.checked)}
+              className="size-4 accent-[#2E5CFF] cursor-pointer"
+            />
+          </label>
+        </section>
+      </div>
+
+      {/* 3. Live Polymarket Whale Event Signals */}
+      <section aria-label="High-Conviction Whale Event Signals" className="space-y-4">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h3 className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--tx)]">
+              Live Polymarket Whale Signals
+            </h3>
+            <p className="text-xs text-[var(--mut)]">
+              Real-time conviction flows tracked across leaderboard whale wallets.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => onNavigateTab?.('copy')}
+            className="text-xs font-extrabold text-[#2E5CFF] hover:underline cursor-pointer inline-flex items-center gap-1 whitespace-nowrap"
+          >
+            <span>Open Polymarket Leaderboard</span>
+            <ArrowRight className="size-3.5" />
+          </button>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -214,43 +423,40 @@ function EventCard({
   activeSide?: 'YES' | 'NO';
   onMirror: (side: 'YES' | 'NO') => void;
 }) {
-  const yesIsStronger = event.yesProbability >= event.noProbability;
-  const sizeLabel =
-    event.size === 'L' ? 'Large Whale Size' : event.size === 'M' ? 'Medium Size' : 'Standard Size';
-
   return (
-    <div
+    <article
       className={cn(
-        'flex flex-col justify-between rounded-[22px] border bg-[var(--s1)] p-5 shadow-sm transition-all',
-        activeSide
-          ? 'border-[#7A12F5]/60 shadow-[0_4px_20px_rgba(122,18,245,0.14)]'
-          : 'border-[var(--line)] hover:border-[var(--mut)]/40',
+        'flex flex-col justify-between rounded-2xl border bg-[var(--s1)] p-5 transition-colors',
+        activeSide ? 'border-[#2E5CFF]/45' : 'border-[var(--line)] hover:border-[var(--mut)]/45',
       )}
     >
       <div>
-        {/* Tier 1: Category & Conviction Header */}
-        <div className="flex items-center justify-between gap-2 mb-2.5">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--s2)] px-2.5 py-0.5 text-[10.5px] font-bold text-[var(--mut)]">
-            <span>{event.category}</span>
-            <span>·</span>
-            <span className="text-[var(--tx)]">{event.volume}</span>
+        <div className="flex items-center justify-between gap-2 text-[11px] text-[var(--mut)]">
+          <span className="truncate">
+            {event.category} · <span className="font-semibold text-[var(--tx)]">{event.volume}</span>
           </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-[#09B4FF]/15 border border-[#09B4FF]/30 px-2.5 py-0.5 text-[10.5px] font-extrabold text-[#09B4FF]">
-            <Activity className="size-3" />
+          <span className="font-mono font-bold text-[#2E5CFF] tabular-nums shrink-0">
             {event.conviction}% edge
           </span>
         </div>
 
-        {/* Tier 2: Market Question Headline */}
-        <h4 className="text-sm sm:text-base font-extrabold leading-snug text-[var(--tx)] min-h-[2.5rem]">
+        <h4 className="mt-2 text-sm sm:text-[15px] font-extrabold leading-snug text-[var(--tx)] min-h-[2.6rem] text-balance">
           {event.title}
         </h4>
 
-        {/* Tier 3: Visual Probability Bar + Split YES/NO Boxes */}
-        <div className="mt-3.5 space-y-2.5">
-          <div className="flex h-2 w-full overflow-hidden rounded-full bg-[var(--s2)] p-0.5 gap-0.5">
+        {/* Polymarket Outcome Odds Meter + Cents Pricing */}
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center justify-between text-xs tabular-nums font-mono">
+            <span className="font-extrabold text-[#10B981]">
+              YES {event.yesProbability}¢
+            </span>
+            <span className="font-extrabold text-[#F43F5E]">
+              NO {event.noProbability}¢
+            </span>
+          </div>
+          <div className="flex h-2 w-full overflow-hidden rounded-full bg-[var(--s2)] gap-0.5">
             <div
-              className="h-full rounded-l-full bg-[#2FBD8E] transition-all"
+              className="h-full rounded-l-full bg-[#10B981] transition-all"
               style={{ width: `${event.yesProbability}%` }}
             />
             <div
@@ -258,71 +464,38 @@ function EventCard({
               style={{ width: `${event.noProbability}%` }}
             />
           </div>
-
-          <div className="grid grid-cols-2 gap-2.5">
-            <div
-              className={cn(
-                'flex items-center justify-between rounded-xl border px-3 py-2',
-                yesIsStronger
-                  ? 'border-[#2FBD8E]/35 bg-[#2FBD8E]/10'
-                  : 'border-[var(--line)] bg-[var(--s2)]',
-              )}
-            >
-              <span className="text-xs font-extrabold uppercase tracking-wider text-[#2FBD8E]">YES</span>
-              <span className="num text-sm font-extrabold text-[var(--tx)]">{event.yesProbability}%</span>
-            </div>
-            <div
-              className={cn(
-                'flex items-center justify-between rounded-xl border px-3 py-2',
-                !yesIsStronger
-                  ? 'border-[#F43F5E]/35 bg-[#F43F5E]/10'
-                  : 'border-[var(--line)] bg-[var(--s2)]',
-              )}
-            >
-              <span className="text-xs font-extrabold uppercase tracking-wider text-[#F43F5E]">NO</span>
-              <span className="num text-sm font-extrabold text-[var(--tx)]">{event.noProbability}%</span>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Tier 4: Whale Signal Meta + Full-Width Action Buttons */}
-      <div className="mt-4 pt-3.5 border-t border-[var(--line)] space-y-2.5">
-        <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--mut)]">
-          <span>Whale Consensus: <strong className={yesIsStronger ? 'text-[#2FBD8E]' : 'text-[#F43F5E]'}>{event.defaultSide}</strong></span>
-          <span>{sizeLabel}</span>
-        </div>
+      <div className="mt-4 pt-3.5 border-t border-[var(--line)] grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => onMirror('YES')}
+          className={cn(
+            'flex h-9 items-center justify-center gap-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer active:scale-[0.98]',
+            activeSide === 'YES'
+              ? 'bg-[#10B981] text-white'
+              : 'bg-[#10B981]/10 text-[#10B981] hover:bg-[#10B981]/18',
+          )}
+        >
+          {activeSide === 'YES' && <CheckCircle2 className="size-3.5 stroke-[2.5]" />}
+          <span>{activeSide === 'YES' ? 'Mirrored YES' : 'Mirror YES'}</span>
+        </button>
 
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => onMirror('YES')}
-            className={cn(
-              'flex h-9 items-center justify-center gap-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer active:scale-95',
-              activeSide === 'YES'
-                ? 'bg-[#2FBD8E] text-black shadow-[0_2px_10px_rgba(47,189,142,0.4)]'
-                : 'border border-[#2FBD8E]/40 bg-[#2FBD8E]/12 text-[#2FBD8E] hover:bg-[#2FBD8E]/20',
-            )}
-          >
-            {activeSide === 'YES' && <CheckCircle2 className="size-3.5 stroke-[2.5]" />}
-            <span>{activeSide === 'YES' ? 'Mirrored YES' : 'Mirror YES'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onMirror('NO')}
-            className={cn(
-              'flex h-9 items-center justify-center gap-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer active:scale-95',
-              activeSide === 'NO'
-                ? 'bg-[#F43F5E] text-white shadow-[0_2px_10px_rgba(244,63,94,0.4)]'
-                : 'border border-[#F43F5E]/40 bg-[#F43F5E]/12 text-[#F43F5E] hover:bg-[#F43F5E]/20',
-            )}
-          >
-            {activeSide === 'NO' && <CheckCircle2 className="size-3.5 stroke-[2.5]" />}
-            <span>{activeSide === 'NO' ? 'Mirrored NO' : 'Mirror NO'}</span>
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => onMirror('NO')}
+          className={cn(
+            'flex h-9 items-center justify-center gap-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer active:scale-[0.98]',
+            activeSide === 'NO'
+              ? 'bg-[#F43F5E] text-white'
+              : 'bg-[#F43F5E]/10 text-[#F43F5E] hover:bg-[#F43F5E]/18',
+          )}
+        >
+          {activeSide === 'NO' && <CheckCircle2 className="size-3.5 stroke-[2.5]" />}
+          <span>{activeSide === 'NO' ? 'Mirrored NO' : 'Mirror NO'}</span>
+        </button>
       </div>
-    </div>
+    </article>
   );
 }

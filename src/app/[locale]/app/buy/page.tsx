@@ -1,12 +1,11 @@
 'use client';
 
 /**
- * /app/buy — Streamlined $OKN Presale Gateway.
+ * /app/buy — Streamlined $OKN Presale Deposit Gateway.
  *
- * Clean, high-contrast crypto purchase experience for mobile and desktop:
+ * Clean, high-contrast crypto deposit experience for mobile and desktop:
  *   - Compact Stage 2 header with Token Price & Stage Progress bar
- *   - Segmented Deposit / Connect Wallet switcher
- *   - Multi-currency selector with authentic vector crypto badges
+ *   - Multi-currency crypto deposit selector with vector currency badges
  *   - Focused Deposit Invoice modal & motion-blur Payment Successful screen
  */
 import { useState, useId } from 'react';
@@ -21,22 +20,18 @@ import {
   Copy,
   QrCode,
   ShieldCheck,
-  Wallet,
   X,
-  Zap,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { useAccount } from 'wagmi';
 import { useQueryClient } from '@tanstack/react-query';
 import { parseEther } from 'viem';
-import { api, getDemoWalletAddress } from '@/lib/api/client';
+import { api } from '@/lib/api/client';
+import { calculatePresaleQuote } from '@/lib/presale-quote';
 import { formatPoints } from '@/lib/utils';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
 import { OknWatermark } from '@/components/ui/okn-watermark';
 import { toast } from 'sonner';
-
-type GatewayTab = 'deposit' | 'connect-wallet';
 
 interface CryptoOption {
   id: string;
@@ -65,23 +60,23 @@ const QUICK_USD = [
 const HOW_TO_STEPS = [
   {
     step: '01',
-    title: 'Choose currency',
-    body: 'Select USDT, BTC, ETH, SOL, BNB, or pay directly with your connected BSC wallet.',
+    title: 'Choose deposit currency',
+    body: 'Select USDT (BEP-20 or TRC-20), BTC, ETH, SOL, or BNB for your presale deposit.',
   },
   {
     step: '02',
-    title: 'Enter purchase amount',
-    body: 'Pick a preset or enter a custom USD/BNB amount to preview your $OKN allocation.',
+    title: 'Enter deposit amount',
+    body: 'Pick a quick USD preset or enter a custom amount to preview your $OKN allocation.',
   },
   {
     step: '03',
-    title: 'Complete transfer',
+    title: 'Complete crypto deposit',
     body: 'Scan the QR code or copy the deposit address from your exchange or wallet.',
   },
   {
     step: '04',
     title: 'Instant portfolio credit',
-    body: 'Your $OKN tokens appear directly in your portfolio upon confirmation.',
+    body: 'Your $OKN tokens appear directly in your portfolio upon deposit confirmation.',
   },
 ];
 
@@ -154,16 +149,7 @@ interface SuccessReceipt {
 export default function BuyPage() {
   const router = useRouter();
   const hydrated = useHydrated();
-  const { address } = useAccount();
   const qc = useQueryClient();
-  const activeAddress = address ?? getDemoWalletAddress();
-  const shortAddr = `${activeAddress.slice(0, 6)}...${activeAddress.slice(-4)}`;
-
-  const [activeTab, setActiveTab] = useState<GatewayTab>('deposit');
-
-  // Web3 BNB State
-  const [bnbAmount, setBnbAmount] = useState('1.0');
-  const [isSubmittingWeb3, setIsSubmittingWeb3] = useState(false);
 
   // Crypto Deposit State
   const [selectedCrypto, setSelectedCrypto] = useState<CryptoOption>(CRYPTO_OPTIONS[0]);
@@ -174,53 +160,15 @@ export default function BuyPage() {
   // Payment Successful Modal State
   const [successReceipt, setSuccessReceipt] = useState<SuccessReceipt | null>(null);
 
-  const RATE_PER_BNB = 1_000_000;
-  const BNB_USD_ESTIMATE = 600;
-
-  const numBnb = parseFloat(bnbAmount) || 0;
-  const oknFromBnb = Math.round(numBnb * RATE_PER_BNB);
-
-  const numUsd = parseFloat(usdAmount) || 0;
-  const oknFromUsd = Math.round((numUsd / BNB_USD_ESTIMATE) * RATE_PER_BNB);
+  const quote = calculatePresaleQuote(usdAmount, selectedCrypto.ticker);
+  const numUsd = quote.usdAmount;
+  const oknFromUsd = quote.oknTokens;
 
   const depositAddress = '0x892aF21b76A93F424e75A0Bf9689874D14c9B231';
 
-  const handleWeb3Buy = () => {
-    if (numBnb <= 0) {
-      toast.error('Please enter a valid BNB amount');
-      return;
-    }
-
-    setIsSubmittingWeb3(true);
-    setTimeout(async () => {
-      try {
-        const bnbWei = parseEther(String(numBnb));
-        const oknWei = BigInt(oknFromBnb) * 10n ** 18n;
-        await api.recordDemoPurchase(bnbWei, oknWei);
-        await Promise.all([
-          qc.invalidateQueries({ queryKey: ['demo-okn-balance'] }),
-          qc.invalidateQueries({ queryKey: ['demo-purchased-bnb'] }),
-          qc.invalidateQueries({ queryKey: ['purchase-history'] }),
-          qc.invalidateQueries({ queryKey: ['portfolio'] }),
-          qc.invalidateQueries({ queryKey: ['notifications'] }),
-        ]);
-        setSuccessReceipt({
-          oknAmount: oknFromBnb,
-          paidLabel: `${bnbAmount} BNB`,
-          networkLabel: 'BNB Smart Chain',
-        });
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Unable to process BNB purchase.';
-        toast.error(msg);
-      } finally {
-        setIsSubmittingWeb3(false);
-      }
-    }, 550);
-  };
-
   const handleGenerateInvoice = () => {
-    if (numUsd <= 0) {
-      toast.error('Please enter a valid purchase amount');
+    if (!quote.valid || numUsd <= 0) {
+      toast.error('Please enter a valid deposit amount');
       return;
     }
     setShowInvoiceModal(true);
@@ -228,8 +176,7 @@ export default function BuyPage() {
 
   const handleSimulateInvoicePaid = async () => {
     try {
-      const bnbEquivalent = Math.max(0.01, numUsd / BNB_USD_ESTIMATE);
-      const bnbWei = parseEther(bnbEquivalent.toFixed(4));
+      const bnbWei = parseEther(quote.bnbEquivalent.toFixed(4));
       const oknWei = BigInt(oknFromUsd) * 10n ** 18n;
       await api.recordDemoPurchase(bnbWei, oknWei);
       await Promise.all([
@@ -242,7 +189,7 @@ export default function BuyPage() {
       setShowInvoiceModal(false);
       setSuccessReceipt({
         oknAmount: oknFromUsd,
-        paidLabel: `$${usdAmount} USD (${selectedCrypto.ticker})`,
+        paidLabel: `$${usdAmount} USD (${quote.cryptoAmountLabel})`,
         networkLabel: `${selectedCrypto.name} · ${selectedCrypto.network}`,
       });
     } catch (err) {
@@ -304,250 +251,149 @@ export default function BuyPage() {
       {/* 2. Main Split Grid: Purchase Widget (Left) + Simple Guide (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 md:gap-6 items-start">
         <div className="lg:col-span-7 rounded-3xl border border-[var(--line)] bg-[var(--s1)] p-4 sm:p-6 shadow-sm space-y-5">
-          {/* Segmented Payment Switcher */}
-          <div
-            role="tablist"
-            aria-label="Payment method"
-            className="grid grid-cols-2 gap-1.5 p-1.5 rounded-2xl border border-[var(--line)] bg-[var(--s2)]"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'deposit'}
-              onClick={() => setActiveTab('deposit')}
-              className={`min-h-[44px] px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap ${
-                activeTab === 'deposit'
-                  ? 'bg-gradient-to-r from-[#7A12F5] to-[#8C38F7] text-white shadow-[0_4px_14px_rgba(122,18,245,0.4)]'
-                  : 'text-[var(--mut)] hover:text-[var(--tx)]'
-              }`}
-            >
-              <Coins className="size-4 shrink-0" />
-              <span>Deposit</span>
-            </button>
-
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'connect-wallet'}
-              onClick={() => setActiveTab('connect-wallet')}
-              className={`min-h-[44px] px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap ${
-                activeTab === 'connect-wallet'
-                  ? 'bg-gradient-to-r from-[#7A12F5] to-[#8C38F7] text-white shadow-[0_4px_14px_rgba(122,18,245,0.4)]'
-                  : 'text-[var(--mut)] hover:text-[var(--tx)]'
-              }`}
-            >
-              <Wallet className="size-4 shrink-0" />
-              <span>Connect Wallet</span>
-            </button>
+          {/* Deposit Payment Header */}
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--line)] bg-[var(--s2)] px-4 py-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#7A12F5]/15 text-[#7A12F5] dark:text-[#C084FC]">
+                <Coins className="size-4" />
+              </span>
+              <div className="min-w-0">
+                <div className="text-sm font-extrabold text-[var(--tx)] leading-tight">
+                  Crypto Deposit
+                </div>
+                <div className="text-[11px] font-medium text-[var(--mut)] truncate">
+                  Direct presale invoice via USDT, BTC, ETH, SOL, or BNB
+                </div>
+              </div>
+            </div>
+            <span className="shrink-0 text-[11px] font-bold text-[#10B981] tabular-nums whitespace-nowrap">
+              Instant Credit
+            </span>
           </div>
 
-          {activeTab === 'deposit' ? (
-            /* =================== CRYPTO DEPOSIT PANEL =================== */
-            <div className="space-y-4">
-              {/* Currency Selector */}
-              <div className="space-y-2.5">
-                <div className="text-sm font-bold text-[var(--tx)]">
-                  Select Currency
-                </div>
-                <div className="grid grid-cols-3 gap-2.5">
-                  {CRYPTO_OPTIONS.map((coin) => {
-                    const isSelected = selectedCrypto.id === coin.id;
-                    return (
-                      <button
-                        key={coin.id}
-                        type="button"
-                        onClick={() => setSelectedCrypto(coin)}
-                        className={`min-h-[58px] px-2.5 py-2 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
-                          isSelected
-                            ? 'border-[#7A12F5] bg-[#7A12F5]/14 text-[var(--tx)] shadow-[0_0_0_1px_rgba(122,18,245,0.35)]'
-                            : 'border-[var(--line)] bg-[var(--s2)] text-[var(--mut)] hover:text-[var(--tx)]'
-                        }`}
-                      >
-                        <CryptoBadge ticker={coin.ticker} size="md" />
-                        <div className="min-w-0 leading-tight">
-                          <div className="font-extrabold text-xs text-[var(--tx)] whitespace-nowrap">
-                            {coin.ticker}
-                          </div>
-                          <div className="text-[11px] font-medium text-[var(--mut)] whitespace-nowrap">
-                            {coin.network}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+          {/* =================== CRYPTO DEPOSIT PANEL =================== */}
+          <div className="space-y-4">
+            {/* Currency Selector */}
+            <div className="space-y-2.5">
+              <div className="text-sm font-bold text-[var(--tx)]">
+                Select Currency
               </div>
-
-              {/* You Pay Box */}
-              <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-4 space-y-3.5">
-                <div className="text-xs font-semibold text-[var(--mut)]">
-                  You Pay (USD)
-                </div>
-
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center flex-1 min-w-0">
-                    <span className="text-2xl font-extrabold text-[var(--mut)] mr-1.5">$</span>
-                    <input
-                      type="number"
-                      step="10"
-                      min="10"
-                      value={usdAmount}
-                      onChange={(e) => setUsdAmount(e.target.value)}
-                      placeholder="250"
-                      aria-label="Contribution Amount (USD)"
-                      className="w-full bg-transparent text-2xl sm:text-3xl font-extrabold text-[var(--tx)] tabular-nums outline-none"
-                    />
-                  </div>
-                  <span className="shrink-0 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--s1)] px-3 py-1.5 text-xs font-extrabold text-[var(--tx)] whitespace-nowrap shadow-xs">
-                    <CryptoBadge ticker={selectedCrypto.ticker} size="sm" />
-                    <span>{selectedCrypto.ticker}</span>
-                  </span>
-                </div>
-
-                {/* Quick Amount Buttons */}
-                <div className="grid grid-cols-5 gap-2">
-                  {QUICK_USD.map((preset) => (
+              <div className="grid grid-cols-3 gap-2.5">
+                {CRYPTO_OPTIONS.map((coin) => {
+                  const isSelected = selectedCrypto.id === coin.id;
+                  return (
                     <button
-                      key={preset.val}
+                      key={coin.id}
                       type="button"
-                      onClick={() => setUsdAmount(preset.val)}
-                      className={`min-h-[38px] rounded-xl border text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${
-                        usdAmount === preset.val
-                          ? 'border-[#7A12F5] bg-[#7A12F5] text-white shadow-[0_2px_10px_rgba(122,18,245,0.4)]'
-                          : 'border-[var(--line)] bg-[var(--s1)] text-[var(--tx)]/80 hover:text-[var(--tx)]'
+                      onClick={() => setSelectedCrypto(coin)}
+                      className={`min-h-[58px] px-2.5 py-2 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
+                        isSelected
+                          ? 'border-[#7A12F5] bg-[#7A12F5]/14 text-[var(--tx)] shadow-[0_0_0_1px_rgba(122,18,245,0.35)]'
+                          : 'border-[var(--line)] bg-[var(--s2)] text-[var(--mut)] hover:text-[var(--tx)]'
                       }`}
                     >
-                      {preset.label}
+                      <CryptoBadge ticker={coin.ticker} size="md" />
+                      <div className="min-w-0 leading-tight">
+                        <div className="font-extrabold text-xs text-[var(--tx)] whitespace-nowrap">
+                          {coin.ticker}
+                        </div>
+                        <div className="text-[11px] font-medium text-[var(--mut)] whitespace-nowrap">
+                          {coin.network}
+                        </div>
+                      </div>
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
-
-              {/* Circular Down Arrow Divider */}
-              <div className="flex justify-center -my-3 relative z-10">
-                <span className="flex size-9 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--s2)] text-[#7A12F5] dark:text-[#C084FC] shadow-sm">
-                  <ArrowDown className="size-4" />
-                </span>
-              </div>
-
-              {/* You Receive Box */}
-              <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-4 space-y-2">
-                <div className="text-xs font-semibold text-[var(--mut)]">
-                  You Receive
-                </div>
-
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-[#7A12F5] dark:text-[#C084FC] tabular-nums whitespace-nowrap">
-                    {formatPoints(oknFromUsd)}
-                  </span>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-[#7A12F5]/30 bg-[#7A12F5]/15 px-3 py-1.5 text-xs font-extrabold text-[var(--tx)] whitespace-nowrap">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/okn-logo.png" alt="$OKN" className="size-5 rounded-full object-contain" />
-                    <span>$OKN</span>
-                  </span>
-                </div>
-              </div>
-
-              {/* Primary CTA Button */}
-              <button
-                type="button"
-                onClick={handleGenerateInvoice}
-                className="w-full h-12 sm:h-[52px] rounded-2xl bg-gradient-to-r from-[#7A12F5] to-[#8C38F7] text-white text-sm sm:text-base font-extrabold shadow-[0_6px_20px_rgba(122,18,245,0.4)] hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2.5 whitespace-nowrap px-4"
-              >
-                <QrCode className="size-5 shrink-0" />
-                <span>Generate Deposit Invoice</span>
-              </button>
             </div>
-          ) : (
-            /* =================== WEB3 WALLET PANEL =================== */
-            <div className="space-y-4">
-              <div className="flex items-center justify-between gap-2 rounded-2xl border border-[var(--line)] bg-[var(--s2)] px-4 py-3 text-xs">
-                <div className="flex items-center gap-2 min-w-0">
-                  <Wallet className="size-4 text-[#F3BA2F] shrink-0" />
-                  <span className="font-semibold text-[var(--mut)] truncate">Connected Wallet</span>
-                </div>
-                <span className="font-mono font-bold text-[var(--tx)] whitespace-nowrap">
-                  {shortAddr} · BSC
+
+            {/* You Pay Box */}
+            <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-4 space-y-3.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-[var(--mut)]">
+                  You Pay (USD)
                 </span>
+                {quote.valid && (
+                  <span className="font-mono text-[11px] font-semibold text-[var(--mut)] tabular-nums">
+                    ≈ {quote.cryptoAmountLabel}
+                  </span>
+                )}
               </div>
 
-              <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-4 space-y-3.5">
-                <div className="text-xs font-semibold text-[var(--mut)]">
-                  You Pay (BNB)
-                </div>
-
-                <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center flex-1 min-w-0">
+                  <span className="text-2xl font-extrabold text-[var(--mut)] mr-1.5">$</span>
                   <input
                     type="number"
-                    step="0.05"
-                    min="0.05"
-                    max="25"
-                    value={bnbAmount}
-                    onChange={(e) => setBnbAmount(e.target.value)}
-                    placeholder="1.0"
-                    aria-label="Enter BNB Amount"
+                    step="10"
+                    min="10"
+                    value={usdAmount}
+                    onChange={(e) => setUsdAmount(e.target.value)}
+                    placeholder="250"
+                    aria-label="Contribution Amount (USD)"
                     className="w-full bg-transparent text-2xl sm:text-3xl font-extrabold text-[var(--tx)] tabular-nums outline-none"
                   />
-                  <span className="shrink-0 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--s1)] px-3 py-1.5 text-xs font-extrabold text-[var(--tx)] whitespace-nowrap">
-                    <CryptoBadge ticker="BNB" size="sm" />
-                    <span>BNB</span>
-                  </span>
                 </div>
-
-                <div className="grid grid-cols-4 gap-2">
-                  {['0.1', '0.5', '1.0', '5.0'].map((val) => (
-                    <button
-                      key={val}
-                      type="button"
-                      onClick={() => setBnbAmount(val)}
-                      className={`min-h-[38px] rounded-xl border text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${
-                        bnbAmount === val
-                          ? 'border-[#7A12F5] bg-[#7A12F5] text-white shadow-[0_2px_10px_rgba(122,18,245,0.4)]'
-                          : 'border-[var(--line)] bg-[var(--s1)] text-[var(--tx)]/80 hover:text-[var(--tx)]'
-                      }`}
-                    >
-                      {val} BNB
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex justify-center -my-3 relative z-10">
-                <span className="flex size-9 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--s2)] text-[#7A12F5] dark:text-[#C084FC] shadow-sm">
-                  <ArrowDown className="size-4" />
+                <span className="shrink-0 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--s1)] px-3 py-1.5 text-xs font-extrabold text-[var(--tx)] whitespace-nowrap shadow-xs">
+                  <CryptoBadge ticker={selectedCrypto.ticker} size="sm" />
+                  <span>{selectedCrypto.ticker}</span>
                 </span>
               </div>
 
-              <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-4 space-y-2">
-                <div className="text-xs font-semibold text-[var(--mut)]">
-                  You Receive
-                </div>
-
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-[#7A12F5] dark:text-[#C084FC] tabular-nums whitespace-nowrap">
-                    {formatPoints(oknFromBnb)}
-                  </span>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-[#7A12F5]/30 bg-[#7A12F5]/15 px-3 py-1.5 text-xs font-extrabold text-[var(--tx)] whitespace-nowrap">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/okn-logo.png" alt="$OKN" className="size-5 rounded-full object-contain" />
-                    <span>$OKN</span>
-                  </span>
-                </div>
+              {/* Quick Amount Buttons */}
+              <div className="grid grid-cols-5 gap-2">
+                {QUICK_USD.map((preset) => (
+                  <button
+                    key={preset.val}
+                    type="button"
+                    onClick={() => setUsdAmount(preset.val)}
+                    className={`min-h-[38px] rounded-xl border text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${
+                      usdAmount === preset.val
+                        ? 'border-[#7A12F5] bg-[#7A12F5] text-white shadow-[0_2px_10px_rgba(122,18,245,0.4)]'
+                        : 'border-[var(--line)] bg-[var(--s1)] text-[var(--tx)]/80 hover:text-[var(--tx)]'
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
               </div>
-
-              <button
-                type="button"
-                onClick={handleWeb3Buy}
-                disabled={isSubmittingWeb3}
-                className="w-full h-12 sm:h-[52px] rounded-2xl bg-gradient-to-r from-[#7A12F5] to-[#8C38F7] text-white text-sm sm:text-base font-extrabold shadow-[0_6px_20px_rgba(122,18,245,0.4)] hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap px-4 disabled:opacity-60"
-              >
-                <Zap className="size-5 shrink-0" />
-                <span>
-                  {isSubmittingWeb3 ? 'Confirming Purchase...' : `Buy $OKN (${bnbAmount || '1.0'} BNB)`}
-                </span>
-              </button>
             </div>
-          )}
+
+            {/* Circular Down Arrow Divider */}
+            <div className="flex justify-center -my-3 relative z-10">
+              <span className="flex size-9 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--s2)] text-[#7A12F5] dark:text-[#C084FC] shadow-sm">
+                <ArrowDown className="size-4" />
+              </span>
+            </div>
+
+            {/* You Receive Box */}
+            <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-4 space-y-2">
+              <div className="text-xs font-semibold text-[var(--mut)]">
+                You Receive
+              </div>
+
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-2xl sm:text-3xl font-extrabold text-[#7A12F5] dark:text-[#C084FC] tabular-nums whitespace-nowrap">
+                  {formatPoints(oknFromUsd)}
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-[#7A12F5]/30 bg-[#7A12F5]/15 px-3 py-1.5 text-xs font-extrabold text-[var(--tx)] whitespace-nowrap">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/okn-logo.png" alt="$OKN" className="size-5 rounded-full object-contain" />
+                  <span>$OKN</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Primary CTA Button */}
+            <button
+              type="button"
+              onClick={handleGenerateInvoice}
+              className="w-full h-12 sm:h-[52px] rounded-2xl bg-gradient-to-r from-[#7A12F5] to-[#8C38F7] text-white text-sm sm:text-base font-extrabold shadow-[0_6px_20px_rgba(122,18,245,0.4)] hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2.5 whitespace-nowrap px-4"
+            >
+              <QrCode className="size-5 shrink-0" />
+              <span>Generate Deposit Invoice</span>
+            </button>
+          </div>
         </div>
 
         {/* Right Column (5 cols): Clean How-To Steps */}

@@ -78,7 +78,7 @@ export function CopierBalanceStrip() {
             <p className="text-xs text-muted-foreground">{t('noWalletBody')}</p>
           </div>
           <Button asChild size="sm" className="cursor-pointer">
-            <a href="/app/polymarket-agent?tab=copier">{t('setUpCopier')}</a>
+            <a href="/app/polymarket-agent?tab=copy">{t('setUpCopier')}</a>
           </Button>
         </CardContent>
       </Card>
@@ -128,11 +128,11 @@ export function CopierBalanceStrip() {
         </div>
         {isZero ? (
           <Button asChild variant="outline" size="sm" className="cursor-pointer">
-            <a href="/app/polymarket-agent?tab=funds">{t('addFunds')}</a>
+            <a href="/app/polymarket-agent?tab=fund">{t('addFunds')}</a>
           </Button>
         ) : (
           <Button asChild variant="outline" size="sm" className="cursor-pointer">
-            <a href="/app/polymarket-agent?tab=funds">{t('manageFunds')}</a>
+            <a href="/app/polymarket-agent?tab=fund">{t('manageFunds')}</a>
           </Button>
         )}
       </CardContent>

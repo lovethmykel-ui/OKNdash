@@ -1016,10 +1016,10 @@
       "overlayBody": "The Polymarket Agent is still in development. No positions will be opened from this page.",
       "backToPortfolio": "Back to portfolio",
       "tabs": {
-        "ariaLabel": "Polymarket surfaces",
+        "ariaLabel": "Polymarket Agent sections",
         "agent": "Agent",
-        "copier": "Copier",
-        "funds": "Funds"
+        "copier": "Copy",
+        "funds": "Fund"
       },
       "copier": {
         "headline": "Mirror top Polymarket traders automatically.",
