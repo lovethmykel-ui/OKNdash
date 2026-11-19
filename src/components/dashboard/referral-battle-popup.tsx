@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { X } from 'lucide-react';
 import { useRouter } from '@/i18n/navigation';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
@@ -36,6 +36,7 @@ const PLACE_TEXT_STYLES = {
 
 export function ReferralBattlePopup() {
   const hydrated = useHydrated();
+  const prefersReducedMotion = useReducedMotion();
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
@@ -237,14 +238,77 @@ export function ReferralBattlePopup() {
                 ))}
               </ul>
 
-              {/* Primary CTA Pill Button */}
-              <button
-                type="button"
-                onClick={handleStart}
-                className="mt-5 flex h-11 sm:h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-[#7A12F5] via-[#C818F5] to-[#941DF7] text-[15px] font-extrabold text-white shadow-[0_10px_26px_rgba(138,24,245,0.42)] transition-all duration-150 hover:brightness-110 active:scale-[0.98] cursor-pointer"
-              >
-                Start
-              </button>
+              {/* Primary CTA Pill Button with Smooth Attention Pulse */}
+              <div className="relative mt-5">
+                {!prefersReducedMotion && (
+                  <>
+                    <motion.span
+                      aria-hidden="true"
+                      initial={{ opacity: 0.55, scale: 0.99 }}
+                      animate={{
+                        opacity: [0.65, 0.18, 0.65],
+                        scale: [0.99, 1.045, 0.99],
+                      }}
+                      transition={{
+                        duration: 2.0,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                      }}
+                      className="pointer-events-none absolute -inset-1 rounded-full bg-gradient-to-r from-[#7A12F5]/60 via-[#C818F5]/60 to-[#941DF7]/60 blur-[8px] will-change-transform"
+                    />
+                    <motion.span
+                      aria-hidden="true"
+                      initial={{ opacity: 0.45, scale: 1 }}
+                      animate={{
+                        opacity: [0.45, 0],
+                        scale: [1, 1.085],
+                      }}
+                      transition={{
+                        duration: 2.0,
+                        repeat: Infinity,
+                        ease: 'easeOut',
+                      }}
+                      className="pointer-events-none absolute inset-0 rounded-full border-2 border-[#C818F5]/60 will-change-transform"
+                    />
+                  </>
+                )}
+                <motion.button
+                  type="button"
+                  onClick={handleStart}
+                  whileHover={prefersReducedMotion ? undefined : { scale: 1.025 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                  className="relative flex h-11 sm:h-12 w-full items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-[#7A12F5] via-[#C818F5] to-[#941DF7] text-[15px] font-extrabold text-white shadow-[0_10px_26px_rgba(138,24,245,0.44)] transition-[filter] duration-150 hover:brightness-110 cursor-pointer"
+                >
+                  {!prefersReducedMotion && (
+                    <>
+                      <motion.span
+                        aria-hidden="true"
+                        animate={{ opacity: [0, 0.22, 0] }}
+                        transition={{
+                          duration: 2.0,
+                          repeat: Infinity,
+                          ease: 'easeInOut',
+                        }}
+                        className="pointer-events-none absolute inset-0 rounded-full bg-white/30"
+                      />
+                      <motion.span
+                        aria-hidden="true"
+                        initial={{ x: '-130%' }}
+                        animate={{ x: ['-130%', '140%'] }}
+                        transition={{
+                          duration: 2.1,
+                          repeat: Infinity,
+                          repeatDelay: 1.1,
+                          ease: [0.22, 1, 0.36, 1],
+                        }}
+                        className="pointer-events-none absolute inset-y-0 w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/32 to-transparent will-change-transform"
+                      />
+                    </>
+                  )}
+                  <span className="relative z-10">Start</span>
+                </motion.button>
+              </div>
             </div>
 
             {/* Bottom Circular Dismiss Button */}

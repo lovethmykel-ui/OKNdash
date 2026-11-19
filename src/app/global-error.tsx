@@ -7,31 +7,52 @@
  */
 'use client';
 
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
+
+const CHUNK_RETRY_KEY = 'okn_global_chunk_retry_ts';
+const CHUNK_RETRY_COOLDOWN_MS = 10_000;
 
 export default function GlobalError({
   error,
   reset,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  reset?: () => void;
 }) {
+  const handleRetry = useCallback(() => {
+    if (typeof reset === 'function') {
+      reset();
+      return;
+    }
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
+  }, [reset]);
+
   useEffect(() => {
     const isChunkError =
       error?.name === 'ChunkLoadError' ||
       error?.message?.includes('ChunkLoadError') ||
       error?.message?.includes('Loading chunk');
-    if (isChunkError) {
-      if (typeof window !== 'undefined') {
-        const key = 'okn_global_chunk_retry';
-        if (!sessionStorage.getItem(key)) {
-          sessionStorage.setItem(key, '1');
+    if (!isChunkError) return;
+
+    if (typeof window !== 'undefined') {
+      try {
+        const lastRetry = Number(window.sessionStorage.getItem(CHUNK_RETRY_KEY) ?? '0');
+        const now = Date.now();
+        if (!Number.isFinite(lastRetry) || now - lastRetry > CHUNK_RETRY_COOLDOWN_MS) {
+          window.sessionStorage.setItem(CHUNK_RETRY_KEY, String(now));
           window.location.reload();
           return;
         }
+      } catch {
+        window.location.reload();
+        return;
       }
+    }
+
+    if (typeof reset === 'function') {
       reset();
-      return;
     }
   }, [error, reset]);
 
@@ -51,16 +72,16 @@ export default function GlobalError({
         >
           <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Something went wrong</h1>
           <p style={{ color: '#666', marginBottom: '1.5rem' }}>
-            An unexpected error occurred. Our team has been notified.
+            An unexpected error occurred. Please reload to continue.
           </p>
           <button
             type="button"
-            onClick={reset}
+            onClick={handleRetry}
             style={{
               padding: '0.75rem 1.5rem',
               borderRadius: '12px',
               border: 'none',
-              background: '#007aff',
+              background: '#7A12F5',
               color: 'white',
               fontWeight: 600,
               cursor: 'pointer',

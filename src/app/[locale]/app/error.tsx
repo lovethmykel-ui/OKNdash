@@ -6,45 +6,55 @@
  */
 'use client';
 
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
+
+const CHUNK_RETRY_KEY = 'okn_app_chunk_retry_ts';
+const CHUNK_RETRY_COOLDOWN_MS = 10_000;
 
 export default function AppError({
   error,
   reset,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  reset?: () => void;
 }) {
+  const handleRetry = useCallback(() => {
+    if (typeof reset === 'function') {
+      reset();
+      return;
+    }
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
+  }, [reset]);
+
   useEffect(() => {
     const isChunkError =
       error?.name === 'ChunkLoadError' ||
       error?.message?.includes('ChunkLoadError') ||
       error?.message?.includes('Loading chunk');
-    if (isChunkError) {
-      if (typeof window !== 'undefined') {
-        const key = 'okn_app_chunk_retry';
-        if (!sessionStorage.getItem(key)) {
-          sessionStorage.setItem(key, '1');
+    if (!isChunkError) return;
+
+    if (typeof window !== 'undefined') {
+      try {
+        const lastRetry = Number(window.sessionStorage.getItem(CHUNK_RETRY_KEY) ?? '0');
+        const now = Date.now();
+        if (!Number.isFinite(lastRetry) || now - lastRetry > CHUNK_RETRY_COOLDOWN_MS) {
+          window.sessionStorage.setItem(CHUNK_RETRY_KEY, String(now));
           window.location.reload();
           return;
         }
+      } catch {
+        window.location.reload();
+        return;
       }
-      reset();
-      return;
     }
-    void fetch('/api/client-error', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: error.message,
-        digest: error.digest,
-        stack: error.stack,
-        location: typeof window !== 'undefined' ? window.location.pathname : 'unknown',
-        area: 'app',
-      }),
-    }).catch(() => {});
+
+    if (typeof reset === 'function') {
+      reset();
+    }
   }, [error, reset]);
 
   return (
@@ -66,7 +76,7 @@ export default function AppError({
       <div className="mt-1 flex flex-wrap items-center justify-center gap-2.5">
         <button
           type="button"
-          onClick={reset}
+          onClick={handleRetry}
           className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#7A12F5] px-5 text-xs sm:text-sm font-extrabold text-white shadow-sm hover:bg-[#8C38F7] active:scale-95 transition-all cursor-pointer"
         >
           <RefreshCw className="size-4" />
