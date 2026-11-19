@@ -3,27 +3,23 @@
 /**
  * polymarket-agent/copier-panel.tsx — the Copy tab content.
  *
- * Clean, single-elevation Polymarket Leaderboard mirror modeled after
- * polymarket.com/leaderboard with timeframe/category/sort/search controls,
- * 1-click inline mirror configuration, custom 0x subscriptions, and executions.
+ * Minimalist workspace combining:
+ *   - Slim inline Agent capital readiness strip
+ *   - Live Polymarket Leaderboard mirror (LeaderboardTable)
+ *   - Active Mirrors (SubscriptionsCard) & Execution Feed (ExecutionsCard)
  */
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   Activity,
   ArrowRight,
-  BadgeCheck,
-  Check,
-  Copy,
   Crown,
   KeyRound,
   Landmark,
   PauseCircle,
   PlayCircle,
   Plus,
-  Search,
   StopCircle,
-  Trophy,
   Users,
   Wallet,
 } from 'lucide-react';
@@ -33,18 +29,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import {
-  POLYMARKET_LEADERBOARD_TRADERS,
-  canEngageLiveCopy,
-  filterAndSortLeaderboard,
-  formatCompactUsd,
-  shortenEvmAddress,
-  type LeaderboardCategory,
-  type LeaderboardSort,
-  type LeaderboardTimeframe,
-  type PolymarketLeaderboardTrader,
-} from '@/lib/polymarket/leaderboard';
+import { canEngageLiveCopy, shortenEvmAddress } from '@/lib/polymarket/leaderboard';
 import type { AgentTab } from './tab-param';
+import { LeaderboardTable } from './leaderboard-table';
 import { TwoFaChallenge } from './two-fa-challenge';
 import { UpgradeDialog } from './upgrade-dialog';
 import {
@@ -67,21 +54,6 @@ import {
 } from './copier-hooks';
 
 type LoadState = 'loading' | 'unconfigured' | 'active' | 'error';
-
-const TIMEFRAME_OPTIONS: { key: LeaderboardTimeframe; label: string }[] = [
-  { key: 'day', label: 'Today' },
-  { key: 'week', label: 'Weekly' },
-  { key: 'month', label: 'Monthly' },
-  { key: 'all', label: 'All Time' },
-];
-
-const CATEGORY_OPTIONS: LeaderboardCategory[] = ['All', 'Politics', 'Crypto', 'Economics', 'Sports'];
-
-const SORT_OPTIONS: { key: LeaderboardSort; label: string }[] = [
-  { key: 'pnl', label: 'Profit / PnL' },
-  { key: 'volume', label: 'Volume' },
-  { key: 'winRate', label: 'Win Rate' },
-];
 
 interface CopierPanelProps {
   onNavigateTab?: (tab: AgentTab) => void;
@@ -177,42 +149,43 @@ export function CopierPanel({ onNavigateTab }: CopierPanelProps) {
 
   return (
     <div className="space-y-6">
-      {/* Slim Readiness Status Bar */}
+      {/* Minimalist Agent Capital Bar */}
       <div
         className={cn(
-          'rounded-2xl border px-4 py-3.5 sm:px-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between',
+          'rounded-2xl border px-5 py-3.5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between',
           funding.ready
             ? 'border-[var(--line)] bg-[var(--s1)]'
-            : 'border-[#F59E0B]/40 bg-[#F59E0B]/[0.07]',
+            : 'border-[#F59E0B]/40 bg-[#F59E0B]/[0.06]',
         )}
       >
         <div className="flex items-center gap-3 min-w-0">
           <Landmark
             className={cn(
-              'size-5 shrink-0',
+              'size-4 shrink-0',
               funding.ready ? 'text-[#10B981]' : 'text-[#D97706] dark:text-[#FBBF24]',
             )}
           />
-          <div className="min-w-0">
-            <div className="text-sm font-extrabold text-[var(--tx)]">
+          <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5 text-xs sm:text-sm min-w-0">
+            <span className="font-semibold text-[var(--tx)] tabular-nums">
               {funding.ready
-                ? `Agent Funded: $${usdcBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC.e`
-                : 'Fund Your Agent Before Engaging Live Copy Trades'}
-            </div>
-            <p className="text-xs text-[var(--mut)] mt-0.5 tabular-nums">
+                ? `$${usdcBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC.e`
+                : 'Fund Agent Wallet to Copy Live'}
+            </span>
+            <span className="text-xs text-[var(--mut)] tabular-nums">
               {funding.ready
-                ? `${polBalance.toFixed(2)} POL gas available · ${liveCount} live trader ${liveCount === 1 ? 'mirror' : 'mirrors'} active`
-                : 'Queue traders in preview mode now, or deposit USDC.e & POL on the Fund tab to go live.'}
-            </p>
+                ? `${polBalance.toFixed(2)} POL · ${liveCount} active ${liveCount === 1 ? 'mirror' : 'mirrors'}`
+                : 'Queue traders in Preview now, or deposit USDC.e & POL first.'}
+            </span>
           </div>
         </div>
+
         <button
           type="button"
           onClick={() => onNavigateTab?.('fund')}
           className={cn(
-            'h-9 px-3.5 rounded-xl text-xs font-extrabold cursor-pointer shrink-0 inline-flex items-center gap-1.5 transition-colors whitespace-nowrap self-start sm:self-auto',
+            'h-8 px-3.5 rounded-lg text-xs font-semibold cursor-pointer shrink-0 inline-flex items-center gap-1.5 transition-colors whitespace-nowrap self-start sm:self-auto',
             funding.ready
-              ? 'border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] hover:bg-[var(--line)]/50'
+              ? 'border border-[var(--line)] bg-[var(--s2)]/60 text-[var(--tx)] hover:bg-[var(--s2)]'
               : 'bg-[#2E5CFF] text-white hover:bg-[#1E4DF0]',
           )}
         >
@@ -223,8 +196,8 @@ export function CopierPanel({ onNavigateTab }: CopierPanelProps) {
 
       {!wallet && <ActivationCard onActivated={refresh} />}
 
-      {/* Polymarket Leaderboard Mirror */}
-      <PolymarketLeaderboardSection
+      {/* Live Polymarket Leaderboard Mirror */}
+      <LeaderboardTable
         subscriptions={subscriptions}
         agentFunded={funding.ready}
         onCopied={refresh}
@@ -257,586 +230,6 @@ export function CopierPanel({ onNavigateTab }: CopierPanelProps) {
           onSubscribed={refresh}
         />
       )}
-    </div>
-  );
-}
-
-function PolymarketLeaderboardSection({
-  subscriptions,
-  agentFunded,
-  onCopied,
-  onGoFund,
-}: {
-  subscriptions: CopierSubscription[];
-  agentFunded: boolean;
-  onCopied: () => void;
-  onGoFund: () => void;
-}) {
-  const [timeframe, setTimeframe] = useState<LeaderboardTimeframe>('month');
-  const [category, setCategory] = useState<LeaderboardCategory>('All');
-  const [sortBy, setSortBy] = useState<LeaderboardSort>('pnl');
-  const [search, setSearch] = useState('');
-  const [configuringId, setConfiguringId] = useState<string | null>(null);
-  const [copyPct, setCopyPct] = useState<number>(10);
-  const [maxUsd, setMaxUsd] = useState<number>(250);
-  const [userLiveChoice, setUserLiveChoice] = useState<boolean | null>(null);
-  const startLive = agentFunded ? (userLiveChoice ?? true) : false;
-  const setStartLive = (v: boolean) => setUserLiveChoice(v);
-  const [busyId, setBusyId] = useState<string | null>(null);
-  const [copiedAddr, setCopiedAddr] = useState<string | null>(null);
-
-  const rankedTraders = useMemo(
-    () =>
-      filterAndSortLeaderboard(POLYMARKET_LEADERBOARD_TRADERS, {
-        timeframe,
-        category,
-        sortBy,
-        search,
-      }),
-    [timeframe, category, sortBy, search],
-  );
-
-  const subByAddress = useMemo(() => {
-    const map = new Map<string, CopierSubscription>();
-    for (const sub of subscriptions) {
-      if (sub.status !== 'stopped') {
-        map.set(sub.traderAddress.toLowerCase(), sub);
-      }
-    }
-    return map;
-  }, [subscriptions]);
-
-  const handleCopyAddress = async (address: string) => {
-    try {
-      await navigator.clipboard.writeText(address);
-      setCopiedAddr(address);
-      toast.success('Trader address copied');
-      setTimeout(() => setCopiedAddr(null), 1600);
-    } catch {
-      toast.info(shortenEvmAddress(address));
-    }
-  };
-
-  const handleConfirmCopy = async (trader: PolymarketLeaderboardTrader) => {
-    setBusyId(trader.id);
-    const mode = startLive && agentFunded ? 'live' : 'preview';
-    const res = await createSubscription({
-      traderAddress: trader.address,
-      traderHandle: trader.handle,
-      specialty: trader.specialty,
-      initialStatus: mode,
-      strategyConfig: {
-        strategy: 'PERCENTAGE',
-        copySize: copyPct,
-        maxOrderSizeUsd: maxUsd,
-        minOrderSizeUsd: 10,
-      },
-    });
-    setBusyId(null);
-    if (res.ok) {
-      setConfiguringId(null);
-      toast.success(
-        mode === 'live'
-          ? `Now copying ${trader.handle} (${copyPct}% · max $${maxUsd} Live)`
-          : `Added ${trader.handle} in Preview mode. Fund your agent to go live.`,
-      );
-      onCopied();
-    } else {
-      toast.error('Could not add trader');
-    }
-  };
-
-  return (
-    <section
-      aria-label="Polymarket Leaderboard"
-      className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--s1)]"
-    >
-      {/* Integrated Leaderboard Toolbar */}
-      <div className="p-4 sm:p-5 border-b border-[var(--line)] space-y-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <Trophy className="size-5 text-[#F59E0B] shrink-0" />
-            <div>
-              <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--tx)]">
-                Polymarket Leaderboard
-              </h2>
-              <p className="text-xs text-[var(--mut)]">
-                Mirror top-ranked Polymarket wallets by realized PnL, trading volume, and win rate.
-              </p>
-            </div>
-          </div>
-
-          <div
-            role="tablist"
-            aria-label="Leaderboard timeframe"
-            className="inline-grid grid-cols-4 gap-1 rounded-xl border border-[var(--line)] bg-[var(--s2)] p-1 self-start md:self-auto"
-          >
-            {TIMEFRAME_OPTIONS.map((tf) => (
-              <button
-                key={tf.key}
-                type="button"
-                role="tab"
-                aria-selected={timeframe === tf.key}
-                onClick={() => setTimeframe(tf.key)}
-                className={cn(
-                  'h-7 px-2.5 sm:px-3 rounded-lg text-[11px] sm:text-xs font-bold transition-all cursor-pointer whitespace-nowrap',
-                  timeframe === tf.key
-                    ? 'bg-[var(--s1)] text-[var(--tx)] shadow-xs'
-                    : 'text-[var(--mut)] hover:text-[var(--tx)]',
-                )}
-              >
-                {tf.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-1 rounded-xl bg-[var(--s2)] p-1 border border-[var(--line)] self-start">
-            {CATEGORY_OPTIONS.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setCategory(cat)}
-                className={cn(
-                  'h-7 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap',
-                  category === cat
-                    ? 'bg-[var(--s1)] text-[#2E5CFF] shadow-xs'
-                    : 'text-[var(--mut)] hover:text-[var(--tx)]',
-                )}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <div className="relative flex-1 sm:w-60">
-              <Search className="size-3.5 text-[var(--mut)] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search @trader or 0x..."
-                aria-label="Search Polymarket leaderboard traders"
-                className="h-9 w-full rounded-xl border border-[var(--line)] bg-[var(--s2)] pl-8 pr-3 text-xs font-medium text-[var(--tx)] placeholder:text-[var(--mut)] outline-none focus:border-[#2E5CFF]"
-              />
-            </div>
-
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as LeaderboardSort)}
-              aria-label="Sort leaderboard by"
-              className="h-9 rounded-xl border border-[var(--line)] bg-[var(--s2)] px-3 text-xs font-bold text-[var(--tx)] outline-none focus:border-[#2E5CFF] cursor-pointer"
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.key} value={opt.key}>
-                  Sort: {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Leaderboard Body */}
-      {rankedTraders.length === 0 ? (
-        <div className="p-10 text-center space-y-2">
-          <p className="text-sm font-bold text-[var(--tx)]">No traders matched your filter</p>
-          <p className="text-xs text-[var(--mut)]">
-            Try clearing your search query or switching back to All categories.
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="cursor-pointer mt-1"
-            onClick={() => {
-              setSearch('');
-              setCategory('All');
-            }}
-          >
-            Reset Filters
-          </Button>
-        </div>
-      ) : (
-        <>
-          {/* Flush Desktop Data Table */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-[var(--line)] bg-[var(--s2)]/50 text-[11px] font-bold uppercase tracking-wider text-[var(--mut)]">
-                  <th className="py-3 pl-5 pr-2 w-14">Rank</th>
-                  <th className="py-3 px-3">Trader</th>
-                  <th className="py-3 px-3">Recent Position</th>
-                  <th className="py-3 px-3 text-right">Profit / PnL</th>
-                  <th className="py-3 px-3 text-right">Volume</th>
-                  <th className="py-3 px-3 text-right">Win Rate</th>
-                  <th className="py-3 pl-3 pr-5 text-right w-32">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--line)] text-sm">
-                {rankedTraders.map(({ rank, trader, periodStats }) => {
-                  const existingSub = subByAddress.get(trader.address.toLowerCase());
-                  const isEditing = configuringId === trader.id;
-                  return (
-                    <Fragment key={trader.id}>
-                      <tr className="hover:bg-[var(--s2)]/50 transition-colors">
-                        <td className="py-3.5 pl-5 pr-2 font-mono text-xs font-extrabold tabular-nums">
-                          <RankMedal rank={rank} />
-                        </td>
-                        <td className="py-3.5 px-3">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <span
-                              className={cn(
-                                'size-9 rounded-full bg-gradient-to-br flex items-center justify-center text-xs font-extrabold text-white shrink-0',
-                                trader.avatarGradient,
-                              )}
-                            >
-                              {trader.displayName.slice(0, 2).toUpperCase()}
-                            </span>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-extrabold text-sm text-[var(--tx)] truncate">
-                                  {trader.handle}
-                                </span>
-                                {trader.verified && (
-                                  <BadgeCheck className="size-3.5 text-[#2E5CFF] shrink-0" />
-                                )}
-                                <span className="text-[11px] font-medium text-[var(--mut)] whitespace-nowrap">
-                                  · {trader.specialty}
-                                </span>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => void handleCopyAddress(trader.address)}
-                                className="inline-flex items-center gap-1 font-mono text-[11px] text-[var(--mut)] hover:text-[var(--tx)] cursor-pointer"
-                              >
-                                <span>{shortenEvmAddress(trader.address)}</span>
-                                {copiedAddr === trader.address ? (
-                                  <Check className="size-3 text-[#10B981]" />
-                                ) : (
-                                  <Copy className="size-3" />
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3.5 px-3 max-w-[240px]">
-                          <div className="text-xs font-semibold text-[var(--tx)] truncate">
-                            {trader.recentMarket}
-                          </div>
-                          <div className="text-[11px] text-[var(--mut)] font-mono tabular-nums mt-0.5">
-                            <span
-                              className={cn(
-                                'font-extrabold',
-                                trader.recentSide === 'YES' ? 'text-[#10B981]' : 'text-[#F43F5E]',
-                              )}
-                            >
-                              {trader.recentSide}
-                            </span>{' '}
-                            · {formatCompactUsd(trader.recentSizeUsd)}
-                          </div>
-                        </td>
-                        <td className="py-3.5 px-3 text-right font-mono font-extrabold text-[#10B981] tabular-nums whitespace-nowrap">
-                          {formatCompactUsd(periodStats.pnlUsd, true)}
-                          <div className="text-[10.5px] font-semibold text-[var(--mut)]">
-                            +{periodStats.roiPct.toFixed(1)}% ROI
-                          </div>
-                        </td>
-                        <td className="py-3.5 px-3 text-right font-mono font-bold text-[var(--tx)] tabular-nums whitespace-nowrap">
-                          {formatCompactUsd(periodStats.volumeUsd)}
-                        </td>
-                        <td className="py-3.5 px-3 text-right font-mono font-bold text-[var(--tx)] tabular-nums whitespace-nowrap">
-                          {periodStats.winRate.toFixed(1)}%
-                          <div className="text-[10.5px] font-medium text-[var(--mut)]">
-                            {periodStats.trades} trades
-                          </div>
-                        </td>
-                        <td className="py-3.5 pl-3 pr-5 text-right">
-                          {existingSub ? (
-                            <button
-                              type="button"
-                              onClick={() => setConfiguringId(isEditing ? null : trader.id)}
-                              className="h-8 px-3 rounded-lg bg-[#10B981]/12 text-[#10B981] text-xs font-extrabold hover:bg-[#10B981]/20 transition-colors cursor-pointer whitespace-nowrap inline-flex items-center gap-1"
-                            >
-                              <Check className="size-3.5" />
-                              <span>{existingSub.status === 'live' ? 'Copying' : 'Preview'}</span>
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => setConfiguringId(isEditing ? null : trader.id)}
-                              className="h-8 px-3.5 rounded-lg bg-[#2E5CFF] text-white text-xs font-extrabold hover:bg-[#1E4DF0] active:scale-[0.97] transition-all cursor-pointer whitespace-nowrap inline-flex items-center gap-1.5"
-                            >
-                              <Copy className="size-3.5" />
-                              <span>Copy</span>
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-
-                      {isEditing && (
-                        <tr className="bg-[var(--s2)]/65">
-                          <td colSpan={7} className="px-5 py-4">
-                            <InlineCopyConfigurator
-                              trader={trader}
-                              copyPct={copyPct}
-                              setCopyPct={setCopyPct}
-                              maxUsd={maxUsd}
-                              setMaxUsd={setMaxUsd}
-                              startLive={startLive}
-                              setStartLive={setStartLive}
-                              agentFunded={agentFunded}
-                              busy={busyId === trader.id}
-                              onCancel={() => setConfiguringId(null)}
-                              onConfirm={() => void handleConfirmCopy(trader)}
-                              onGoFund={onGoFund}
-                            />
-                          </td>
-                        </tr>
-                      )}
-                    </Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile Leaderboard Rows (Flush Hairline List) */}
-          <div className="divide-y divide-[var(--line)] md:hidden">
-            {rankedTraders.map(({ rank, trader, periodStats }) => {
-              const existingSub = subByAddress.get(trader.address.toLowerCase());
-              const isEditing = configuringId === trader.id;
-              return (
-                <div key={trader.id} className="p-4 space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <RankMedal rank={rank} />
-                      <span
-                        className={cn(
-                          'size-9 rounded-full bg-gradient-to-br flex items-center justify-center text-xs font-extrabold text-white shrink-0',
-                          trader.avatarGradient,
-                        )}
-                      >
-                        {trader.displayName.slice(0, 2).toUpperCase()}
-                      </span>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1">
-                          <span className="font-extrabold text-sm text-[var(--tx)] truncate">
-                            {trader.handle}
-                          </span>
-                          {trader.verified && (
-                            <BadgeCheck className="size-3.5 text-[#2E5CFF] shrink-0" />
-                          )}
-                        </div>
-                        <div className="text-[11px] font-mono text-[var(--mut)] truncate">
-                          {shortenEvmAddress(trader.address)} · {trader.specialty}
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setConfiguringId(isEditing ? null : trader.id)}
-                      className={cn(
-                        'h-8 px-3 rounded-lg text-xs font-extrabold cursor-pointer shrink-0 whitespace-nowrap inline-flex items-center gap-1',
-                        existingSub
-                          ? 'bg-[#10B981]/12 text-[#10B981]'
-                          : 'bg-[#2E5CFF] text-white',
-                      )}
-                    >
-                      {existingSub ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-                      <span>{existingSub ? (existingSub.status === 'live' ? 'Copying' : 'Preview') : 'Copy'}</span>
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 pt-2 text-xs">
-                    <div>
-                      <div className="text-[10px] font-semibold text-[var(--mut)]">Profit</div>
-                      <div className="font-mono font-extrabold text-[#10B981] tabular-nums">
-                        {formatCompactUsd(periodStats.pnlUsd, true)}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-[10px] font-semibold text-[var(--mut)]">Volume</div>
-                      <div className="font-mono font-bold text-[var(--tx)] tabular-nums">
-                        {formatCompactUsd(periodStats.volumeUsd)}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-[10px] font-semibold text-[var(--mut)]">Win Rate</div>
-                      <div className="font-mono font-bold text-[var(--tx)] tabular-nums">
-                        {periodStats.winRate.toFixed(1)}%
-                      </div>
-                    </div>
-                  </div>
-
-                  {isEditing && (
-                    <div className="pt-3 border-t border-[var(--line)]">
-                      <InlineCopyConfigurator
-                        trader={trader}
-                        copyPct={copyPct}
-                        setCopyPct={setCopyPct}
-                        maxUsd={maxUsd}
-                        setMaxUsd={setMaxUsd}
-                        startLive={startLive}
-                        setStartLive={setStartLive}
-                        agentFunded={agentFunded}
-                        busy={busyId === trader.id}
-                        onCancel={() => setConfiguringId(null)}
-                        onConfirm={() => void handleConfirmCopy(trader)}
-                        onGoFund={onGoFund}
-                      />
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
-    </section>
-  );
-}
-
-function RankMedal({ rank }: { rank: number }) {
-  if (rank === 1) {
-    return (
-      <span className="inline-flex size-6 items-center justify-center rounded-md bg-[#F59E0B]/18 text-[#D97706] dark:text-[#FBBF24] font-mono text-xs font-extrabold">
-        1
-      </span>
-    );
-  }
-  if (rank === 2) {
-    return (
-      <span className="inline-flex size-6 items-center justify-center rounded-md bg-slate-400/18 text-slate-600 dark:text-slate-300 font-mono text-xs font-extrabold">
-        2
-      </span>
-    );
-  }
-  if (rank === 3) {
-    return (
-      <span className="inline-flex size-6 items-center justify-center rounded-md bg-[#B45309]/18 text-[#B45309] dark:text-[#F59E0B] font-mono text-xs font-extrabold">
-        3
-      </span>
-    );
-  }
-  return <span className="inline-flex size-6 items-center justify-center text-[var(--mut)] font-mono text-xs font-bold">#{rank}</span>;
-}
-
-function InlineCopyConfigurator({
-  trader,
-  copyPct,
-  setCopyPct,
-  maxUsd,
-  setMaxUsd,
-  startLive,
-  setStartLive,
-  agentFunded,
-  busy,
-  onCancel,
-  onConfirm,
-  onGoFund,
-}: {
-  trader: PolymarketLeaderboardTrader;
-  copyPct: number;
-  setCopyPct: (v: number) => void;
-  maxUsd: number;
-  setMaxUsd: (v: number) => void;
-  startLive: boolean;
-  setStartLive: (v: boolean) => void;
-  agentFunded: boolean;
-  busy: boolean;
-  onCancel: () => void;
-  onConfirm: () => void;
-  onGoFund: () => void;
-}) {
-  return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-      <div className="space-y-0.5">
-        <div className="text-xs font-extrabold text-[var(--tx)]">
-          Configure Mirror for {trader.handle}
-        </div>
-        <p className="text-[11px] text-[var(--mut)]">
-          Set proportional sizing and max order cap before mirroring positions.
-        </p>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] font-bold text-[var(--mut)]">Size %:</span>
-          {[5, 10, 15, 25].map((pct) => (
-            <button
-              key={pct}
-              type="button"
-              onClick={() => setCopyPct(pct)}
-              className={cn(
-                'h-7 px-2.5 rounded-lg border text-xs font-extrabold cursor-pointer tabular-nums transition-colors',
-                copyPct === pct
-                  ? 'border-[#2E5CFF] bg-[#2E5CFF] text-white'
-                  : 'border-[var(--line)] bg-[var(--s1)] text-[var(--tx)]',
-              )}
-            >
-              {pct}%
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] font-bold text-[var(--mut)]">Max Cap:</span>
-          {[100, 250, 500].map((cap) => (
-            <button
-              key={cap}
-              type="button"
-              onClick={() => setMaxUsd(cap)}
-              className={cn(
-                'h-7 px-2.5 rounded-lg border text-xs font-extrabold cursor-pointer tabular-nums transition-colors',
-                maxUsd === cap
-                  ? 'border-[#2E5CFF] bg-[#2E5CFF] text-white'
-                  : 'border-[var(--line)] bg-[var(--s1)] text-[var(--tx)]',
-              )}
-            >
-              ${cap}
-            </button>
-          ))}
-        </div>
-
-        {agentFunded ? (
-          <label className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--tx)] cursor-pointer">
-            <input
-              type="checkbox"
-              checked={startLive}
-              onChange={(e) => setStartLive(e.target.checked)}
-              className="size-4 accent-[#2E5CFF] cursor-pointer"
-            />
-            <span>Go Live immediately</span>
-          </label>
-        ) : (
-          <button
-            type="button"
-            onClick={onGoFund}
-            className="text-xs font-bold text-[#D97706] dark:text-[#FBBF24] hover:underline cursor-pointer"
-          >
-            Fund Agent to enable Live →
-          </button>
-        )}
-
-        <div className="flex items-center gap-2 ml-auto">
-          <Button type="button" variant="outline" size="sm" onClick={onCancel} className="cursor-pointer">
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            disabled={busy}
-            onClick={onConfirm}
-            className="cursor-pointer bg-[#2E5CFF] text-white hover:bg-[#1E4DF0]"
-          >
-            {busy ? 'Saving...' : startLive && agentFunded ? 'Confirm Live Copy' : 'Add in Preview'}
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }
@@ -879,11 +272,11 @@ function ActivationCard({ onActivated }: { onActivated: () => void }) {
   return (
     <section className="rounded-2xl border border-[var(--line)] bg-[var(--s1)] p-5 md:p-6 space-y-4">
       <div className="flex items-start gap-4">
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#2E5CFF]/12 text-[#2E5CFF]">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#2E5CFF]/10 text-[#2E5CFF]">
           <Users className="size-5" />
         </span>
         <div className="space-y-1">
-          <p className="font-display text-lg font-bold text-[var(--tx)]">{t('headline')}</p>
+          <p className="font-display text-base font-bold text-[var(--tx)]">{t('headline')}</p>
           <p className="max-w-prose text-sm text-[var(--mut)]">{t('body')}</p>
         </div>
       </div>
@@ -1025,37 +418,37 @@ function SubscriptionsCard({
 
   return (
     <section className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--s1)]">
-      <div className="p-5 border-b border-[var(--line)] flex items-center justify-between gap-2">
-        <h2 className="text-sm font-extrabold tracking-tight text-[var(--tx)]">
+      <div className="px-5 py-4 border-b border-[var(--line)] flex items-center justify-between gap-2">
+        <h2 className="text-sm font-bold tracking-tight text-[var(--tx)]">
           {t('tradersTitle')}
         </h2>
         <div className="flex items-center gap-2 text-xs text-[var(--mut)] tabular-nums">
           <span>{t('traderCount', { count: subscriptions.length })}</span>
           {entitlement?.billingEnabled && slots !== undefined ? (
             isPro ? (
-              <span className="inline-flex items-center gap-1 font-bold text-[#D97706] dark:text-[#FBBF24]">
+              <span className="inline-flex items-center gap-1 font-semibold text-[#D97706] dark:text-[#FBBF24]">
                 <Crown className="size-3.5" aria-hidden="true" />
-                PRO
+                Pro
               </span>
             ) : (
               <button
                 type="button"
-                className="cursor-pointer font-bold text-[#2E5CFF] hover:underline"
+                className="cursor-pointer font-semibold text-[#2E5CFF] hover:underline"
                 onClick={onUpgrade}
                 aria-label={tb('upgradeCta')}
               >
-                FREE · {liveCount}/{slots}
+                · Free {liveCount}/{slots}
               </button>
             )
           ) : null}
         </div>
       </div>
 
-      <div className="p-5 border-b border-[var(--line)] bg-[var(--s2)]/40 space-y-3">
+      <div className="px-5 py-4 border-b border-[var(--line)] bg-[var(--s2)]/30 space-y-3">
         <div className="grid gap-2.5 sm:grid-cols-[1fr_auto_auto] sm:items-end">
           <div className="space-y-1">
-            <Label htmlFor="copier-trader-address" className="text-xs font-semibold">
-              Custom Polymarket wallet address
+            <Label htmlFor="copier-trader-address" className="text-xs font-medium text-[var(--mut)]">
+              Add custom wallet address
             </Label>
             <Input
               id="copier-trader-address"
@@ -1063,10 +456,11 @@ function SubscriptionsCard({
               onChange={(e) => setTraderAddress(e.target.value)}
               placeholder="0x..."
               aria-invalid={!validAddress && traderAddress.length > 0}
+              className="h-9 text-xs font-mono"
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="copier-copy-size" className="text-xs font-semibold">
+            <Label htmlFor="copier-copy-size" className="text-xs font-medium text-[var(--mut)]">
               {t('copySizeLabel')}
             </Label>
             <Input
@@ -1076,10 +470,10 @@ function SubscriptionsCard({
               max={100}
               value={copySize}
               onChange={(e) => setCopySize(e.target.value)}
-              className="w-24 tabular-nums"
+              className="h-9 w-20 text-xs font-mono tabular-nums"
             />
           </div>
-          <Button type="button" onClick={add} disabled={busy || !validAddress} className="cursor-pointer">
+          <Button type="button" size="sm" onClick={add} disabled={busy || !validAddress} className="h-9 cursor-pointer">
             <Plus data-icon="inline-start" />
             {t('addTrader')}
           </Button>
@@ -1098,15 +492,15 @@ function SubscriptionsCard({
           {subscriptions.map((sub) => (
             <li
               key={sub.id}
-              className="flex flex-col gap-2.5 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between hover:bg-[var(--s2)]/40 transition-colors"
+              className="flex flex-col gap-2.5 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between hover:bg-[var(--s2)]/35 transition-colors"
             >
               <div className="min-w-0 space-y-0.5">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-extrabold text-[var(--tx)]">
+                  <span className="text-sm font-semibold text-[var(--tx)]">
                     {sub.traderHandle ?? shortenEvmAddress(sub.traderAddress)}
                   </span>
                   {sub.specialty && (
-                    <span className="text-[11px] text-[var(--mut)]">· {sub.specialty}</span>
+                    <span className="text-xs text-[var(--mut)]">· {sub.specialty}</span>
                   )}
                   <StatusText status={sub.status} />
                 </div>
@@ -1171,7 +565,7 @@ function StatusText({ status }: { status: CopierSubscription['status'] }) {
           ? 'text-[#D97706] dark:text-[#FBBF24]'
           : 'text-[var(--mut)]';
   return (
-    <span className={cn('text-[11px] font-extrabold uppercase tracking-wide', tone)}>
+    <span className={cn('text-xs font-semibold', tone)}>
       · {t(`status.${status}`)}
     </span>
   );
@@ -1181,8 +575,8 @@ function ExecutionsCard({ executions }: { executions: CopierExecution[] }) {
   const t = useTranslations('dashboard.polymarketAgent.copier');
   return (
     <section className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--s1)]">
-      <div className="p-5 border-b border-[var(--line)] flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-sm font-extrabold tracking-tight text-[var(--tx)]">
+      <div className="px-5 py-4 border-b border-[var(--line)] flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-sm font-bold tracking-tight text-[var(--tx)]">
           <Activity className="size-4 text-[#2E5CFF]" />
           <span>{t('executionsTitle')}</span>
         </h2>
@@ -1198,10 +592,10 @@ function ExecutionsCard({ executions }: { executions: CopierExecution[] }) {
           {executions.map((e) => (
             <li
               key={e.id}
-              className="flex flex-col gap-1 px-5 py-3.5 text-xs sm:flex-row sm:items-center sm:justify-between hover:bg-[var(--s2)]/40 transition-colors"
+              className="flex flex-col gap-1 px-5 py-3.5 text-xs sm:flex-row sm:items-center sm:justify-between hover:bg-[var(--s2)]/35 transition-colors"
             >
               <div className="min-w-0 space-y-0.5">
-                <p className="font-mono font-bold text-[var(--tx)] truncate">
+                <p className="font-mono font-semibold text-[var(--tx)] truncate">
                   {e.market.slug ?? e.market.asset ?? e.id}
                 </p>
                 <p className="text-[var(--mut)] tabular-nums">
@@ -1213,11 +607,11 @@ function ExecutionsCard({ executions }: { executions: CopierExecution[] }) {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 {e.sizing?.finalAmount !== undefined && e.sizing.finalAmount > 0 && (
-                  <span className="font-mono font-extrabold text-[var(--tx)] tabular-nums">
+                  <span className="font-mono font-bold text-[var(--tx)] tabular-nums">
                     ${e.sizing.finalAmount.toFixed(2)}
                   </span>
                 )}
-                <span className="text-[11px] font-bold uppercase text-[#10B981]">
+                <span className="text-xs font-semibold text-[#10B981]">
                   · {e.status}
                 </span>
               </div>

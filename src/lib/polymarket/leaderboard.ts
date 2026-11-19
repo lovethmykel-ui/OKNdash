@@ -614,6 +614,13 @@ export function formatCompactUsd(amount: number, signed = false): string {
   return `${sign}$${abs.toFixed(0)}`;
 }
 
+export function formatTradeUsd(amount: number): string {
+  const abs = Math.abs(amount);
+  if (abs >= 1_000) return formatCompactUsd(amount, false);
+  if (abs > 0 && abs < 10) return `$${abs.toFixed(2)}`;
+  return `$${abs.toFixed(0)}`;
+}
+
 export function canEngageLiveCopy(usdcBalance: number, polBalance: number): {
   ready: boolean;
   needsUsdc: boolean;
