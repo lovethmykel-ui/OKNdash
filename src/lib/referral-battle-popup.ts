@@ -29,7 +29,7 @@ export const REFERRAL_BATTLE_PRIZES: readonly ReferralBattlePrize[] = [
     placeLabel: '1st PRIZE:',
     title: 'iPhone Duo',
     tier: 'gold',
-    imageSrc: '/assets/referral-battle/iphone-duo.png',
+    imageSrc: '/assets/aistudio/iPhone-Duo-Night-Sky_2a631c95.png',
     imageAlt: 'iPhone Duo foldable smartphone',
   },
   {
@@ -37,7 +37,7 @@ export const REFERRAL_BATTLE_PRIZES: readonly ReferralBattlePrize[] = [
     placeLabel: '2nd PRIZE:',
     title: 'iPhone 18 Pro Max',
     tier: 'silver',
-    imageSrc: '/assets/referral-battle/iphone-18-pro-max.png',
+    imageSrc: '/assets/aistudio/Apple-iPhone-18-Pro-12GB-256GB-5G-Burgundy-700x700_162eff92.jpg',
     imageAlt: 'iPhone 18 Pro Max deep burgundy smartphone',
   },
   {
@@ -45,8 +45,8 @@ export const REFERRAL_BATTLE_PRIZES: readonly ReferralBattlePrize[] = [
     placeLabel: '3rd PRIZE:',
     title: 'iPhone 17 Air',
     tier: 'bronze',
-    imageSrc: '/assets/referral-battle/iphone-17-air.png',
-    imageAlt: 'iPhone 17 Air silver-white smartphone',
+    imageSrc: '/assets/aistudio/iphone_air_cloud_white_pdp_image_position_1__wwen_1_2_57c6031a.jpg',
+    imageAlt: 'iPhone 17 Air cloud white smartphone',
   },
 ] as const;
 

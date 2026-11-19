@@ -137,10 +137,10 @@ export function NotificationBell() {
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-extrabold text-foreground">
-                Referral Battle Live! Stand a Chance to Win
+                Presale Giveaway! Stand a Chance to Win
               </p>
               <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-                iPhone Duo, iPhone 18 Pro Max &amp; iPhone 17 Air
+                Join Presale for iPhone Duo, 18 Pro Max &amp; 17 Air
               </p>
             </div>
           </button>

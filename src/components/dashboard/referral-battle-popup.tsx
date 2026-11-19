@@ -81,7 +81,7 @@ export function ReferralBattlePopup() {
 
   const handleStart = useCallback(() => {
     dismiss();
-    router.push('/app/referral' as never);
+    router.push('/app/buy' as never);
   }, [dismiss, router]);
 
   useEffect(() => {
@@ -129,7 +129,7 @@ export function ReferralBattlePopup() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/assets/referral-battle/bell-hero.png"
-                alt="Referral Battle Notification"
+                alt="Presale Giveaway Notification"
                 referrerPolicy="no-referrer"
                 className="h-24 w-24 sm:h-28 sm:w-28 object-contain drop-shadow-[0_14px_26px_rgba(122,18,245,0.42)] select-none"
               />
@@ -137,17 +137,17 @@ export function ReferralBattlePopup() {
 
             {/* Main Frosted Iridescent Lavender-to-Mint Glass Card */}
             <div className="relative w-full rounded-[28px] border border-white/85 bg-[linear-gradient(170deg,#FAF8FF_0%,#F2EDFE_48%,#E9EEFD_78%,#DDF6F5_100%)] px-4.5 sm:px-5.5 pt-14 sm:pt-15 pb-5.5 text-[#181824] shadow-[0_28px_72px_rgba(10,6,28,0.58),inset_0_1px_0_rgba(255,255,255,0.95)]">
-              {/* Top Showcase Box: 3 iPhone Assets + Live Strip */}
+              {/* Top Showcase Box: 3 Uploaded iPhone Assets + Live Strip */}
               <div className="overflow-hidden rounded-[20px] border border-[#E5DFF5] bg-white shadow-[0_10px_28px_rgba(122,18,245,0.09)]">
-                <div className="grid grid-cols-[1fr_0.95fr_1.15fr] items-center gap-1.5 px-3 pt-3.5 pb-2.5 bg-gradient-to-b from-white to-[#FCFAFF]">
+                <div className="grid grid-cols-[1fr_0.95fr_1.15fr] items-center gap-1.5 px-3 pt-3.5 pb-2.5 bg-white">
                   {/* 3rd Prize: iPhone 17 Air */}
                   <div className="flex items-center justify-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="/assets/referral-battle/iphone-17-air.png"
+                      src="/assets/aistudio/iphone_air_cloud_white_pdp_image_position_1__wwen_1_2_57c6031a.jpg"
                       alt="iPhone 17 Air"
                       referrerPolicy="no-referrer"
-                      className="h-[78px] sm:h-[88px] w-auto object-contain drop-shadow-[0_4px_10px_rgba(15,23,42,0.12)]"
+                      className="h-[80px] sm:h-[90px] w-auto object-contain mix-blend-multiply"
                     />
                   </div>
 
@@ -155,22 +155,22 @@ export function ReferralBattlePopup() {
                   <div className="flex items-center justify-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="/assets/referral-battle/iphone-duo.png"
+                      src="/assets/aistudio/iPhone-Duo-Night-Sky_2a631c95.png"
                       alt="iPhone Duo"
                       referrerPolicy="no-referrer"
-                      className="h-[74px] sm:h-[84px] w-auto object-contain drop-shadow-[0_6px_14px_rgba(15,23,42,0.18)]"
+                      className="h-[78px] sm:h-[88px] w-auto object-contain drop-shadow-[0_6px_14px_rgba(15,23,42,0.16)]"
                     />
                   </div>
 
-                  {/* Featured Spotlight Circle: iPhone 18 Pro Max + 1st Scalloped Seal */}
+                  {/* Featured Spotlight Circle: iPhone 18 Pro Max + 1st Badge */}
                   <div className="relative flex items-center justify-center">
-                    <div className="relative flex size-[86px] sm:size-[94px] items-center justify-center rounded-full border border-[#EAE4FA] bg-gradient-to-b from-white to-[#F7F3FF] p-2 shadow-[0_8px_22px_rgba(122,18,245,0.14)]">
+                    <div className="relative flex size-[86px] sm:size-[94px] items-center justify-center rounded-full border border-[#EAE4FA] bg-white p-2 shadow-[0_8px_22px_rgba(122,18,245,0.14)]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src="/assets/referral-battle/iphone-18-pro-max.png"
+                        src="/assets/aistudio/Apple-iPhone-18-Pro-12GB-256GB-5G-Burgundy-700x700_162eff92.jpg"
                         alt="iPhone 18 Pro Max"
                         referrerPolicy="no-referrer"
-                        className="h-[68px] sm:h-[74px] w-auto object-contain drop-shadow-[0_5px_12px_rgba(88,28,45,0.22)]"
+                        className="h-[68px] sm:h-[74px] w-auto object-contain mix-blend-multiply"
                       />
                       <span className="absolute -top-1 -right-1 flex size-[26px] items-center justify-center rounded-full border-[1.5px] border-white/95 bg-gradient-to-b from-[#69657E] to-[#464357] text-[10px] font-black tracking-tight text-white shadow-md">
                         1st
@@ -182,8 +182,8 @@ export function ReferralBattlePopup() {
                 {/* Showcase Bottom Notification Strip */}
                 <div className="flex items-center justify-between gap-2 border-t border-[#EEEAF9] bg-[#F8F5FE] px-3.5 py-2 text-[11px] sm:text-[11.5px]">
                   <p className="truncate text-[#5E5A75]">
-                    <strong className="font-extrabold text-[#1E1B2E]">Referral Battle Live!</strong>{' '}
-                    <span>Invite friends to win.</span>
+                    <strong className="font-extrabold text-[#1E1B2E]">Presale Giveaway Live!</strong>{' '}
+                    <span>Join Presale to win.</span>
                   </p>
                   <button
                     type="button"
@@ -207,8 +207,8 @@ export function ReferralBattlePopup() {
                 <p className="mt-0.5 bg-gradient-to-r from-[#7A12F5] via-[#C316F5] to-[#DF19CE] bg-clip-text text-[38px] sm:text-[42px] font-black uppercase tracking-tight text-transparent leading-[0.95]">
                   TO WIN
                 </p>
-                <p className="mt-1.5 text-[12px] sm:text-[13px] font-medium text-[#64617B]">
-                  The biggest referrals win the biggest rewards.
+                <p className="mt-1.5 px-2 text-[12px] sm:text-[13px] font-medium leading-snug text-[#64617B]">
+                  Win any of the iPhones by participating in the Presale.
                 </p>
               </div>
 
