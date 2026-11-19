@@ -126,7 +126,8 @@ export function LeaderboardTable({
     })
       .then(async (res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return (await res.json()) as {
+        const text = await res.text();
+        return JSON.parse(text) as {
           source: 'live' | 'fallback';
           syncedAt?: string;
           traders?: LiveLeaderboardTrader[];
@@ -166,7 +167,8 @@ export function LeaderboardTable({
     try {
       const res = await fetch(`/api/polymarket/trader/${encodeURIComponent(address)}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = (await res.json()) as TraderDetailPayload;
+      const text = await res.text();
+      const json = JSON.parse(text) as TraderDetailPayload;
       detailCacheRef.current.add(key);
       setTraderDetails((prev) => ({ ...prev, [key]: json }));
     } catch {
@@ -599,39 +601,36 @@ export function LeaderboardTable({
                         </td>
                       </tr>
 
-                      <AnimatePresence initial={false}>
-                        {isExpanded && (
-                          <tr className="bg-[var(--s2)]/45">
-                            <td colSpan={5} className="p-0">
-                              <motion.div
-                                initial={{ opacity: 0, y: -4 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -4 }}
-                                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                                className="px-6 py-5"
-                              >
-                                <TraderInspectAndCopy
-                                  trader={trader}
-                                  detail={detail}
-                                  detailLoading={isDetailLoading}
-                                  copyPct={copyPct}
-                                  setCopyPct={setCopyPct}
-                                  maxUsd={maxUsd}
-                                  setMaxUsd={setMaxUsd}
-                                  startLive={startLive}
-                                  setStartLive={setUserLiveChoice}
-                                  agentFunded={agentFunded}
-                                  busy={busyAddress === trader.address}
-                                  existingSub={existingSub}
-                                  onCancel={() => setExpandedAddress(null)}
-                                  onConfirm={() => void handleConfirmCopy(trader)}
-                                  onGoFund={onGoFund}
-                                />
-                              </motion.div>
-                            </td>
-                          </tr>
-                        )}
-                      </AnimatePresence>
+                      {isExpanded && (
+                        <tr className="bg-[var(--s2)]/45">
+                          <td colSpan={5} className="p-0">
+                            <motion.div
+                              initial={{ opacity: 0, y: -4 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                              className="px-6 py-5"
+                            >
+                              <TraderInspectAndCopy
+                                trader={trader}
+                                detail={detail}
+                                detailLoading={isDetailLoading}
+                                copyPct={copyPct}
+                                setCopyPct={setCopyPct}
+                                maxUsd={maxUsd}
+                                setMaxUsd={setMaxUsd}
+                                startLive={startLive}
+                                setStartLive={setUserLiveChoice}
+                                agentFunded={agentFunded}
+                                busy={busyAddress === trader.address}
+                                existingSub={existingSub}
+                                onCancel={() => setExpandedAddress(null)}
+                                onConfirm={() => void handleConfirmCopy(trader)}
+                                onGoFund={onGoFund}
+                              />
+                            </motion.div>
+                          </td>
+                        </tr>
+                      )}
                     </Fragment>
                   );
                 })}

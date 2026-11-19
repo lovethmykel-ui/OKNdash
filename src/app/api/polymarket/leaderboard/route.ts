@@ -26,6 +26,16 @@ const VALID_CATEGORIES = new Set<LeaderboardCategory>([
 ]);
 const VALID_SORTS = new Set<LeaderboardSort>(['pnl', 'volume', 'winRate']);
 
+async function safeParseJson<T>(res: Response): Promise<T | null> {
+  try {
+    const raw = await res.text();
+    if (!raw) return null;
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const rawTf = sp.get('timeframe') as LeaderboardTimeframe | null;
@@ -80,13 +90,18 @@ export async function GET(req: NextRequest) {
       throw new Error(`Upstream HTTP ${listRes?.status ?? 'unknown'}`);
     }
 
-    const payload = (await listRes.json()) as { data?: RawPolymarketV2LeaderboardRow[] };
+    const payload = await safeParseJson<{ data?: RawPolymarketV2LeaderboardRow[] }>(listRes);
+    if (!payload) {
+      throw new Error('Malformed upstream leaderboard payload');
+    }
     let traders: LiveLeaderboardTrader[] = normalizePolymarketV2Rows(
       Array.isArray(payload.data) ? payload.data : [],
     );
 
     if (isExactAddress && userRes?.ok) {
-      const userPayload = (await userRes.json()) as { data?: RawPolymarketV2LeaderboardRow & { rank_pnl?: number; rank_volume?: number } };
+      const userPayload = await safeParseJson<{
+        data?: RawPolymarketV2LeaderboardRow & { rank_pnl?: number; rank_volume?: number };
+      }>(userRes);
       if (userPayload?.data) {
         const directRow = normalizePolymarketV2Row({
           ...userPayload.data,

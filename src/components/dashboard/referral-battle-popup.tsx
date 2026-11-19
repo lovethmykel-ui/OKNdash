@@ -144,33 +144,33 @@ export function ReferralBattlePopup() {
                   <div className="flex items-center justify-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="/assets/aistudio/iphone_air_cloud_white_pdp_image_position_1__wwen_1_2_57c6031a.jpg"
-                      alt="iPhone 17 Air"
+                      src={REFERRAL_BATTLE_PRIZES[2].imageSrc}
+                      alt={REFERRAL_BATTLE_PRIZES[2].imageAlt}
                       referrerPolicy="no-referrer"
-                      className="h-[80px] sm:h-[90px] w-auto object-contain mix-blend-multiply"
+                      className="h-[80px] sm:h-[90px] w-auto object-contain"
                     />
                   </div>
 
-                  {/* 1st Prize: iPhone Duo */}
+                  {/* 2nd Prize: iPhone 18 Pro Max */}
                   <div className="flex items-center justify-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="/assets/aistudio/iPhone-Duo-Night-Sky_2a631c95.png"
-                      alt="iPhone Duo"
+                      src={REFERRAL_BATTLE_PRIZES[1].imageSrc}
+                      alt={REFERRAL_BATTLE_PRIZES[1].imageAlt}
                       referrerPolicy="no-referrer"
-                      className="h-[78px] sm:h-[88px] w-auto object-contain drop-shadow-[0_6px_14px_rgba(15,23,42,0.16)]"
+                      className="h-[78px] sm:h-[88px] w-auto object-contain drop-shadow-[0_6px_14px_rgba(15,23,42,0.14)]"
                     />
                   </div>
 
-                  {/* Featured Spotlight Circle: iPhone 18 Pro Max + 1st Badge */}
+                  {/* Featured Spotlight Circle: 1st Prize iPhone Duo + 1st Badge */}
                   <div className="relative flex items-center justify-center">
                     <div className="relative flex size-[86px] sm:size-[94px] items-center justify-center rounded-full border border-[#EAE4FA] bg-white p-2 shadow-[0_8px_22px_rgba(122,18,245,0.14)]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src="/assets/aistudio/Apple-iPhone-18-Pro-12GB-256GB-5G-Burgundy-700x700_162eff92.jpg"
-                        alt="iPhone 18 Pro Max"
+                        src={REFERRAL_BATTLE_PRIZES[0].imageSrc}
+                        alt={REFERRAL_BATTLE_PRIZES[0].imageAlt}
                         referrerPolicy="no-referrer"
-                        className="h-[68px] sm:h-[74px] w-auto object-contain mix-blend-multiply"
+                        className="h-[68px] sm:h-[74px] w-auto object-contain"
                       />
                       <span className="absolute -top-1 -right-1 flex size-[26px] items-center justify-center rounded-full border-[1.5px] border-white/95 bg-gradient-to-b from-[#69657E] to-[#464357] text-[10px] font-black tracking-tight text-white shadow-md">
                         1st

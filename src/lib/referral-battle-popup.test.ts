@@ -66,7 +66,7 @@ describe('referral-battle-popup session helpers', () => {
     );
   });
 
-  it('defines the three referral battle prizes in rank order', () => {
+  it('defines the three referral battle prizes in rank order with valid local assets', () => {
     assert.equal(REFERRAL_BATTLE_PRIZES.length, 3);
     assert.deepEqual(
       REFERRAL_BATTLE_PRIZES.map((p) => [p.rank, p.title]),
@@ -74,6 +74,14 @@ describe('referral-battle-popup session helpers', () => {
         ['01', 'iPhone Duo'],
         ['02', 'iPhone 18 Pro Max'],
         ['03', 'iPhone 17 Air'],
+      ],
+    );
+    assert.deepEqual(
+      REFERRAL_BATTLE_PRIZES.map((p) => p.imageSrc),
+      [
+        '/assets/referral-battle/iphone-duo.png',
+        '/assets/referral-battle/iphone-18-pro-max.png',
+        '/assets/referral-battle/iphone-17-air.png',
       ],
     );
   });
