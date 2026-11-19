@@ -10,11 +10,14 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/use-toast';
 import { useMe } from '@/lib/hooks/use-me';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { api, getDemoWalletAddress } from '@/lib/api/client';
 
 export function WalletConnect() {
   const t = useTranslations('dashboard.walletConnect');
-  const { address } = useAccount();
+  const hydrated = useHydrated();
+  const { address: rawAddress } = useAccount();
+  const address = hydrated ? rawAddress : undefined;
   const qc = useQueryClient();
   const { toast } = useToast();
   const me = useMe();

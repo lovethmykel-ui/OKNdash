@@ -117,7 +117,7 @@ export default function WinnersPage() {
 function formatScore(w: LeaderboardWinner): string {
   if (w.category === 'buyers') {
     try {
-      return `${(Number(w.score) / 1e18).toLocaleString(undefined, { maximumFractionDigits: 4 })} BNB`;
+      return `${(Number(w.score) / 1e18).toLocaleString('en-US', { maximumFractionDigits: 4 })} BNB`;
     } catch {
       return w.score;
     }

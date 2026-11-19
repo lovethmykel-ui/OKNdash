@@ -13,9 +13,12 @@
 import { useAccount, useSwitchChain } from 'wagmi';
 import { APP_CONFIG } from '@okn/shared';
 import { isCorrectChain } from '@/lib/chain-guard';
+import { useHydrated } from './use-hydrated';
 
 export function useChainGuard() {
-  const { chainId } = useAccount();
+  const hydrated = useHydrated();
+  const { chainId: rawChainId } = useAccount();
+  const chainId = hydrated ? rawChainId : undefined;
   const { switchChainAsync } = useSwitchChain();
 
   const configured = APP_CONFIG.chainId;

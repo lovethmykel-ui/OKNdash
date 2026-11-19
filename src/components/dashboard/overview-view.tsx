@@ -47,6 +47,7 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
   const { address } = useAccount();
 
   const hydrated = useHydrated();
+  const walletAddress = hydrated ? address : undefined;
   const [hideBalanceState, setHideBalanceState] = useState(false);
 
   useEffect(() => {
@@ -576,7 +577,7 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
                 )}
               </div>
               <div className="text-[11px] font-bold text-[#2FBD8E] mt-2">
-                {address ? address.slice(0, 6) + '...' + address.slice(-4) : '0xBF6B...0377 (Demo)'}
+                {walletAddress ? walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4) : '0xBF6B...0377 (Demo)'}
               </div>
             </div>
           </div>

@@ -7,6 +7,7 @@ import { useOknBalance } from '@/lib/hooks/use-wallet';
 import { useClaimEligibility } from '@/lib/hooks/use-claim';
 import { usePortfolio } from '@/lib/hooks/use-portfolio';
 import { useMe } from '@/lib/hooks/use-me';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { api } from '@/lib/api/client';
 import { formatPoints, formatWei } from '@/lib/utils';
 import { Activity, ArrowDownToLine, Users } from 'lucide-react';
@@ -15,7 +16,10 @@ import { StatCard } from '@/components/dashboard/stat-card';
 import { toast } from 'sonner';
 
 export function HoldingsView() {
-  const { address, chain } = useAccount();
+  const hydrated = useHydrated();
+  const { address: rawAddress, chain: rawChain } = useAccount();
+  const address = hydrated ? rawAddress : undefined;
+  const chain = hydrated ? rawChain : undefined;
   const qc = useQueryClient();
   const me = useMe();
   const oknBalance = useOknBalance();

@@ -46,6 +46,7 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { useUnbindWallet } from '@/lib/hooks/use-wallet';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { toastError } from '@/lib/api/toast';
 import { useDarkClass } from '@/components/layout/area-theme';
 import { shortAddress } from '@/lib/utils';
@@ -55,7 +56,9 @@ export function UnbindWalletCard({ currentWallet }: { currentWallet: string | nu
   const tToast = useTranslations('toasts.unbind');
   const { toast } = useToast();
   const qc = useQueryClient();
-  const { address } = useAccount();
+  const hydrated = useHydrated();
+  const { address: rawAddress } = useAccount();
+  const address = hydrated ? rawAddress : undefined;
   const unbind = useUnbindWallet();
   const darkClass = useDarkClass();
   const [confirmOpen, setConfirmOpen] = useState(false);

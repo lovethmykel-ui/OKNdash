@@ -28,6 +28,7 @@ import type {
   UpdateProfileInput,
 } from '@okn/shared';
 import { DEFAULT_DAILY_SCHEDULE, DEFAULT_LEADERBOARD_PRIZES, DEFAULT_PRESALE_MULTIPLIER } from '@okn/shared';
+import { resetReferralBattlePopupForFreshLogin } from '../referral-battle-popup';
 
 export type { StreakInfo, CheckInResult, RewardConfig };
 export type {
@@ -805,6 +806,7 @@ const rawApi = {
       walletAddress: input.address,
       walletBoundAt: new Date().toISOString(),
     };
+    resetReferralBattlePopupForFreshLogin();
     return { ok: true as const, user: { ...demoState.user } };
   },
   bindTelegram: async (_input: { authData: Record<string, string | number> }) => ({
@@ -1224,7 +1226,10 @@ const rawApi = {
   }),
 
   // Auth
-  telegramLogin: async (_authData: string) => ({ ok: true as const }),
+  telegramLogin: async (_authData: string) => {
+    resetReferralBattlePopupForFreshLogin();
+    return { ok: true as const };
+  },
   telegramInitData: async (_initData: string) => ({ ok: true as const }),
 
   // Admin
@@ -1658,7 +1663,7 @@ const rawApi = {
       id: `notif-${Date.now()}`,
       type: 'presale',
       title: 'Presale Purchase Confirmed',
-      body: `Allocated ${(Number(oknAmountWei / 10n ** 18n)).toLocaleString()} $OKN to your wallet.`,
+      body: `Allocated ${(Number(oknAmountWei / 10n ** 18n)).toLocaleString('en-US')} $OKN to your wallet.`,
       link: '/app/portfolio',
       read: false,
       createdAt: new Date().toISOString(),
@@ -1673,7 +1678,7 @@ const rawApi = {
       id: `notif-${Date.now()}`,
       type: 'claim',
       title: '$OKN Claim Confirmed',
-      body: `Claimed ${(Number(entitlementWei / 10n ** 18n)).toLocaleString()} $OKN on BNB Smart Chain.`,
+      body: `Claimed ${(Number(entitlementWei / 10n ** 18n)).toLocaleString('en-US')} $OKN on BNB Smart Chain.`,
       link: '/app/wallet',
       read: false,
       createdAt: new Date().toISOString(),

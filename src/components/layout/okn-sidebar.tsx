@@ -17,7 +17,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { motion } from 'motion/react';
 import {
   Activity,
   ArrowLeftRight,
@@ -279,25 +278,7 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
                             className="size-[18px] shrink-0 rounded-full object-contain shadow-[0_2px_8px_rgba(9,180,255,0.3)]"
                           />
                         ) : isBuy ? (
-                          <motion.span
-                            suppressHydrationWarning
-                            initial={false}
-                            animate={
-                              hydrated
-                                ? {
-                                    y: [0, -2, 0],
-                                    rotate: [0, -10, 10, 0],
-                                    scale: [1, 1.1, 1],
-                                  }
-                                : undefined
-                            }
-                            transition={{
-                              duration: 2.2,
-                              repeat: Infinity,
-                              ease: 'easeInOut',
-                            }}
-                            className="relative inline-flex items-center justify-center shrink-0"
-                          >
+                          <span className="okn-cart-wiggle relative inline-flex items-center justify-center shrink-0">
                             <ShoppingCart
                               className={cn('size-[18px]', isActive && '!text-white !stroke-white')}
                               style={isActive ? { color: '#ffffff', stroke: '#ffffff' } : undefined}
@@ -314,7 +295,7 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
                                 isActive ? 'bg-[#FFD60A]' : 'bg-[#09B4FF]',
                               )}
                             />
-                          </motion.span>
+                          </span>
                         ) : (
                           <Icon
                             className={cn('size-[18px] shrink-0', isActive && '!text-white !stroke-white')}

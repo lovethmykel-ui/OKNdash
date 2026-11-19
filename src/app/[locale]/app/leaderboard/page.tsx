@@ -160,7 +160,7 @@ function formatScore(score: string, unit: string): string {
   if (unit === 'BNB') {
     try {
       const bnb = Number(score) / 1e18;
-      return `${bnb.toLocaleString(undefined, { maximumFractionDigits: 4 })} BNB`;
+      return `${bnb.toLocaleString('en-US', { maximumFractionDigits: 4 })} BNB`;
     } catch {
       return `${score} BNB`;
     }

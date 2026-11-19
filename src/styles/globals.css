@@ -810,8 +810,51 @@ body::before {
 
 @media (prefers-reduced-motion: reduce) {
   .okn-coin-bounce,
-  .okn-coin-shadow {
+  .okn-coin-shadow,
+  .okn-cart-wiggle,
+  .okn-page-enter {
     animation: none !important;
   }
 }
 
+/* Shopping Cart Nav Icon Wiggle & Hop Animation (SSR-safe CSS keyframes) */
+@keyframes oknCartWiggle {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  20% {
+    transform: translate3d(0, -2.5px, 0) rotate(-11deg) scale(1.1);
+  }
+  42% {
+    transform: translate3d(0, -1px, 0) rotate(11deg) scale(1.1);
+  }
+  62% {
+    transform: translate3d(0, -2px, 0) rotate(-6deg) scale(1.05);
+  }
+  80% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+
+.okn-cart-wiggle {
+  animation: oknCartWiggle 2.2s ease-in-out infinite;
+  will-change: transform;
+  transform-origin: center center;
+}
+
+/* Route Page Enter Transition (SSR-safe CSS keyframes) */
+@keyframes oknPageEnter {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.okn-page-enter {
+  animation: oknPageEnter 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}

@@ -108,13 +108,15 @@ const INITIAL_VAULT_ACTIVITY: VaultActivityItem[] = [
 
 export default function WalletPage() {
   const hydrated = useHydrated();
-  const { address } = useAccount();
+  const { address: rawAddress } = useAccount();
+  const address = hydrated ? rawAddress : undefined;
   const qc = useQueryClient();
   const me = useMe();
   const oknBalance = useOknBalance();
   const eligibility = useClaimEligibility();
 
-  const [hideBalance, setHideBalance] = useState(false);
+  const [hideBalanceState, setHideBalanceState] = useState(false);
+  const hideBalance = hydrated && hideBalanceState;
   const [copied, setCopied] = useState(false);
   const [switchingWallet, setSwitchingWallet] = useState(false);
   const [assetFilter, setAssetFilter] = useState<AssetFilter>('all');
@@ -141,12 +143,12 @@ export default function WalletPage() {
   useEffect(() => {
     try {
       const stored = localStorage.getItem('okn_hide_balance') === 'true';
-      setHideBalance(stored);
+      setHideBalanceState(stored);
     } catch {}
   }, []);
 
   const toggleBalance = () => {
-    setHideBalance((prev) => {
+    setHideBalanceState((prev) => {
       const next = !prev;
       try {
         localStorage.setItem('okn_hide_balance', next ? 'true' : 'false');

@@ -23,11 +23,11 @@ import { LanguageSwitcher } from '@/components/landing/language-switcher';
 import { DevRoleToggle } from '@/components/admin/dev-role-toggle';
 import { SilentRefresher } from './silent-refresher';
 import { DailyCheckIn } from '@/components/dashboard/daily-check-in';
+import { ReferralBattlePopup } from '@/components/dashboard/referral-battle-popup';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { cn } from '@/lib/utils';
 import { Cpu, Home, ShoppingCart, Users, Zap } from 'lucide-react';
-import { motion } from 'motion/react';
 
 interface AppShellProps {
   area: 'app' | 'admin';
@@ -134,25 +134,7 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
                       style={isActive ? { background: 'linear-gradient(135deg, #7A12F5 0%, #8E2BFF 100%)', color: '#ffffff' } : undefined}
                     >
                       {isBuy ? (
-                        <motion.div
-                          suppressHydrationWarning
-                          initial={false}
-                          animate={
-                            hydrated
-                              ? {
-                                  y: [0, -2, 0],
-                                  rotate: [0, -8, 8, 0],
-                                  scale: [1, 1.08, 1],
-                                }
-                              : undefined
-                          }
-                          transition={{
-                            duration: 2.2,
-                            repeat: Infinity,
-                            ease: 'easeInOut',
-                          }}
-                          className="relative flex items-center justify-center shrink-0"
-                        >
+                        <div className="okn-cart-wiggle relative flex items-center justify-center shrink-0">
                           <ShoppingCart
                             className={cn(
                               'size-[18px] sm:size-5',
@@ -172,7 +154,7 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
                               isActive ? 'bg-[#FFD60A]' : 'bg-[#09B4FF]',
                             )}
                           />
-                        </motion.div>
+                        </div>
                       ) : (
                         <Icon
                           className={cn('size-[18px] sm:size-5 shrink-0', isActive ? '!text-white !stroke-white' : 'text-[var(--mut)]')}
@@ -196,8 +178,9 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
           )}
         </SidebarInset>
 
-        {/* Daily login check-in */}
+        {/* Daily login check-in & fresh-login Referral Battle notification */}
         {area === 'app' && <DailyCheckIn />}
+        {area === 'app' && <ReferralBattlePopup />}
       </SidebarProvider>
     </AreaThemeProvider>
   );

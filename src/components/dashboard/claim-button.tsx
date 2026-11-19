@@ -18,6 +18,7 @@ import { explorerTxUrl } from '@okn/shared';
 import { useClaimEligibility, useClaimProof } from '@/lib/hooks/use-claim';
 import { useMe } from '@/lib/hooks/use-me';
 import { useOknBalance, useRequiredFeeBnb } from '@/lib/hooks/use-wallet';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { api } from '@/lib/api/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,7 +29,9 @@ import { formatWei, shortAddress } from '@/lib/utils';
 export function ClaimButton() {
   const t = useTranslations('dashboard.claimButton');
   const tToast = useTranslations('toasts.claim');
-  const { address } = useAccount();
+  const hydrated = useHydrated();
+  const { address: rawAddress } = useAccount();
+  const address = hydrated ? rawAddress : undefined;
   const me = useMe();
   const { toast } = useToast();
   const qc = useQueryClient();

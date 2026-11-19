@@ -32,6 +32,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { MARKETING } from './config';
 
 /** Inline SVG brand icons for the platforms lucide doesn't ship.
@@ -96,7 +97,9 @@ const LABELS: Record<string, string> = {
 
 export function SocialSidebar() {
   const t = useTranslations('socialSidebar');
-  const reduceMotion = useReducedMotion();
+  const hydrated = useHydrated();
+  const rawReduceMotion = useReducedMotion();
+  const reduceMotion = hydrated && Boolean(rawReduceMotion);
   const entries = Object.entries(MARKETING.socials);
 
   return (

@@ -93,7 +93,7 @@ function describeCall(
   switch (`${contractName}.${functionName}`) {
     case 'tokenSale.setRate': {
       const rate = args[0] as bigint;
-      return `Set sale rate to ${(Number(rate) / 1e24).toLocaleString()} OKN/BNB`;
+      return `Set sale rate to ${(Number(rate) / 1e24).toLocaleString('en-US')} OKN/BNB`;
     }
     case 'tokenSale.setCapPerWallet': {
       const cap = args[0] as bigint;
@@ -146,7 +146,7 @@ const PARAM_NAMES: Record<string, string[]> = {
 /** Format a value for display. */
 function formatValue(value: unknown, name: string): string {
   if (typeof value === 'bigint') {
-    if (name.toLowerCase().includes('rate')) return (Number(value) / 1e24).toLocaleString();
+    if (name.toLowerCase().includes('rate')) return (Number(value) / 1e24).toLocaleString('en-US');
     // _feeUsd is a USD value in 8 decimals (Chainlink standard).
     if (name.toLowerCase().includes('feeusd')) return `$${(Number(value) / 1e8).toFixed(2)}`;
     return formatEther(value);

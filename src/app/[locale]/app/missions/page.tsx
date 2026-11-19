@@ -86,19 +86,19 @@ export default function MissionsPage() {
 function formatMetricValue(value: string, metric: CommunityMetric): string {
   const n = Number(value);
   if (metric === 'total_bnb') {
-    return `${(n / 1e18).toLocaleString(undefined, { maximumFractionDigits: 2 })} BNB`;
+    return `${(n / 1e18).toLocaleString('en-US', { maximumFractionDigits: 2 })} BNB`;
   }
   if (metric === 'total_okn_claimed') {
-    return `${(n / 1e18).toLocaleString(undefined, { maximumFractionDigits: 0 })} $OKN`;
+    return `${(n / 1e18).toLocaleString('en-US', { maximumFractionDigits: 0 })} $OKN`;
   }
-  return n.toLocaleString();
+  return n.toLocaleString('en-US');
 }
 
 function formatThreshold(value: string, metric: CommunityMetric): string {
   const n = Number(value);
-  if (metric === 'total_bnb') return `${(n / 1e18).toLocaleString(undefined, { maximumFractionDigits: 2 })} BNB`;
-  if (metric === 'total_okn_claimed') return `${(n / 1e18).toLocaleString(undefined, { maximumFractionDigits: 0 })} $OKN`;
-  return n.toLocaleString();
+  if (metric === 'total_bnb') return `${(n / 1e18).toLocaleString('en-US', { maximumFractionDigits: 2 })} BNB`;
+  if (metric === 'total_okn_claimed') return `${(n / 1e18).toLocaleString('en-US', { maximumFractionDigits: 0 })} $OKN`;
+  return n.toLocaleString('en-US');
 }
 
 function ActiveMissionCard({ mission }: { mission: MissionWithProgress }) {

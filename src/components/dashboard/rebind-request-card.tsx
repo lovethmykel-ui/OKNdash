@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { useSubmitRebind } from '@/lib/hooks/use-wallet';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { toastError } from '@/lib/api/toast';
 import type { RebindRequestInput } from '@/lib/api/client';
 import { useDarkClass } from '@/components/layout/area-theme';
@@ -45,7 +46,9 @@ export function RebindRequestCard({ currentWallet }: { currentWallet: string | n
   const t = useTranslations('dashboard.rebind');
   const tToast = useTranslations('toasts.rebind');
   const { toast } = useToast();
-  const { address } = useAccount();
+  const hydrated = useHydrated();
+  const { address: rawAddress } = useAccount();
+  const address = hydrated ? rawAddress : undefined;
   const submit = useSubmitRebind();
   const darkClass = useDarkClass();
   const [reason, setReason] = useState<string>('lost_key');

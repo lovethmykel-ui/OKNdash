@@ -16,6 +16,7 @@ import {
   APP_CONFIG,
 } from '@okn/shared';
 import { useMemo } from 'react';
+import { useHydrated } from './use-hydrated';
 import {
   api,
   getDemoOknBalanceWei,
@@ -41,7 +42,9 @@ function isRealDeployedContract(addr?: string): boolean {
 }
 
 export function useOknBalance() {
-  const { address } = useAccount();
+  const hydrated = useHydrated();
+  const { address: rawAddress } = useAccount();
+  const address = hydrated ? rawAddress : undefined;
   const realContract = isRealDeployedContract(CONTRACTS.oknToken);
   const result = useReadContract({
     address: CONTRACTS.oknToken,
@@ -157,7 +160,9 @@ export function useSaleStatus() {
 }
 
 export function usePurchasedAmount() {
-  const { address } = useAccount();
+  const hydrated = useHydrated();
+  const { address: rawAddress } = useAccount();
+  const address = hydrated ? rawAddress : undefined;
   const realContract = isRealDeployedContract(CONTRACTS.tokenSale);
   const result = useReadContract({
     address: CONTRACTS.tokenSale,

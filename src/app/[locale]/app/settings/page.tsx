@@ -48,6 +48,7 @@ import { SocialIconRow } from '@/components/landing/social-sidebar';
 import { useToast } from '@/components/ui/use-toast';
 import { AreaThemeSwitch, useTheme } from '@/components/layout/area-theme';
 import { TwoFactorCard } from '@/components/settings/two-factor-card';
+import { resetReferralBattlePopupForFreshLogin } from '@/lib/referral-battle-popup';
 import {
   useMe,
   useUpdateProfile,
@@ -1195,6 +1196,7 @@ function SessionTab() {
 
   const handleSignOut = async () => {
     setSigningOut(true);
+    resetReferralBattlePopupForFreshLogin(undefined, false);
     window.location.href = '/app/portfolio';
   };
 

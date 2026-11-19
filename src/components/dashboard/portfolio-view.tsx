@@ -69,7 +69,7 @@ export function PortfolioView() {
       const rateOknPerBnb = Number(rate) / 1e18;
       if (rateOknPerBnb > 0) {
         const v = holdingsOkn / rateOknPerBnb;
-        valueBnbLabel = `${v.toLocaleString(undefined, { maximumFractionDigits: 4 })} BNB`;
+        valueBnbLabel = `${v.toLocaleString('en-US', { maximumFractionDigits: 4 })} BNB`;
       }
     } catch {
       // ignore parse errors; keep the dash

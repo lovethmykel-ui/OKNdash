@@ -30,6 +30,7 @@ import { useSalePrice } from '@/lib/hooks/use-sale';
 import { useMe } from '@/lib/hooks/use-me';
 import { usePurchasedAmount, useSaleStatus } from '@/lib/hooks/use-wallet';
 import { useChainGuard } from '@/lib/hooks/use-chain-guard';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { buyBlockReason, type BuyBlockReason } from '@/lib/chain-guard';
 import { decodeChainError, isUserRejection } from '@/lib/chain-errors';
 import {
@@ -70,7 +71,9 @@ function formatUsd(usd8: bigint): string {
 export function BuyWidget() {
   const t = useTranslations('dashboard.buyWidget');
   const tToast = useTranslations('toasts.buy');
-  const { address } = useAccount();
+  const hydrated = useHydrated();
+  const { address: rawAddress } = useAccount();
+  const address = hydrated ? rawAddress : undefined;
   const { toast } = useToast();
   const qc = useQueryClient();
   const publicClient = usePublicClient();

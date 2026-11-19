@@ -10,7 +10,7 @@ export function cn(...inputs: ClassValue[]) {
 /** Format a bigint wei amount as a human-readable number string. */
 export function formatToken(wei: bigint, decimals = 18n): string {
   const whole = wei / 10n ** decimals;
-  return whole.toLocaleString();
+  return whole.toLocaleString('en-US');
 }
 
 /**
@@ -47,6 +47,7 @@ export function formatDate(value: string | Date | null | undefined): string {
     year: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
+    timeZone: 'UTC',
   }).format(d);
 }
 

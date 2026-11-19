@@ -22,12 +22,15 @@ import { ArrowLeft, Compass } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 export default function NotFound() {
   const t = useTranslations('notFound');
-  const reduce = useReducedMotion();
+  const hydrated = useHydrated();
+  const rawReduce = useReducedMotion();
+  const reduce = hydrated && Boolean(rawReduce);
 
   // Staggered entrance container. Children appear one after another so the eye
   // lands on the brand, then the 404, then the recovery path.

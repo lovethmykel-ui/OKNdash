@@ -16,6 +16,7 @@ import { AreaThemeSwitch, useDarkClass } from '@/components/layout/area-theme';
 import { SocialIconRow } from '@/components/landing/social-sidebar';
 import { useMe } from '@/lib/hooks/use-me';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
+import { resetReferralBattlePopupForFreshLogin } from '@/lib/referral-battle-popup';
 import { LogOut, Settings, Users, Wallet } from 'lucide-react';
 import type { MeUser } from '@/lib/api/client';
 import { cn } from '@/lib/utils';
@@ -118,6 +119,7 @@ export function UserMenu() {
 
   const handleSignOut = async () => {
     setOpen(false);
+    resetReferralBattlePopupForFreshLogin(undefined, false);
     window.location.href = '/app/portfolio';
   };
 

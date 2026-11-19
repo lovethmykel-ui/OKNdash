@@ -6,6 +6,7 @@ import { useMe } from '@/lib/hooks/use-me';
 import { useClaimEligibility } from '@/lib/hooks/use-claim';
 import { useStreak } from '@/lib/hooks/use-rewards';
 import { useAccount } from 'wagmi';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { Flame, Clock, ChevronsRight, CheckCircle2 } from 'lucide-react';
 import { formatPoints, shortenAddress } from '@/lib/utils';
 
@@ -18,7 +19,9 @@ export function PortfolioHero({ activeTab, onTabChange }: PortfolioHeroProps) {
   const me = useMe();
   const eligibility = useClaimEligibility();
   const streak = useStreak();
-  const { address } = useAccount();
+  const hydrated = useHydrated();
+  const { address: rawAddress } = useAccount();
+  const address = hydrated ? rawAddress : undefined;
 
   const user = me.data?.user;
   const initials = user?.firstName

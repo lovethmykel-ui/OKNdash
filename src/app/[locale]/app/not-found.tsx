@@ -20,11 +20,14 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { ArrowLeft, LayoutDashboard } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 export default function AppNotFound() {
-  const reduce = useReducedMotion();
+  const hydrated = useHydrated();
+  const rawReduce = useReducedMotion();
+  const reduce = hydrated && Boolean(rawReduce);
   const t = useTranslations('dashboard.notFound');
 
   const container = {
