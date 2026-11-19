@@ -66,11 +66,21 @@ export function AreaThemeProvider({
 
   useEffect(() => {
     if (!hydrated) return;
-    const stored = (window.localStorage.getItem('okn_theme_v2') ||
-      window.localStorage.getItem(`okn-theme-v2:${area}`)) as Theme | null;
-    const initial: Theme = stored === 'light' || stored === 'dark' ? stored : 'light';
-    applyThemeToDOM(initial);
-    setThemeState(initial);
+    const syncFromStorage = () => {
+      const stored = (window.localStorage.getItem('okn_theme_v2') ||
+        window.localStorage.getItem(`okn-theme-v2:${area}`)) as Theme | null;
+      const initial: Theme =
+        stored === 'light' || stored === 'dark'
+          ? stored
+          : document.documentElement.classList.contains('dark')
+            ? 'dark'
+            : 'light';
+      applyThemeToDOM(initial);
+      setThemeState(initial);
+    };
+    syncFromStorage();
+    window.addEventListener('storage', syncFromStorage);
+    return () => window.removeEventListener('storage', syncFromStorage);
   }, [area, hydrated]);
 
   const setTheme = useCallback(
@@ -105,9 +115,7 @@ export function AreaThemeProvider({
 
   return (
     <AreaThemeContext.Provider value={{ theme: activeTheme, toggle, setTheme }}>
-      <div suppressHydrationWarning className={`w-full ${activeTheme === 'dark' ? 'dark' : 'light'}`}>
-        {children}
-      </div>
+      <div className="w-full">{children}</div>
     </AreaThemeContext.Provider>
   );
 }

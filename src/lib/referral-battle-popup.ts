@@ -1,5 +1,6 @@
 export const REFERRAL_BATTLE_SESSION_KEY = 'okn_referral_battle_popup_shown';
 export const REFERRAL_BATTLE_FRESH_LOGIN_EVENT = 'okn:fresh-login';
+export const REFERRAL_BATTLE_OPEN_EVENT = 'okn:open-referral-battle';
 
 export interface StorageReader {
   getItem(key: string): string | null;
@@ -49,6 +50,25 @@ export const REFERRAL_BATTLE_PRIZES: readonly ReferralBattlePrize[] = [
   },
 ] as const;
 
+/**
+ * In-memory flag scoped to the current loaded document (resets automatically on
+ * any browser reload / fresh app entry or explicit fresh login, while staying
+ * suppressed across client-side tab/sidebar route changes in the same session).
+ */
+let shownInCurrentDocumentLoad = false;
+
+export function shouldShowReferralBattleOnFreshLoad(): boolean {
+  return !shownInCurrentDocumentLoad;
+}
+
+export function markReferralBattleShownInDocument(): void {
+  shownInCurrentDocumentLoad = true;
+}
+
+export function resetReferralBattleDocumentLoadFlag(): void {
+  shownInCurrentDocumentLoad = false;
+}
+
 export function shouldShowReferralBattlePopup(
   storage: StorageReader | null | undefined,
 ): boolean {
@@ -63,6 +83,7 @@ export function shouldShowReferralBattlePopup(
 export function markReferralBattlePopupShown(
   storage: StorageWriter | null | undefined,
 ): void {
+  shownInCurrentDocumentLoad = true;
   if (!storage) return;
   try {
     storage.setItem(REFERRAL_BATTLE_SESSION_KEY, '1');
@@ -75,6 +96,8 @@ export function resetReferralBattlePopupForFreshLogin(
   storage?: StorageRemover | null,
   dispatchLoginEvent = true,
 ): void {
+  shownInCurrentDocumentLoad = false;
+
   const targetStorage =
     storage !== undefined
       ? storage
@@ -92,5 +115,11 @@ export function resetReferralBattlePopupForFreshLogin(
 
   if (dispatchLoginEvent && typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent(REFERRAL_BATTLE_FRESH_LOGIN_EVENT));
+  }
+}
+
+export function openReferralBattlePopup(): void {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(REFERRAL_BATTLE_OPEN_EVENT));
   }
 }

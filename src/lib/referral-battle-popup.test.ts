@@ -4,7 +4,10 @@ import {
   REFERRAL_BATTLE_PRIZES,
   REFERRAL_BATTLE_SESSION_KEY,
   markReferralBattlePopupShown,
+  markReferralBattleShownInDocument,
+  resetReferralBattleDocumentLoadFlag,
   resetReferralBattlePopupForFreshLogin,
+  shouldShowReferralBattleOnFreshLoad,
   shouldShowReferralBattlePopup,
 } from './referral-battle-popup.ts';
 
@@ -22,7 +25,18 @@ function createMemoryStorage() {
 }
 
 describe('referral-battle-popup session helpers', () => {
-  it('shows popup on a fresh session and hides once marked as shown', () => {
+  it('shows popup on a fresh document load and hides after marked shown until fresh login', () => {
+    resetReferralBattleDocumentLoadFlag();
+    assert.equal(shouldShowReferralBattleOnFreshLoad(), true);
+
+    markReferralBattleShownInDocument();
+    assert.equal(shouldShowReferralBattleOnFreshLoad(), false);
+
+    resetReferralBattlePopupForFreshLogin(null, false);
+    assert.equal(shouldShowReferralBattleOnFreshLoad(), true);
+  });
+
+  it('shows popup on a fresh storage session and hides once marked as shown', () => {
     const storage = createMemoryStorage();
     assert.equal(shouldShowReferralBattlePopup(storage), true);
 

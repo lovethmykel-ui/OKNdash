@@ -9,7 +9,34 @@
 /* --------------------------------------------------------------------------
    1. Theme Color Design Tokens (Exact Figma System)
    -------------------------------------------------------------------------- */
-:root {
+:root,
+.light,
+[data-theme="light"] {
+  --bg: #F5F3FA;
+  --s1: #FFFFFF;
+  --s2: #EFEBF8;
+  --line: #E2DDEE;
+  --tx: #15121F;
+  --mut: #5C5870;
+  --vio: #7A12F5;
+  --vio2: #8C38F7;
+  --vio-l: #6A0FD4;
+  --cyan: #0A84C6;
+  --yel: #FFD60A;
+  --org: #FFAA00;
+  --cyan-t: #0A6FA6;
+  --yel-t: #8A6500;
+  --org-t: #9A5A00;
+  --inv-bg: #17141F;
+  --inv-tx: #FFFFFF;
+  --inv-mut: #B9B5C9;
+  --inv-chip: #2C2838;
+  --dash: #CBC5DB;
+  --ok: #0B8F63;
+}
+
+.dark,
+[data-theme="dark"] {
   --bg: #0A0A0C;
   --s1: #131316;
   --s2: #1B1B20;
@@ -33,28 +60,6 @@
   --ok: #2FBD8E;
 }
 
-[data-theme="light"] {
-  --bg: #F5F3FA;
-  --s1: #FFFFFF;
-  --s2: #EFEBF8;
-  --line: #E2DDEE;
-  --tx: #15121F;
-  --mut: #5C5870;
-  --vio: #7A12F5;
-  --vio2: #8C38F7;
-  --vio-l: #6A0FD4;
-  --cyan: #0A84C6;
-  --cyan-t: #0A6FA6;
-  --yel-t: #8A6500;
-  --org-t: #9A5A00;
-  --inv-bg: #17141F;
-  --inv-tx: #FFFFFF;
-  --inv-mut: #B9B5C9;
-  --inv-chip: #2C2838;
-  --dash: #CBC5DB;
-  --ok: #0B8F63;
-}
-
 /* --------------------------------------------------------------------------
    2. Base Reset & Typography
    -------------------------------------------------------------------------- */
@@ -64,9 +69,15 @@
 
 html {
   scroll-behavior: smooth !important;
+  color-scheme: light;
+}
+
+.dark,
+[data-theme="dark"] {
   color-scheme: dark;
 }
 
+.light,
 [data-theme="light"] {
   color-scheme: light;
 }
@@ -94,16 +105,17 @@ body::before {
   left: 0;
   right: 0;
   height: 650px;
-  background: radial-gradient(circle 800px at 50% -120px, rgba(122, 18, 245, 0.18), transparent 75%),
-              radial-gradient(circle 500px at 95% 150px, rgba(9, 180, 255, 0.08), transparent 70%),
-              radial-gradient(circle 450px at 5% 350px, rgba(255, 214, 10, 0.04), transparent 70%);
+  background: radial-gradient(circle 800px at 50% -120px, rgba(122, 18, 245, 0.09), transparent 75%),
+              radial-gradient(circle 500px at 95% 150px, rgba(9, 180, 255, 0.05), transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
 
-[data-theme="light"] body::before {
-  background: radial-gradient(circle 800px at 50% -120px, rgba(122, 18, 245, 0.09), transparent 75%),
-              radial-gradient(circle 500px at 95% 150px, rgba(9, 180, 255, 0.05), transparent 70%);
+.dark body::before,
+[data-theme="dark"] body::before {
+  background: radial-gradient(circle 800px at 50% -120px, rgba(122, 18, 245, 0.18), transparent 75%),
+              radial-gradient(circle 500px at 95% 150px, rgba(9, 180, 255, 0.08), transparent 70%),
+              radial-gradient(circle 450px at 5% 350px, rgba(255, 214, 10, 0.04), transparent 70%);
 }
 
 button {

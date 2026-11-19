@@ -17,10 +17,11 @@
  *   - Auto-refresh on window focus
  */
 import { useState, useRef, useEffect } from 'react';
-import { Bell, CheckCheck, Loader2 } from 'lucide-react';
+import { Bell, CheckCheck, Gift, Loader2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
+import { openReferralBattlePopup } from '@/lib/referral-battle-popup';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 
@@ -121,6 +122,28 @@ export function NotificationBell() {
               </button>
             )}
           </div>
+
+          {/* Featured Referral Battle announcement */}
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              openReferralBattlePopup();
+            }}
+            className="flex w-full items-start gap-3 border-b border-border/60 bg-[#7A12F5]/8 px-4 py-3 text-left transition-colors hover:bg-[#7A12F5]/14 cursor-pointer"
+          >
+            <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#7A12F5] to-[#C818F5] text-white shadow-xs">
+              <Gift className="size-3.5" aria-hidden />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-extrabold text-foreground">
+                Referral Battle Live! Stand a Chance to Win
+              </p>
+              <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                iPhone Duo, iPhone 18 Pro Max &amp; iPhone 17 Air
+              </p>
+            </div>
+          </button>
 
           {/* List */}
           <div className="max-h-80 overflow-y-auto">
