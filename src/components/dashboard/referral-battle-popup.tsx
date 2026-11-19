@@ -241,72 +241,53 @@ export function ReferralBattlePopup() {
               {/* Primary CTA Pill Button with Smooth Attention Pulse */}
               <div className="relative mt-5">
                 {!prefersReducedMotion && (
-                  <>
-                    <motion.span
-                      aria-hidden="true"
-                      initial={{ opacity: 0.55, scale: 0.99 }}
-                      animate={{
-                        opacity: [0.65, 0.18, 0.65],
-                        scale: [0.99, 1.045, 0.99],
-                      }}
-                      transition={{
-                        duration: 2.0,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                      }}
-                      className="pointer-events-none absolute -inset-1 rounded-full bg-gradient-to-r from-[#7A12F5]/60 via-[#C818F5]/60 to-[#941DF7]/60 blur-[8px] will-change-transform"
-                    />
-                    <motion.span
-                      aria-hidden="true"
-                      initial={{ opacity: 0.45, scale: 1 }}
-                      animate={{
-                        opacity: [0.45, 0],
-                        scale: [1, 1.085],
-                      }}
-                      transition={{
-                        duration: 2.0,
-                        repeat: Infinity,
-                        ease: 'easeOut',
-                      }}
-                      className="pointer-events-none absolute inset-0 rounded-full border-2 border-[#C818F5]/60 will-change-transform"
-                    />
-                  </>
+                  <motion.span
+                    aria-hidden="true"
+                    initial={{ opacity: 0.4, scale: 0.985 }}
+                    animate={{
+                      opacity: [0.4, 0.78, 0.4],
+                      scale: [0.985, 1.03, 0.985],
+                    }}
+                    transition={{
+                      duration: 1.85,
+                      repeat: Infinity,
+                      ease: 'easeInOut',
+                    }}
+                    className="pointer-events-none absolute -inset-1 rounded-full bg-gradient-to-r from-[#7A12F5]/45 via-[#C818F5]/45 to-[#941DF7]/45 blur-[10px] will-change-transform"
+                  />
                 )}
                 <motion.button
                   type="button"
                   onClick={handleStart}
-                  whileHover={prefersReducedMotion ? undefined : { scale: 1.025 }}
-                  whileTap={{ scale: 0.97 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                  className="relative flex h-11 sm:h-12 w-full items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-[#7A12F5] via-[#C818F5] to-[#941DF7] text-[15px] font-extrabold text-white shadow-[0_10px_26px_rgba(138,24,245,0.44)] transition-[filter] duration-150 hover:brightness-110 cursor-pointer"
-                >
-                  {!prefersReducedMotion && (
-                    <>
-                      <motion.span
-                        aria-hidden="true"
-                        animate={{ opacity: [0, 0.22, 0] }}
-                        transition={{
-                          duration: 2.0,
+                  animate={
+                    prefersReducedMotion
+                      ? undefined
+                      : { scale: [1, 1.022, 1] }
+                  }
+                  transition={
+                    prefersReducedMotion
+                      ? undefined
+                      : {
+                          duration: 1.85,
                           repeat: Infinity,
                           ease: 'easeInOut',
-                        }}
-                        className="pointer-events-none absolute inset-0 rounded-full bg-white/30"
-                      />
-                      <motion.span
-                        aria-hidden="true"
-                        initial={{ x: '-130%' }}
-                        animate={{ x: ['-130%', '140%'] }}
-                        transition={{
-                          duration: 2.1,
-                          repeat: Infinity,
-                          repeatDelay: 1.1,
-                          ease: [0.22, 1, 0.36, 1],
-                        }}
-                        className="pointer-events-none absolute inset-y-0 w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/32 to-transparent will-change-transform"
-                      />
-                    </>
-                  )}
-                  <span className="relative z-10">Start</span>
+                        }
+                  }
+                  whileHover={
+                    prefersReducedMotion
+                      ? undefined
+                      : {
+                          scale: 1.035,
+                          transition: { type: 'spring', stiffness: 480, damping: 28 },
+                        }
+                  }
+                  whileTap={{
+                    scale: 0.965,
+                    transition: { type: 'spring', stiffness: 560, damping: 30 },
+                  }}
+                  className="relative flex h-11 sm:h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-[#7A12F5] via-[#C818F5] to-[#941DF7] text-[15px] font-extrabold text-white shadow-[0_10px_26px_rgba(138,24,245,0.44)] transition-[filter] duration-150 hover:brightness-110 will-change-transform cursor-pointer"
+                >
+                  <span>Start</span>
                 </motion.button>
               </div>
             </div>
