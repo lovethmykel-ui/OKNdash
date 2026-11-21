@@ -1,10 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
+  computeWhalePerformance,
+  isValidEvmAddress,
+  normalizeTraderActivity,
   normalizeTraderPosition,
-  normalizeTraderTrade,
+  type LiveTraderPosition,
+  type LiveTraderTrade,
+  type RawPolymarketV2ActivityRow,
   type RawPolymarketV2PositionRow,
-  type RawPolymarketV2TradeRow,
 } from '@/lib/polymarket/leaderboard';
+
+const POLYMARKET_POSITIONS_ENDPOINT = 'https://data-api.polymarket.com/v2/positions';
+const POLYMARKET_ACTIVITY_ENDPOINT = 'https://data-api.polymarket.com/v2/activity';
+
+async function safeParseJson<T>(res: Response): Promise<T | null> {
+  try {
+    const raw = await res.text();
+    if (!raw) return null;
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
 
 export async function GET(
   _req: NextRequest,
@@ -13,65 +30,72 @@ export async function GET(
   const { address } = await context.params;
   const cleanAddress = (address ?? '').trim();
 
-  if (!/^0x[a-fA-F0-9]{40}$/.test(cleanAddress)) {
+  if (!isValidEvmAddress(cleanAddress)) {
     return NextResponse.json({ error: 'Invalid Polymarket wallet address' }, { status: 400 });
   }
 
-  const posUrl = new URL('https://data-api.polymarket.com/v2/positions');
+  const posUrl = new URL(POLYMARKET_POSITIONS_ENDPOINT);
   posUrl.searchParams.set('user', cleanAddress);
-  posUrl.searchParams.set('limit', '4');
+  posUrl.searchParams.set('limit', '50');
 
-  const tradeUrl = new URL('https://data-api.polymarket.com/v2/trades');
-  tradeUrl.searchParams.set('user', cleanAddress);
-  tradeUrl.searchParams.set('limit', '4');
+  const activityUrl = new URL(POLYMARKET_ACTIVITY_ENDPOINT);
+  activityUrl.searchParams.set('user', cleanAddress);
+  activityUrl.searchParams.set('type', 'TRADE');
+  activityUrl.searchParams.set('limit', '25');
 
-  const [posRes, tradeRes] = await Promise.allSettled([
+  const [posRes, activityRes] = await Promise.allSettled([
     fetch(posUrl.toString(), {
       headers: { Accept: 'application/json' },
       next: { revalidate: 30 },
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(7000),
     }),
-    fetch(tradeUrl.toString(), {
+    fetch(activityUrl.toString(), {
       headers: { Accept: 'application/json' },
       next: { revalidate: 30 },
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(7000),
     }),
   ]);
 
-  let positions = [];
-  let trades = [];
+  let positions: LiveTraderPosition[] = [];
+  let trades: LiveTraderTrade[] = [];
+  let positionsOk = false;
+  let activityOk = false;
 
   if (posRes.status === 'fulfilled' && posRes.value.ok) {
-    try {
-      const json = (await posRes.value.json()) as { data?: RawPolymarketV2PositionRow[] };
-      const rows = Array.isArray(json.data) ? json.data : [];
-      positions = rows
-        .map(normalizeTraderPosition)
-        .filter((item): item is NonNullable<typeof item> => item !== null)
-        .slice(0, 4);
-    } catch {
-      // Ignore parse errors gracefully
-    }
+    positionsOk = true;
+    const json = await safeParseJson<{ data?: RawPolymarketV2PositionRow[] }>(posRes.value);
+    const rows = Array.isArray(json?.data) ? json.data : [];
+    positions = rows
+      .map(normalizeTraderPosition)
+      .filter((item): item is LiveTraderPosition => item !== null)
+      .sort((a, b) => b.currentValueUsd - a.currentValueUsd);
   }
 
-  if (tradeRes.status === 'fulfilled' && tradeRes.value.ok) {
-    try {
-      const json = (await tradeRes.value.json()) as { data?: RawPolymarketV2TradeRow[] };
-      const rows = Array.isArray(json.data) ? json.data : [];
-      trades = rows
-        .map(normalizeTraderTrade)
-        .filter((item): item is NonNullable<typeof item> => item !== null)
-        .slice(0, 4);
-    } catch {
-      // Ignore parse errors gracefully
-    }
+  if (activityRes.status === 'fulfilled' && activityRes.value.ok) {
+    activityOk = true;
+    const json = await safeParseJson<{ data?: RawPolymarketV2ActivityRow[] }>(activityRes.value);
+    const rows = Array.isArray(json?.data) ? json.data : [];
+    trades = rows
+      .map(normalizeTraderActivity)
+      .filter((item): item is LiveTraderTrade => item !== null)
+      .sort((a, b) => b.timestamp - a.timestamp);
   }
+
+  if (!positionsOk && !activityOk) {
+    return NextResponse.json(
+      { error: 'Unable to load live positions and activity from Polymarket Data API v2.' },
+      { status: 503 },
+    );
+  }
+
+  const performance = computeWhalePerformance(positions);
 
   return NextResponse.json(
     {
       address: cleanAddress,
-      positions,
-      trades,
+      positions: positions.slice(0, 20),
+      trades: trades.slice(0, 20),
+      performance,
       fetchedAt: new Date().toISOString(),
     },
     {

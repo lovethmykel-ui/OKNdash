@@ -21,6 +21,7 @@ export interface CopierSubscription {
   id: string;
   traderAddress: string;
   traderHandle?: string;
+  traderAvatar?: string | null;
   specialty?: string;
   status: 'preview' | 'live' | 'paused' | 'stopped';
   strategyConfig: {
@@ -28,6 +29,8 @@ export interface CopierSubscription {
     copySize: number;
     maxOrderSizeUsd: number;
     minOrderSizeUsd: number;
+    allocationUsd?: number;
+    slippagePct?: number;
   };
   createdAt?: string;
 }
@@ -141,83 +144,8 @@ const copierDemo = {
     status: 'active',
     createdAt: '2026-01-20T10:15:00.000Z',
   } satisfies CopierWallet,
-  subscriptions: [
-    {
-      id: 'sub-demo-1',
-      traderAddress: '0x7b3291a4c8d1e0f23456789abcdef012345691a4',
-      traderHandle: '@Theo4',
-      specialty: 'Politics',
-      status: 'live' as const,
-      strategyConfig: {
-        strategy: 'PERCENTAGE' as const,
-        copySize: 15,
-        maxOrderSizeUsd: 250,
-        minOrderSizeUsd: 10,
-      },
-      createdAt: '2026-11-13T10:15:00.000Z',
-    },
-    {
-      id: 'sub-demo-2',
-      traderAddress: '0x4c19e08b91a2b3c4d5e6f708192a3b4c5d6ee08b',
-      traderHandle: '@Fredi9999',
-      specialty: 'Economics',
-      status: 'preview' as const,
-      strategyConfig: {
-        strategy: 'FIXED' as const,
-        copySize: 50,
-        maxOrderSizeUsd: 150,
-        minOrderSizeUsd: 25,
-      },
-      createdAt: '2026-11-16T10:15:00.000Z',
-    },
-  ] as CopierSubscription[],
-  executions: [
-    {
-      id: 'exec-demo-1',
-      status: 'filled',
-      market: {
-        asset: 'YES',
-        slug: 'fed-rate-cut-q4-2026',
-        side: 'BUY',
-      },
-      traderUsdcSize: '1500.00',
-      sizing: {
-        finalAmount: 225,
-        reasoning: '15% proportional copy of whale entry ($1,500 USDC)',
-      },
-      createdAt: '2026-11-18T11:30:00.000Z',
-    },
-    {
-      id: 'exec-demo-2',
-      status: 'filled',
-      market: {
-        asset: 'YES',
-        slug: 'btc-above-100k-november',
-        side: 'BUY',
-      },
-      traderUsdcSize: '800.00',
-      sizing: {
-        finalAmount: 120,
-        reasoning: '15% proportional copy of whale entry ($800 USDC)',
-      },
-      createdAt: '2026-11-18T04:30:00.000Z',
-    },
-    {
-      id: 'exec-demo-3',
-      status: 'sized',
-      market: {
-        asset: 'NO',
-        slug: 'eth-etf-weekly-outflow',
-        side: 'SELL',
-      },
-      traderUsdcSize: '500.00',
-      sizing: {
-        finalAmount: 50,
-        reasoning: 'Preview mode simulation ($50 fixed order)',
-      },
-      createdAt: '2026-11-17T19:30:00.000Z',
-    },
-  ] satisfies CopierExecution[],
+  subscriptions: [] as CopierSubscription[],
+  executions: [] as CopierExecution[],
   allowlist: [
     {
       id: 'allow-1',
@@ -351,6 +279,7 @@ export async function fetchSubscriptions() {
 export async function createSubscription(body: {
   traderAddress: string;
   traderHandle?: string;
+  traderAvatar?: string | null;
   specialty?: string;
   initialStatus?: CopierSubscription['status'];
   strategyConfig: CopierSubscription['strategyConfig'];
@@ -363,6 +292,7 @@ export async function createSubscription(body: {
     existing.strategyConfig = body.strategyConfig;
     if (body.initialStatus) existing.status = body.initialStatus;
     if (body.traderHandle) existing.traderHandle = body.traderHandle;
+    if (body.traderAvatar !== undefined) existing.traderAvatar = body.traderAvatar;
     if (body.specialty) existing.specialty = body.specialty;
     notifyCopierListeners();
     return { ok: true, status: 200, data: { ...existing } };
@@ -372,23 +302,63 @@ export async function createSubscription(body: {
     id: `sub-${Date.now()}`,
     traderAddress: body.traderAddress.trim(),
     traderHandle: body.traderHandle,
+    traderAvatar: body.traderAvatar ?? null,
     specialty: body.specialty,
     status: body.initialStatus ?? 'preview',
     strategyConfig: body.strategyConfig,
     createdAt: new Date().toISOString(),
   };
   copierDemo.subscriptions.unshift(created);
+
+  const allocationLabel =
+    body.strategyConfig.allocationUsd !== undefined
+      ? `$${body.strategyConfig.allocationUsd} alloc`
+      : `max $${body.strategyConfig.maxOrderSizeUsd}`;
+  const sizingLabel =
+    body.strategyConfig.strategy === 'FIXED'
+      ? `$${body.strategyConfig.copySize} fixed per trade`
+      : `${body.strategyConfig.copySize}% proportional mirror`;
+
+  copierDemo.executions.unshift({
+    id: `exec-${Date.now()}`,
+    status: created.status === 'live' ? 'watching' : 'preview',
+    market: {
+      asset: created.traderHandle ?? created.traderAddress.slice(0, 10),
+      slug: `Auto-copy armed · ${created.traderHandle ?? created.traderAddress.slice(0, 10)}`,
+      side: created.status === 'live' ? 'LIVE' : 'PREVIEW',
+    },
+    traderUsdcSize: String(body.strategyConfig.allocationUsd ?? body.strategyConfig.maxOrderSizeUsd),
+    sizing: {
+      finalAmount: body.strategyConfig.maxOrderSizeUsd,
+      reasoning: `${sizingLabel} · ${allocationLabel} · ${body.strategyConfig.slippagePct ?? 1}% max slippage`,
+    },
+    createdAt: new Date().toISOString(),
+  });
+
   notifyCopierListeners();
   return { ok: true, status: 201, data: created };
 }
 
 export async function updateSubscription(
   id: string,
-  body: { status?: CopierSubscription['status'] },
+  body: {
+    status?: CopierSubscription['status'];
+    strategyConfig?: CopierSubscription['strategyConfig'];
+  },
 ) {
-  const sub = copierDemo.subscriptions.find((s) => s.id === id) ?? copierDemo.subscriptions[0]!;
+  const sub = copierDemo.subscriptions.find((s) => s.id === id);
+  if (!sub) {
+    return {
+      ok: false,
+      status: 404,
+      error: { code: 'not_found', message: 'Subscription not found' },
+    };
+  }
   if (body.status) {
     sub.status = body.status;
+  }
+  if (body.strategyConfig) {
+    sub.strategyConfig = body.strategyConfig;
   }
   notifyCopierListeners();
   return { ok: true, status: 200, data: { ...sub } };
