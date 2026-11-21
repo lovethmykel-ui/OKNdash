@@ -40,6 +40,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
 import { cn } from '@/lib/utils';
+import { formatElapsedCompact } from '@/lib/polymarket/leaderboard';
 import type { AgentTab } from './tab-param';
 import { TwoFaChallenge } from './two-fa-challenge';
 import { UpgradeDialog } from './upgrade-dialog';
@@ -340,11 +341,11 @@ function TreasuryAndFundingDesk({
                 <span>
                   {tw('gasLabel')}:{' '}
                   <span className="font-mono font-bold text-[var(--tx)]">
-                    {balances ? `${Number(balances.pol).toFixed(3)} POL` : '—'}
+                    {balances ? `${Number(balances.pol).toFixed(2)} POL` : '—'}
                   </span>
                 </span>
                 {agoSeconds !== null && (
-                  <span>· {tw('updatedAgo', { seconds: agoSeconds })}</span>
+                  <span>· {formatElapsedCompact(agoSeconds)}</span>
                 )}
               </div>
             </div>
@@ -354,9 +355,9 @@ function TreasuryAndFundingDesk({
                 <button
                   type="button"
                   onClick={onGoCopy}
-                  className="inline-flex items-center gap-1.5 text-xs font-extrabold text-[#2E5CFF] hover:underline cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#7A12F5] dark:text-[#C084FC] hover:underline cursor-pointer"
                 >
-                  <span>Copy Top Leaderboard Traders</span>
+                  <span>Browse Top 3 Leaders</span>
                   <ArrowRight className="size-3.5" />
                 </button>
               </div>
@@ -396,16 +397,11 @@ function TreasuryAndFundingDesk({
         </div>
 
         {/* Right: Fund Agent Controls */}
-        <div className="lg:col-span-7 p-5 sm:p-6 flex flex-col justify-between gap-5">
+        <div className="lg:col-span-7 p-5 sm:p-6 flex flex-col justify-between gap-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--tx)]">
-                Fund Agent Before Trading
-              </h2>
-              <p className="text-xs text-[var(--mut)] mt-0.5">
-                Deposit Polygon USDC.e trading capital and POL gas into your dedicated Agent wallet.
-              </p>
-            </div>
+            <h2 className="text-sm sm:text-base font-extrabold tracking-tight text-[var(--tx)]">
+              Deposit Capital
+            </h2>
 
             <div
               role="tablist"
@@ -884,9 +880,9 @@ function AddAllowlistRow({ onAdded }: { onAdded: () => void }) {
           {t('addAddress')}
         </Button>
       </div>
-      <p className="text-xs text-[var(--mut)]">{t('allowlistHelp')}</p>
+      <p className="text-[11px] text-[var(--mut)]">24h cooldown on new addresses</p>
       {error && (
-        <p role="alert" className="text-sm text-ios-red">
+        <p role="alert" className="text-xs text-ios-red">
           {error}
         </p>
       )}

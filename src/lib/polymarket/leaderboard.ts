@@ -12,7 +12,8 @@ export type LeaderboardCategory =
   | 'Crypto'
   | 'Finance'
   | 'Economics'
-  | 'Tech';
+  | 'Tech'
+  | 'Culture';
 export type LeaderboardSort = 'pnl' | 'volume';
 
 export type PolymarketApiTimePeriod = 'day' | 'week' | 'month' | 'all';
@@ -23,8 +24,12 @@ export type PolymarketApiCategory =
   | 'crypto'
   | 'finance'
   | 'economics'
-  | 'tech';
+  | 'tech'
+  | 'culture';
 export type PolymarketApiSortBy = 'PNL' | 'VOLUME';
+
+/** Strictly mirror the top 3 all-time leaders per Polymarket category. */
+export const TOP_LEADERS_LIMIT = 3;
 
 /** Canonical live whale record mirrored from Polymarket Data API v2. */
 export interface LiveLeaderboardTrader {
@@ -156,6 +161,7 @@ export const LEADERBOARD_CATEGORIES: LeaderboardCategory[] = [
   'Finance',
   'Economics',
   'Tech',
+  'Culture',
 ];
 
 export const LEADERBOARD_TIMEFRAMES: {
@@ -196,9 +202,25 @@ export function toPolymarketCategory(cat: LeaderboardCategory): PolymarketApiCat
       return 'economics';
     case 'Tech':
       return 'tech';
+    case 'Culture':
+      return 'culture';
     default:
       return 'overall';
   }
+}
+
+/**
+ * Enforces the top-N (default 3) leaderboard cap and normalizes podium ranks 1..N.
+ */
+export function enforceTopLeaders(
+  traders: LiveLeaderboardTrader[],
+  limit = TOP_LEADERS_LIMIT,
+): LiveLeaderboardTrader[] {
+  const safeLimit = Math.max(1, Math.min(TOP_LEADERS_LIMIT, Math.trunc(limit)));
+  return traders.slice(0, safeLimit).map((trader, idx) => ({
+    ...trader,
+    rank: idx + 1,
+  }));
 }
 
 export function toPolymarketSortBy(sort: LeaderboardSort): PolymarketApiSortBy {
@@ -522,6 +544,18 @@ export function formatRelativeTime(unixSeconds: number, nowMs: number | null): s
   if (diffHr < 24) return `${diffHr}h ago`;
   const diffDay = Math.floor(diffHr / 24);
   return `${diffDay}d ago`;
+}
+
+export function formatElapsedCompact(seconds: number | null): string {
+  if (seconds === null || !Number.isFinite(seconds) || seconds < 0) return 'Live';
+  if (seconds < 15) return 'Just now';
+  if (seconds < 60) return `${Math.floor(seconds)}s ago`;
+  const mins = Math.floor(seconds / 60);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
 }
 
 export function shortenEvmAddress(address: string): string {

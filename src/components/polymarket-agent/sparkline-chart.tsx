@@ -1,13 +1,15 @@
 'use client';
 
 /**
- * Pure, deterministic SVG sparkline curve for whale leaderboard cards.
- * Zero Math.random() or client-only state so SSR and hydration always match.
+ * Pure, deterministic SVG sparkline curve with whisper-soft area gradient
+ * for minimalist whale leader cards. Uses a deterministic gradient ID so
+ * SSR HTML and client hydration match identically.
  */
 
 interface SparklineChartProps {
   values: number[];
   positive: boolean;
+  seed?: string;
   width?: number;
   height?: number;
   ariaLabel?: string;
@@ -16,8 +18,9 @@ interface SparklineChartProps {
 export function SparklineChart({
   values,
   positive,
-  width = 112,
-  height = 36,
+  seed = 'curve',
+  width = 128,
+  height = 44,
   ariaLabel,
 }: SparklineChartProps) {
   const safeValues = values.length >= 2 ? values : [0, positive ? 1 : -1];
@@ -26,8 +29,8 @@ export function SparklineChart({
   const span = max - min || 1;
 
   const padX = 2;
-  const padY = 5;
-  const curveWidth = Math.round(width * 0.74);
+  const padY = 6;
+  const curveWidth = width - 8;
   const usableHeight = height - padY * 2;
 
   const coords = safeValues.map((v, i) => {
@@ -37,7 +40,7 @@ export function SparklineChart({
     return { x: Number(x.toFixed(2)), y: Number(y.toFixed(2)) };
   });
 
-  // Build smooth quadratic path through midpoints
+  // Smooth quadratic spline through midpoints
   let pathD = `M ${coords[0]!.x} ${coords[0]!.y}`;
   for (let i = 1; i < coords.length; i++) {
     const prev = coords[i - 1]!;
@@ -50,10 +53,13 @@ export function SparklineChart({
       pathD += ` Q ${prev.x} ${prev.y} ${midX} ${midY}`;
     }
   }
+  const first = coords[0]!;
   const last = coords[coords.length - 1]!;
   pathD += ` L ${last.x} ${last.y}`;
 
+  const areaD = `${pathD} L ${last.x} ${height} L ${first.x} ${height} Z`;
   const strokeColor = positive ? '#10B981' : '#F43F5E';
+  const safeId = `spark-${seed.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 16) || 'pm'}`;
 
   return (
     <svg
@@ -65,26 +71,21 @@ export function SparklineChart({
       aria-label={ariaLabel ?? (positive ? 'Positive PnL trend' : 'Negative PnL trend')}
       className="shrink-0 overflow-visible"
     >
-      {/* Subtle dashed projection baseline matching reference card layout */}
-      <line
-        x1={last.x + 4}
-        y1={last.y}
-        x2={width - 2}
-        y2={last.y}
-        stroke="currentColor"
-        strokeOpacity="0.18"
-        strokeWidth="1.5"
-        strokeDasharray="3 3"
-        strokeLinecap="round"
-      />
+      <defs>
+        <linearGradient id={safeId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={strokeColor} stopOpacity="0.18" />
+          <stop offset="100%" stopColor={strokeColor} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={areaD} fill={`url(#${safeId})`} />
       <path
         d={pathD}
         stroke={strokeColor}
-        strokeWidth="2.25"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx={last.x} cy={last.y} r="2.5" fill={strokeColor} />
+      <circle cx={last.x} cy={last.y} r="3" fill={strokeColor} />
     </svg>
   );
 }

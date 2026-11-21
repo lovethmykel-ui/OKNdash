@@ -1,13 +1,13 @@
 'use client';
 
 /**
- * polymarket-agent/agent-copier-tabs.tsx — architectural segmented tab shell
- * for Agent, Copy, and Fund views on /app/polymarket-agent.
+ * polymarket-agent/agent-copier-tabs.tsx — deterministic, hydration-safe
+ * segmented tab shell (Agent / Copy / Fund) with static ARIA IDs.
  */
 import type { ReactNode } from 'react';
 import { Bot, Copy, Landmark } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { parseAgentTab, type AgentTab } from './tab-param';
+import { cn } from '@/lib/utils';
+import type { AgentTab } from './tab-param';
 
 interface AgentCopierTabsProps {
   value: AgentTab;
@@ -17,6 +17,17 @@ interface AgentCopierTabsProps {
   fund: ReactNode;
 }
 
+const TAB_ITEMS: {
+  id: AgentTab;
+  label: string;
+  icon: typeof Bot;
+  activeIconClass: string;
+}[] = [
+  { id: 'agent', label: 'Agent', icon: Bot, activeIconClass: 'text-[#2E5CFF]' },
+  { id: 'copy', label: 'Copy', icon: Copy, activeIconClass: 'text-[#7A12F5] dark:text-[#C084FC]' },
+  { id: 'fund', label: 'Fund', icon: Landmark, activeIconClass: 'text-[#10B981]' },
+];
+
 export function AgentCopierTabs({
   value,
   onValueChange,
@@ -24,50 +35,49 @@ export function AgentCopierTabs({
   copy,
   fund,
 }: AgentCopierTabsProps) {
-  const handleValueChange = (raw: string) => {
-    onValueChange(parseAgentTab(raw));
-  };
-
   return (
-    <Tabs value={value} onValueChange={handleValueChange}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <TabsList
-          aria-label="Polymarket Agent sections"
-          className="h-11 w-full sm:w-auto rounded-xl border border-[var(--line)] bg-[var(--s2)] p-1 grid grid-cols-3 sm:inline-grid"
-        >
-          <TabsTrigger
-            value="agent"
-            className="cursor-pointer rounded-lg px-4 sm:px-6 py-1.5 text-xs sm:text-sm font-bold transition-all whitespace-nowrap text-[var(--mut)] data-[state=active]:bg-[var(--s1)] data-[state=active]:text-[var(--tx)] data-[state=active]:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5CFF]/35"
-          >
-            <Bot className="size-4 mr-1.5 shrink-0 text-[#2E5CFF]" />
-            <span>Agent</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="copy"
-            className="cursor-pointer rounded-lg px-4 sm:px-6 py-1.5 text-xs sm:text-sm font-bold transition-all whitespace-nowrap text-[var(--mut)] data-[state=active]:bg-[var(--s1)] data-[state=active]:text-[var(--tx)] data-[state=active]:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5CFF]/35"
-          >
-            <Copy className="size-4 mr-1.5 shrink-0 text-[#7A12F5] dark:text-[#C084FC]" />
-            <span>Copy</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="fund"
-            className="cursor-pointer rounded-lg px-4 sm:px-6 py-1.5 text-xs sm:text-sm font-bold transition-all whitespace-nowrap text-[var(--mut)] data-[state=active]:bg-[var(--s1)] data-[state=active]:text-[var(--tx)] data-[state=active]:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5CFF]/35"
-          >
-            <Landmark className="size-4 mr-1.5 shrink-0 text-[#10B981]" />
-            <span>Fund</span>
-          </TabsTrigger>
-        </TabsList>
+    <div className="space-y-5">
+      <div
+        role="tablist"
+        aria-label="Polymarket Agent sections"
+        className="grid grid-cols-3 sm:inline-grid h-10 w-full sm:w-auto rounded-xl border border-[var(--line)] bg-[var(--s2)] p-1"
+      >
+        {TAB_ITEMS.map((item) => {
+          const Icon = item.icon;
+          const active = value === item.id;
+          return (
+            <button
+              key={item.id}
+              id={`polymarket-tab-${item.id}`}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              aria-controls={`polymarket-panel-${item.id}`}
+              onClick={() => onValueChange(item.id)}
+              className={cn(
+                'inline-flex items-center justify-center gap-1.5 rounded-lg px-4 sm:px-5 text-xs sm:text-sm font-bold transition-colors cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7A12F5]/35',
+                active
+                  ? 'bg-[var(--s1)] text-[var(--tx)] shadow-xs'
+                  : 'text-[var(--mut)] hover:text-[var(--tx)]',
+              )}
+            >
+              <Icon
+                className={cn('size-3.5 shrink-0', active ? item.activeIconClass : 'opacity-70')}
+                aria-hidden="true"
+              />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
       </div>
 
-      <TabsContent value="agent" className="mt-5 space-y-6">
-        {agent}
-      </TabsContent>
-      <TabsContent value="copy" className="mt-5 space-y-6">
-        {copy}
-      </TabsContent>
-      <TabsContent value="fund" className="mt-5 space-y-6">
-        {fund}
-      </TabsContent>
-    </Tabs>
+      <div
+        id={`polymarket-panel-${value}`}
+        role="tabpanel"
+        aria-labelledby={`polymarket-tab-${value}`}
+      >
+        {value === 'agent' ? agent : value === 'copy' ? copy : fund}
+      </div>
+    </div>
   );
 }

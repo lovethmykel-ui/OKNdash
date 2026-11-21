@@ -43,7 +43,7 @@ export function FeeCard() {
           <span>{t('title')}</span>
         </h2>
       </div>
-      <dl className="grid grid-cols-3 gap-4 border-y border-[var(--line)] py-3.5">
+      <dl className="grid grid-cols-3 gap-4 border-t border-[var(--line)] pt-3.5">
         <div>
           <dt className="text-[11px] font-medium text-[var(--mut)]">{t('outstanding')}</dt>
           <dd className="mt-0.5 font-mono text-lg sm:text-xl font-extrabold tabular-nums text-[var(--tx)]" aria-live="polite">
@@ -63,7 +63,6 @@ export function FeeCard() {
           </dd>
         </div>
       </dl>
-      <p className="text-xs text-[var(--mut)] leading-relaxed">{t('explainer')}</p>
     </section>
   );
 }

@@ -1,11 +1,7 @@
 'use client';
 
 /**
- * /app/polymarket-agent — Polymarket Agent Copier (Agent / Copy / Fund).
- *
- *   - Agent: Landing command screen connecting funding, guardrails, and whale signals.
- *   - Copy: Polymarket Leaderboard mirror (polymarket.com/leaderboard) + 1-click trader copying.
- *   - Fund: Funding of Agent wallet (USDC.e & POL) before engaging live copy trades.
+ * /app/polymarket-agent — Minimalist Polymarket Copy Agent Dashboard.
  */
 import { Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -25,7 +21,10 @@ function PolymarketAgentWorkspace() {
 
   const handleTabChange = useCallback(
     (nextTab: AgentTab) => {
-      const target = nextTab === 'agent' ? '/app/polymarket-agent' : `/app/polymarket-agent?tab=${nextTab}`;
+      const target =
+        nextTab === 'agent'
+          ? '/app/polymarket-agent'
+          : `/app/polymarket-agent?tab=${nextTab}`;
       router.replace(target as never, { scroll: false });
     },
     [router],
@@ -46,31 +45,28 @@ export default function PolymarketAgentPage() {
   const t = useTranslations('dashboard.polymarketAgent');
 
   return (
-    <main className="space-y-6 pb-24 md:pb-12">
-      {/* Editorial Terminal Header */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between border-b border-[var(--line)] pb-5">
-        <div className="flex items-start gap-3.5 min-w-0">
-          <div className="flex size-11 sm:size-12 shrink-0 items-center justify-center rounded-2xl border border-[#2E5CFF]/25 bg-[#2E5CFF]/10">
+    <div className="space-y-5 pb-24 md:pb-10">
+      {/* Compact Single-Row Dashboard Header */}
+      <header className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--s1)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/polymarket.png" alt="Polymarket" className="size-6 sm:size-7 object-contain" />
+            <img
+              src="/polymarket.png"
+              alt="Polymarket"
+              className="size-4.5 object-contain"
+            />
           </div>
-          <div className="min-w-0">
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--tx)] text-balance">
-              {t('title')}
-            </h1>
-            <p className="mt-1 text-xs sm:text-sm text-[var(--mut)] max-w-2xl">
-              {t('description')}
-            </p>
-          </div>
+          <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-[var(--tx)] truncate">
+            {t('title')}
+          </h1>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--mut)] font-medium shrink-0">
-          <span className="font-semibold text-[var(--tx)]">Polygon PoS</span>
+        <p className="hidden sm:flex items-center gap-2 text-xs text-[var(--mut)] font-medium shrink-0">
+          <span>Polygon</span>
           <span aria-hidden="true">·</span>
-          <span>USDC.e Collateral</span>
-          <span aria-hidden="true">·</span>
-          <span>Automated Whale Mirroring</span>
-        </div>
+          <span>USDC.e</span>
+        </p>
       </header>
 
       <Suspense
@@ -82,6 +78,6 @@ export default function PolymarketAgentPage() {
       </Suspense>
 
       <RiskDisclosure />
-    </main>
+    </div>
   );
 }

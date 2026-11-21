@@ -85,12 +85,8 @@ export function WhaleDetailView({
   onCopied,
   onGoFund,
 }: WhaleDetailViewProps) {
-  const cachedEntry = traderDetailCache.get(trader.address.toLowerCase());
-  const validInitial =
-    cachedEntry && cachedEntry.expiresAt > Date.now() ? cachedEntry.payload : null;
-
-  const [detail, setDetail] = useState<TraderDetailPayload | null>(validInitial);
-  const [loading, setLoading] = useState(!validInitial);
+  const [detail, setDetail] = useState<TraderDetailPayload | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [feedTab, setFeedTab] = useState<'positions' | 'trades'>('positions');
   const [configOpen, setConfigOpen] = useState(false);
@@ -346,11 +342,11 @@ export function WhaleDetailView({
           {/* Performance Breakdown Card */}
           <section className="rounded-3xl border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-6 shadow-xs space-y-5">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-lg font-extrabold tracking-tight text-[var(--tx)]">
+              <h3 className="text-base font-extrabold tracking-tight text-[var(--tx)]">
                 Performance
               </h3>
-              <span className="rounded-lg border border-[var(--line)] bg-[var(--s2)]/70 px-2.5 py-1 text-[11px] font-bold text-[var(--mut)]">
-                {timeframeLabel} Leaderboard
+              <span className="text-xs font-medium text-[var(--mut)]">
+                {timeframeLabel} · Live
               </span>
             </div>
 

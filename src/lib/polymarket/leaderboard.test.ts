@@ -1,13 +1,16 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  TOP_LEADERS_LIMIT,
   buildDeterministicSparkline,
   buildPolymarketProfileUrl,
   canEngageLiveCopy,
   computeReturnOnVolumePct,
   computeWhalePerformance,
+  enforceTopLeaders,
   filterLiveLeaderboardTraders,
   formatCompactUsd,
+  formatElapsedCompact,
   formatPolymarketUsername,
   formatRelativeTime,
   formatSignedPct,
@@ -35,8 +38,33 @@ describe('Polymarket Data API v2 Leaderboard helpers', () => {
     assert.equal(toPolymarketCategory('All'), 'overall');
     assert.equal(toPolymarketCategory('Politics'), 'politics');
     assert.equal(toPolymarketCategory('Finance'), 'finance');
+    assert.equal(toPolymarketCategory('Culture'), 'culture');
     assert.equal(toPolymarketSortBy('pnl'), 'PNL');
     assert.equal(toPolymarketSortBy('volume'), 'VOLUME');
+    assert.equal(TOP_LEADERS_LIMIT, 3);
+  });
+
+  it('strictly caps leaderboard leaders to top 3 and formats elapsed times cleanly', () => {
+    const sample = normalizePolymarketV2Rows([
+      { rank: 10, user_id: '0x1111111111111111111111111111111111111111', pnl: 500, volume: 1000, user_name: 'One' },
+      { rank: 11, user_id: '0x2222222222222222222222222222222222222222', pnl: 400, volume: 900, user_name: 'Two' },
+      { rank: 12, user_id: '0x3333333333333333333333333333333333333333', pnl: 300, volume: 800, user_name: 'Three' },
+      { rank: 13, user_id: '0x4444444444444444444444444444444444444444', pnl: 200, volume: 700, user_name: 'Four' },
+    ]);
+    const capped = enforceTopLeaders(sample);
+    assert.equal(capped.length, 3);
+    assert.deepEqual(
+      capped.map((t) => t.rank),
+      [1, 2, 3],
+    );
+    assert.equal(capped[2]?.displayName, 'Three');
+
+    assert.equal(formatElapsedCompact(5), 'Just now');
+    assert.equal(formatElapsedCompact(42), '42s ago');
+    assert.equal(formatElapsedCompact(185), '3m ago');
+    assert.equal(formatElapsedCompact(7200), '2h ago');
+    assert.equal(formatElapsedCompact(228964), '2d ago');
+    assert.equal(formatElapsedCompact(null), 'Live');
   });
 
   it('validates EVM addresses, pagination cursors, and HTTPS-only image URLs', () => {

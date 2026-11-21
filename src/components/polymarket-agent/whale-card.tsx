@@ -1,11 +1,13 @@
 'use client';
 
 /**
- * Clean card-based Whale Leaderboard item modeled on the reference card
- * architecture, adapted to OKN theme tokens for both light & dark modes.
+ * Minimalist, high-craft Top-3 Whale Leader Card with subtle Framer Motion
+ * hover scale + ambient glowing shadow, clean unboxed telemetry, and
+ * podium rank typography.
  */
 import { useState } from 'react';
-import { ArrowRight, BadgeCheck, Star, Trophy, Users } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
+import { ArrowUpRight, BadgeCheck, Check, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   buildDeterministicSparkline,
@@ -33,10 +35,10 @@ export function WhaleAvatar({
 
   const dims =
     size === 'lg'
-      ? 'size-13 text-base'
+      ? 'size-12 text-base'
       : size === 'sm'
-        ? 'size-9 text-xs'
-        : 'size-11 text-sm';
+        ? 'size-8 text-xs'
+        : 'size-10 text-xs';
 
   const initials = name.replace(/^[@0x]+/i, '').slice(0, 2).toUpperCase() || 'PM';
 
@@ -49,7 +51,7 @@ export function WhaleAvatar({
         loading="lazy"
         onError={() => setFailed(true)}
         className={cn(
-          'shrink-0 rounded-full object-cover ring-2 ring-[var(--line)] bg-[var(--s2)]',
+          'shrink-0 rounded-full object-cover ring-1 ring-[var(--line)] bg-[var(--s2)]',
           dims,
         )}
       />
@@ -60,7 +62,7 @@ export function WhaleAvatar({
     <span
       aria-hidden="true"
       className={cn(
-        'shrink-0 rounded-full bg-gradient-to-br flex items-center justify-center font-extrabold text-white ring-2 ring-black/5 dark:ring-white/10 select-none',
+        'shrink-0 rounded-full bg-gradient-to-br flex items-center justify-center font-extrabold text-white ring-1 ring-black/10 dark:ring-white/15 select-none',
         toneClass,
         dims,
       )}
@@ -70,8 +72,31 @@ export function WhaleAvatar({
   );
 }
 
+function rankAccent(rank: number): { label: string; textClass: string; barClass: string } {
+  if (rank === 1) {
+    return {
+      label: '#1',
+      textClass: 'text-[#D97706] dark:text-[#FBBF24]',
+      barClass: 'bg-gradient-to-r from-[#F59E0B] via-[#7A12F5] to-transparent',
+    };
+  }
+  if (rank === 2) {
+    return {
+      label: '#2',
+      textClass: 'text-[#64748B] dark:text-[#CBD5E1]',
+      barClass: 'bg-gradient-to-r from-[#94A3B8] via-[#7A12F5]/70 to-transparent',
+    };
+  }
+  return {
+    label: '#3',
+    textClass: 'text-[#B45309] dark:text-[#F59E0B]/80',
+    barClass: 'bg-gradient-to-r from-[#D97706]/80 via-[#7A12F5]/50 to-transparent',
+  };
+}
+
 interface WhaleCardProps {
   trader: LiveLeaderboardTrader;
+  categoryLabel?: string;
   subscription?: CopierSubscription;
   isFavorite: boolean;
   onToggleFavorite: (address: string) => void;
@@ -80,11 +105,13 @@ interface WhaleCardProps {
 
 export function WhaleCard({
   trader,
+  categoryLabel = 'All-Time',
   subscription,
   isFavorite,
   onToggleFavorite,
   onOpenDetails,
 }: WhaleCardProps) {
+  const prefersReducedMotion = useReducedMotion();
   const positive = trader.pnlUsd >= 0;
   const sparkPoints = buildDeterministicSparkline(
     trader.address,
@@ -93,155 +120,194 @@ export function WhaleCard({
   );
   const isCopied = Boolean(subscription && subscription.status !== 'stopped');
   const isLive = subscription?.status === 'live';
+  const rankMeta = rankAccent(trader.rank);
+
+  const hoverBoxShadow = isLive
+    ? '0 18px 40px -12px rgba(16, 185, 129, 0.28), 0 0 0 1px rgba(16, 185, 129, 0.45)'
+    : '0 18px 40px -12px rgba(122, 18, 245, 0.24), 0 0 0 1px rgba(122, 18, 245, 0.40)';
 
   return (
-    <article
+    <motion.article
       data-testid="whale-card"
+      whileHover={
+        prefersReducedMotion
+          ? undefined
+          : {
+              scale: 1.018,
+              y: -3,
+              boxShadow: hoverBoxShadow,
+            }
+      }
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.992 }}
+      transition={{ type: 'spring', stiffness: 380, damping: 28, mass: 0.75 }}
       className={cn(
-        'group relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-gradient-to-b from-[var(--s1)] via-[var(--s1)] transition-all duration-200',
+        'group relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-[var(--s1)] transition-colors duration-200 will-change-transform',
         isLive
-          ? 'border-[#10B981]/50 to-[#10B981]/[0.08] dark:to-[#10B981]/[0.12] shadow-xs'
-          : 'border-[#7A12F5]/22 hover:border-[#7A12F5]/55 dark:border-[#7A12F5]/30 dark:hover:border-[#9B4DFF]/65 to-[#7A12F5]/[0.07] dark:to-[#7A12F5]/[0.14] hover:shadow-md',
+          ? 'border-[#10B981]/50'
+          : 'border-[var(--line)] hover:border-[#7A12F5]/45 dark:hover:border-[#9B4DFF]/55',
       )}
     >
-      {/* Top Section: Header */}
-      <div className="p-4 sm:p-5 pb-3.5 flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <WhaleAvatar
-            name={trader.displayName}
-            imageUrl={trader.profileImage}
-            toneClass={trader.avatarTone}
-          />
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <h3 className="truncate text-[15px] sm:text-base font-extrabold tracking-tight text-[var(--tx)]">
-                {trader.displayName}
-              </h3>
-              {trader.verified && (
-                <BadgeCheck
-                  className="size-4 shrink-0 text-[#7A12F5] dark:text-[#A855F7]"
-                  aria-label="Verified Polymarket profile"
-                />
-              )}
-            </div>
-            <div className="mt-0.5 flex items-center gap-2 text-xs text-[var(--mut)] tabular-nums">
-              <span className="inline-flex items-center gap-1 font-semibold">
-                <Trophy className="size-3.5 text-[var(--mut)]" aria-hidden="true" />
-                <span>#{trader.rank}</span>
-              </span>
-              {trader.xUsername ? (
-                <span className="truncate max-w-[110px]">@{trader.xUsername}</span>
-              ) : isCopied ? (
-                <span className="inline-flex items-center gap-1 text-[#10B981] font-semibold">
-                  <Users className="size-3" aria-hidden="true" />
-                  <span>{isLive ? 'Copying live' : 'Preview'}</span>
+      {/* Subtle 2px top podium accent line */}
+      <div
+        aria-hidden="true"
+        className={cn(
+          'h-[2px] w-full transition-opacity duration-200',
+          isLive
+            ? 'bg-gradient-to-r from-[#10B981] via-[#34D399] to-transparent opacity-100'
+            : cn(rankMeta.barClass, 'opacity-55 group-hover:opacity-100'),
+        )}
+      />
+
+      {/* Ambient hover sheen */}
+      <div
+        aria-hidden="true"
+        className={cn(
+          'pointer-events-none absolute inset-x-0 top-0 h-24 opacity-0 transition-opacity duration-200 group-hover:opacity-100',
+          isLive
+            ? 'bg-gradient-to-b from-[#10B981]/[0.07] to-transparent'
+            : 'bg-gradient-to-b from-[#7A12F5]/[0.06] to-transparent',
+        )}
+      />
+
+      {/* Card Body */}
+      <div className="relative p-5 flex flex-col gap-5 flex-1">
+        {/* Identity Row */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <WhaleAvatar
+              name={trader.displayName}
+              imageUrl={trader.profileImage}
+              toneClass={trader.avatarTone}
+            />
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <h3 className="truncate text-[15px] font-bold tracking-tight text-[var(--tx)]">
+                  {trader.displayName}
+                </h3>
+                {trader.verified && (
+                  <BadgeCheck
+                    className="size-4 shrink-0 text-[#7A12F5] dark:text-[#A855F7]"
+                    aria-label="Verified profile"
+                  />
+                )}
+              </div>
+              <p className="mt-0.5 flex items-center gap-1.5 text-xs text-[var(--mut)] tabular-nums truncate">
+                <span className={cn('font-mono font-extrabold', rankMeta.textClass)}>
+                  {rankMeta.label}
                 </span>
-              ) : null}
+                <span aria-hidden="true">·</span>
+                <span className="truncate">
+                  {trader.xUsername ? `@${trader.xUsername}` : categoryLabel}
+                </span>
+              </p>
             </div>
           </div>
-        </div>
 
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleFavorite(trader.address);
-          }}
-          aria-pressed={isFavorite}
-          aria-label={
-            isFavorite
-              ? `Remove ${trader.displayName} from watchlist`
-              : `Add ${trader.displayName} to watchlist`
-          }
-          className={cn(
-            'size-9 shrink-0 rounded-xl border flex items-center justify-center transition-colors cursor-pointer',
-            isFavorite
-              ? 'border-[#F59E0B]/40 bg-[#F59E0B]/10 text-[#D97706] dark:text-[#FBBF24]'
-              : 'border-[var(--line)] bg-[var(--s1)] text-[var(--mut)] hover:text-[var(--tx)] hover:border-[var(--mut)]/40',
-          )}
-        >
-          <Star
-            className={cn('size-4', isFavorite && 'fill-current')}
-            aria-hidden="true"
-          />
-        </button>
-      </div>
-
-      {/* Hairline Divider */}
-      <div className="mx-4 sm:mx-5 border-t border-[var(--line)]/80" />
-
-      {/* Middle Section: Total PnL + Sparkline */}
-      <div className="px-4 sm:px-5 py-4 flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-xs font-medium text-[var(--mut)]">Total PnL</p>
-          <p
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavorite(trader.address);
+            }}
+            aria-pressed={isFavorite}
+            aria-label={
+              isFavorite
+                ? `Remove ${trader.displayName} from watchlist`
+                : `Add ${trader.displayName} to watchlist`
+            }
             className={cn(
-              'mt-1 text-xl sm:text-[22px] font-extrabold tracking-tight tabular-nums leading-none',
-              positive
-                ? 'text-[#059669] dark:text-[#10B981]'
-                : 'text-[#E11D48] dark:text-[#F43F5E]',
+              'size-8 shrink-0 rounded-lg flex items-center justify-center transition-colors cursor-pointer',
+              isFavorite
+                ? 'text-[#D97706] dark:text-[#FBBF24] bg-[#F59E0B]/10'
+                : 'text-[var(--mut)] hover:text-[var(--tx)] hover:bg-[var(--s2)]',
             )}
           >
-            {formatCompactUsd(trader.pnlUsd, true)}
-          </p>
+            <Star
+              className={cn('size-4', isFavorite && 'fill-current')}
+              aria-hidden="true"
+            />
+          </button>
         </div>
 
-        <SparklineChart
-          values={sparkPoints}
-          positive={positive}
-          ariaLabel={`${trader.displayName} ${positive ? 'positive' : 'negative'} PnL curve`}
-        />
-      </div>
-
-      {/* Hairline Divider */}
-      <div className="mx-4 sm:mx-5 border-t border-[var(--line)]/80" />
-
-      {/* Secondary Metric + Footer CTA (sitting over soft tinted wash) */}
-      <div className="px-4 sm:px-5 pt-3.5 pb-4 sm:pb-5 space-y-4">
-        <div>
-          <p className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--tx)] tabular-nums leading-tight">
-            {formatCompactUsd(trader.volumeUsd)}
-          </p>
-          <div className="mt-1 flex items-center gap-2 text-xs text-[var(--mut)]">
-            <span>Volume</span>
-            <span
+        {/* Dominant Metric + Precision Area Sparkline */}
+        <div className="flex items-end justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium text-[var(--mut)]">All-Time PnL</p>
+            <p
               className={cn(
-                'inline-flex items-center rounded-md border px-1.5 py-0.5 text-[11px] font-bold tabular-nums',
+                'mt-1 font-mono text-2xl sm:text-[26px] font-extrabold tracking-tight tabular-nums leading-none',
                 positive
-                  ? 'border-[#10B981]/25 bg-[#10B981]/10 text-[#059669] dark:text-[#34D399]'
-                  : 'border-[#F43F5E]/25 bg-[#F43F5E]/10 text-[#E11D48] dark:text-[#FB7185]',
+                  ? 'text-[#059669] dark:text-[#10B981]'
+                  : 'text-[#E11D48] dark:text-[#F43F5E]',
               )}
             >
-              ROI {formatSignedPct(trader.roiPct)}
-            </span>
+              {formatCompactUsd(trader.pnlUsd, true)}
+            </p>
           </div>
+
+          <SparklineChart
+            values={sparkPoints}
+            positive={positive}
+            seed={trader.address}
+            width={118}
+            height={42}
+            ariaLabel={`${trader.displayName} ${positive ? 'positive' : 'negative'} PnL curve`}
+          />
         </div>
 
+        {/* Unboxed Secondary Telemetry Strip (Zero pills) */}
+        <dl className="grid grid-cols-2 gap-3 border-t border-[var(--line)] pt-3.5 text-xs">
+          <div>
+            <dt className="text-[11px] text-[var(--mut)]">Volume</dt>
+            <dd className="mt-0.5 font-mono text-sm font-bold text-[var(--tx)] tabular-nums">
+              {formatCompactUsd(trader.volumeUsd)}
+            </dd>
+          </div>
+          <div className="text-right">
+            <dt className="text-[11px] text-[var(--mut)]">Return</dt>
+            <dd
+              className={cn(
+                'mt-0.5 font-mono text-sm font-bold tabular-nums',
+                positive
+                  ? 'text-[#059669] dark:text-[#10B981]'
+                  : 'text-[#E11D48] dark:text-[#F43F5E]',
+              )}
+            >
+              {formatSignedPct(trader.roiPct)}
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      {/* Minimalist Action Footer */}
+      <div className="relative px-5 pb-4">
         <button
           type="button"
           onClick={() => onOpenDetails(trader)}
           data-testid="whale-details-btn"
           className={cn(
-            'w-full h-11 rounded-xl border px-4 text-sm font-bold transition-all cursor-pointer inline-flex items-center justify-center gap-2 shadow-xs active:scale-[0.985]',
+            'w-full h-10 rounded-xl px-4 text-xs font-bold transition-colors cursor-pointer inline-flex items-center justify-between whitespace-nowrap',
             isLive
-              ? 'border-[#10B981]/40 bg-[var(--s1)] text-[#059669] dark:text-[#34D399] hover:bg-[#10B981]/10'
-              : 'border-[var(--line)] bg-[var(--s1)] text-[var(--tx)] hover:border-[#7A12F5]/50 hover:text-[#7A12F5] dark:hover:text-[#C084FC]',
+              ? 'bg-[#10B981]/12 text-[#059669] dark:text-[#34D399] hover:bg-[#10B981]/20'
+              : isCopied
+                ? 'bg-[#7A12F5]/12 text-[#7A12F5] dark:text-[#C084FC] hover:bg-[#7A12F5]/18'
+                : 'bg-[var(--s2)] text-[var(--tx)] hover:bg-[#7A12F5] hover:text-white',
           )}
         >
-          {isCopied && (
-            <span
-              aria-hidden="true"
-              className={cn(
-                'size-2 rounded-full',
-                isLive ? 'bg-[#10B981]' : 'bg-[#7A12F5]',
-              )}
-            />
-          )}
-          <span>{isLive ? 'Copying · Details' : 'Details'}</span>
-          <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+          <span className="inline-flex items-center gap-1.5">
+            {isLive && <Check className="size-3.5 stroke-[2.75]" aria-hidden="true" />}
+            <span>
+              {isLive
+                ? 'Mirroring Live'
+                : isCopied
+                  ? 'Preview Connected'
+                  : 'Inspect & Copy'}
+            </span>
+          </span>
+          <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </button>
       </div>
-    </article>
+    </motion.article>
   );
 }
 
@@ -249,34 +315,36 @@ export function WhaleCardSkeleton() {
   return (
     <div
       aria-hidden="true"
-      className="rounded-2xl border border-[var(--line)] bg-[var(--s1)] p-4 sm:p-5 space-y-4 animate-pulse"
+      className="rounded-2xl border border-[var(--line)] bg-[var(--s1)] p-5 space-y-5 animate-pulse"
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="size-11 rounded-full bg-[var(--s2)]" />
-          <div className="space-y-2">
-            <div className="h-4 w-28 rounded bg-[var(--s2)]" />
+          <div className="size-10 rounded-full bg-[var(--s2)]" />
+          <div className="space-y-1.5">
+            <div className="h-4 w-24 rounded bg-[var(--s2)]" />
             <div className="h-3 w-16 rounded bg-[var(--s2)]" />
           </div>
         </div>
-        <div className="size-9 rounded-xl bg-[var(--s2)]" />
+        <div className="size-8 rounded-lg bg-[var(--s2)]" />
       </div>
-      <div className="border-t border-[var(--line)]/70" />
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <div className="h-3 w-14 rounded bg-[var(--s2)]" />
-          <div className="h-6 w-24 rounded bg-[var(--s2)]" />
-        </div>
-        <div className="h-8 w-24 rounded bg-[var(--s2)]" />
-      </div>
-      <div className="border-t border-[var(--line)]/70" />
-      <div className="space-y-3">
+      <div className="flex items-end justify-between">
         <div className="space-y-1.5">
-          <div className="h-5 w-20 rounded bg-[var(--s2)]" />
-          <div className="h-3 w-28 rounded bg-[var(--s2)]" />
+          <div className="h-3 w-16 rounded bg-[var(--s2)]" />
+          <div className="h-7 w-28 rounded bg-[var(--s2)]" />
         </div>
-        <div className="h-11 w-full rounded-xl bg-[var(--s2)]" />
+        <div className="h-10 w-28 rounded bg-[var(--s2)]" />
       </div>
+      <div className="grid grid-cols-2 gap-3 border-t border-[var(--line)] pt-3.5">
+        <div className="space-y-1.5">
+          <div className="h-3 w-12 rounded bg-[var(--s2)]" />
+          <div className="h-4 w-20 rounded bg-[var(--s2)]" />
+        </div>
+        <div className="space-y-1.5 flex flex-col items-end">
+          <div className="h-3 w-12 rounded bg-[var(--s2)]" />
+          <div className="h-4 w-16 rounded bg-[var(--s2)]" />
+        </div>
+      </div>
+      <div className="h-10 w-full rounded-xl bg-[var(--s2)]" />
     </div>
   );
 }

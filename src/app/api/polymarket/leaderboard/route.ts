@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
+  TOP_LEADERS_LIMIT,
+  enforceTopLeaders,
   filterLiveLeaderboardTraders,
   isValidEvmAddress,
-  isValidPaginationCursor,
   normalizePolymarketV2Row,
   normalizePolymarketV2Rows,
   toPolymarketCategory,
@@ -14,7 +15,6 @@ import {
   type LeaderboardTimeframe,
   type LiveLeaderboardTrader,
   type RawPolymarketV2LeaderboardRow,
-  type RawPolymarketV2Pagination,
 } from '@/lib/polymarket/leaderboard';
 
 const VALID_TIMEFRAMES = new Set<LeaderboardTimeframe>(['day', 'week', 'month', 'all']);
@@ -26,6 +26,7 @@ const VALID_CATEGORIES = new Set<LeaderboardCategory>([
   'Finance',
   'Economics',
   'Tech',
+  'Culture',
 ]);
 const VALID_SORTS = new Set<LeaderboardSort>(['pnl', 'volume']);
 
@@ -47,16 +48,18 @@ export async function GET(req: NextRequest) {
   const rawCat = sp.get('category') as LeaderboardCategory | null;
   const rawSortParam = sp.get('sort_by') ?? sp.get('sortBy');
   const rawSort = rawSortParam ? (rawSortParam.toLowerCase() as LeaderboardSort) : null;
-  const search = (sp.get('search') ?? '').trim().slice(0, 120);
-  const rawCursor = (sp.get('cursor') ?? '').trim();
-  const rawLimit = Number(sp.get('limit') ?? '24');
+  const search = (sp.get('search') ?? sp.get('user') ?? '').trim().slice(0, 120);
+  const rawLimit = Number(sp.get('limit') ?? String(TOP_LEADERS_LIMIT));
 
+  // Default strictly to All-Time top 3 leaders per category
   const timeframe: LeaderboardTimeframe =
-    rawTf && VALID_TIMEFRAMES.has(rawTf) ? rawTf : 'month';
+    rawTf && VALID_TIMEFRAMES.has(rawTf) ? rawTf : 'all';
   const category: LeaderboardCategory =
     rawCat && VALID_CATEGORIES.has(rawCat) ? rawCat : 'All';
   const sortBy: LeaderboardSort = rawSort && VALID_SORTS.has(rawSort) ? rawSort : 'pnl';
-  const limit = Number.isFinite(rawLimit) ? Math.min(Math.max(Math.trunc(rawLimit), 6), 50) : 24;
+  const limit = Number.isFinite(rawLimit)
+    ? Math.min(Math.max(Math.trunc(rawLimit), 1), TOP_LEADERS_LIMIT)
+    : TOP_LEADERS_LIMIT;
 
   const apiPeriod = toPolymarketTimePeriod(timeframe);
   const apiCategory = toPolymarketCategory(category);
@@ -65,12 +68,9 @@ export async function GET(req: NextRequest) {
   const upstreamUrl = new URL(POLYMARKET_LEADERBOARD_ENDPOINT);
   upstreamUrl.searchParams.set('time_period', apiPeriod);
   upstreamUrl.searchParams.set('sort_by', apiSortBy);
-  upstreamUrl.searchParams.set('limit', String(search ? 50 : limit));
+  upstreamUrl.searchParams.set('limit', String(limit));
   if (apiCategory !== 'overall') {
     upstreamUrl.searchParams.set('category', apiCategory);
-  }
-  if (rawCursor && isValidPaginationCursor(rawCursor) && !search) {
-    upstreamUrl.searchParams.set('cursor', rawCursor);
   }
 
   try {
@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
     const requests: Promise<Response>[] = [
       fetch(upstreamUrl.toString(), {
         headers: { Accept: 'application/json' },
-        next: { revalidate: 45 },
+        next: { revalidate: 60 },
         signal: AbortSignal.timeout(8000),
       }),
     ];
@@ -95,7 +95,7 @@ export async function GET(req: NextRequest) {
       requests.push(
         fetch(userUrl.toString(), {
           headers: { Accept: 'application/json' },
-          next: { revalidate: 45 },
+          next: { revalidate: 60 },
           signal: AbortSignal.timeout(8000),
         }),
       );
@@ -114,7 +114,6 @@ export async function GET(req: NextRequest) {
 
     const payload = await safeParseJson<{
       data?: RawPolymarketV2LeaderboardRow[];
-      pagination?: RawPolymarketV2Pagination;
     }>(listRes);
 
     if (!payload || !Array.isArray(payload.data)) {
@@ -127,7 +126,10 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    let traders: LiveLeaderboardTrader[] = normalizePolymarketV2Rows(payload.data);
+    let traders: LiveLeaderboardTrader[] = enforceTopLeaders(
+      normalizePolymarketV2Rows(payload.data),
+      limit,
+    );
 
     if (isExactAddress && userRes?.ok) {
       const userPayload = await safeParseJson<{
@@ -145,22 +147,17 @@ export async function GET(req: NextRequest) {
           directRow &&
           !traders.some((t) => t.address.toLowerCase() === directRow.address.toLowerCase())
         ) {
-          traders = [directRow, ...traders];
+          traders = [directRow];
         }
       }
     }
 
     const filtered = search ? filterLiveLeaderboardTraders(traders, search) : traders;
     const pagination: LeaderboardPagination = {
-      limit: Number(payload.pagination?.limit ?? limit),
-      offset: Number(payload.pagination?.offset ?? 0),
-      hasMore: !search && Boolean(payload.pagination?.has_more && payload.pagination?.next_cursor),
-      nextCursor:
-        !search &&
-        typeof payload.pagination?.next_cursor === 'string' &&
-        isValidPaginationCursor(payload.pagination.next_cursor)
-          ? payload.pagination.next_cursor
-          : null,
+      limit,
+      offset: 0,
+      hasMore: false,
+      nextCursor: null,
     };
 
     return NextResponse.json(
@@ -175,7 +172,7 @@ export async function GET(req: NextRequest) {
       },
       {
         headers: {
-          'Cache-Control': 'public, s-maxage=45, stale-while-revalidate=60',
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=90',
         },
       },
     );
