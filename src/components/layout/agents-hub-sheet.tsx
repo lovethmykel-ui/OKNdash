@@ -37,7 +37,7 @@ const AGENT_ROWS: readonly (readonly AgentOrbItem[])[] = [
       id: 'polymarket',
       label: 'Polymarket',
       href: '/app/polymarket-agent',
-      imageSrc: '/assets/aistudio/IMG_6464_df7f8c90.jpeg',
+      imageSrc: '/polymarket.png',
       orbBg: 'radial-gradient(circle at 30% 25%, rgba(37, 99, 235, 0.42), rgba(24, 24, 34, 0.96) 72%)',
       iconGlow: 'shadow-[0_10px_24px_rgba(22,82,240,0.45)]',
       ringAccent: 'ring-[#38BDF8]/40',
@@ -152,10 +152,10 @@ export function AgentsHubSheet({ open, onClose }: AgentsHubSheetProps) {
           className="fixed inset-0 z-[115] flex items-end justify-center bg-black/62 backdrop-blur-[6px] md:hidden"
         >
           <motion.div
-            initial={prefersReducedMotion ? { opacity: 0 } : { y: '100%' }}
-            animate={prefersReducedMotion ? { opacity: 1 } : { y: 0 }}
-            exit={prefersReducedMotion ? { opacity: 0 } : { y: '100%' }}
-            transition={{ type: 'spring', stiffness: 360, damping: 32 }}
+            initial={prefersReducedMotion ? { opacity: 0 } : { y: 140, opacity: 0 }}
+            animate={prefersReducedMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { y: 140, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 32 }}
             onClick={(e) => e.stopPropagation()}
             className="relative w-full max-w-[460px] rounded-t-[32px] border-t border-white/[0.1] bg-[#141319]/96 px-6 pt-3.5 pb-[max(24px,env(safe-area-inset-bottom,24px))] text-white shadow-[0_-20px_60px_rgba(0,0,0,0.68)] backdrop-blur-2xl"
           >

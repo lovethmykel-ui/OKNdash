@@ -128,7 +128,7 @@ export function PolymarketAgentTile() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/assets/aistudio/IMG_6464_df7f8c90.jpeg"
+              src="/polymarket.png"
               alt="Polymarket"
               referrerPolicy="no-referrer"
               className="size-full scale-[1.06] object-cover"
