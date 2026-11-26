@@ -76,29 +76,31 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
       <SidebarProvider open={hydrated ? open : true} onOpenChange={setOpen}>
         <OknSidebar area={area} navItems={navItems} isAdmin={isAdmin} roleLabel={roleLabel} />
         <SidebarInset className="bg-[var(--bg)] transition-colors duration-200">
-          <header className="sticky top-0 z-50 flex h-14 md:h-16 shrink-0 items-center justify-between gap-2 border-b border-[var(--line)] bg-[var(--s1)]/85 px-3 backdrop-blur-xl md:px-6">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <SidebarTrigger className="size-9 md:size-10 shrink-0 rounded-xl border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] hover:bg-[var(--s1)] transition-colors" />
-              <Separator orientation="vertical" className="hidden md:block h-5 bg-[var(--line)]" />
-              <h1 className="truncate text-sm md:text-base font-extrabold tracking-tight text-[var(--tx)]">
-                {title}
-              </h1>
-            </div>
+          <div className="sticky top-0 z-50 w-full shrink-0">
+            <header className="flex h-14 md:h-16 w-full items-center justify-between gap-2 border-b border-[var(--line)] bg-[var(--s1)]/88 px-3 backdrop-blur-xl md:px-6">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <SidebarTrigger className="size-9 md:size-10 shrink-0 rounded-xl border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] hover:bg-[var(--s1)] transition-colors" />
+                <Separator orientation="vertical" className="hidden md:block h-5 bg-[var(--line)]" />
+                <h1 className="truncate text-sm md:text-base font-extrabold tracking-tight text-[var(--tx)]">
+                  {title}
+                </h1>
+              </div>
 
-            {/* Right cluster — compact on mobile so zero icons clip */}
-            <div className="ml-auto flex shrink-0 items-center gap-1.5 md:gap-2.5">
-              {area === 'app' ? <LanguageSwitcher /> : null}
-              <AreaThemeToggle />
-              <NotificationBell />
-              {area === 'app' ? <UserMenu /> : null}
-              {area === 'admin' ? <DevRoleToggle /> : null}
-              {area === 'admin' ? <AdminUserMenu /> : null}
-            </div>
-          </header>
+              {/* Right cluster — compact on mobile so zero icons clip */}
+              <div className="ml-auto flex shrink-0 items-center gap-1.5 md:gap-2.5">
+                {area === 'app' ? <LanguageSwitcher /> : null}
+                <AreaThemeToggle />
+                <NotificationBell />
+                {area === 'app' ? <UserMenu /> : null}
+                {area === 'admin' ? <DevRoleToggle /> : null}
+                {area === 'admin' ? <AdminUserMenu /> : null}
+              </div>
+            </header>
 
-          {area === 'app' && <StageCountdownBar />}
+            {area === 'app' && <StageCountdownBar />}
+          </div>
 
-          <div className="app-shell-main flex-1 overflow-y-auto">
+          <div className="app-shell-main flex-1">
             <div
               className={cn(
                 'mx-auto w-full px-3.5 py-5 sm:px-5 md:px-8 md:py-6',
