@@ -98,25 +98,23 @@ export function AnnouncementCarousel({ id = 'ann-carousel' }: { id?: string }) {
                   </div>
 
                   <div className="min-w-0 flex-1 space-y-1">
-                    {/* Tier 1: Eyebrow Badges */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-extrabold bg-[#FFD60A]/15 text-[#FFD60A] border border-[#FFD60A]/30">
-                        <span className="size-1.5 rounded-full bg-[#FFD60A] animate-pulse" />
-                        COMING SOON
-                      </span>
-                      <span className="px-2.5 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-bold bg-[var(--s2)] text-[var(--tx)] border border-[var(--line)]">
-                        +38.4% 7D ROI · 78% Win Rate
-                      </span>
+                    {/* Tier 1: Unboxed Live Metadata */}
+                    <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-[var(--mut)] tabular-nums">
+                      <span className="font-bold text-[#059669] dark:text-[#10B981]">Live</span>
+                      <span aria-hidden="true">·</span>
+                      <span>+38.4% 7D ROI</span>
+                      <span aria-hidden="true">·</span>
+                      <span>78% Win Rate</span>
                     </div>
 
                     {/* Tier 2: Headline */}
                     <h3 className="text-sm sm:text-base md:text-lg font-extrabold tracking-tight text-[var(--tx)] leading-snug">
-                      Polymarket Copy Agent — <span className="text-[#7A12F5] dark:text-[#9D4EDD]">Coming Soon</span>
+                      Polymarket Copy Agent
                     </h3>
 
                     {/* Tier 3: Supporting Description */}
                     <p className="text-xs sm:text-[13px] text-[var(--mut)] font-medium line-clamp-2 sm:line-clamp-1">
-                      Auto-mirror top 1% prediction whales in real time with 1-click execution.
+                      Mirror Top 3 All-Time prediction leaders in real time with 1-click execution.
                     </p>
                   </div>
                 </div>

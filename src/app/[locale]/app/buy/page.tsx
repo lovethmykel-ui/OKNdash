@@ -8,7 +8,7 @@
  *   - Multi-currency crypto deposit selector with vector currency badges
  *   - Focused Deposit Invoice modal & motion-blur Payment Successful screen
  */
-import { useState, useId } from 'react';
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from '@/i18n/navigation';
 import {
@@ -31,6 +31,7 @@ import { formatPoints } from '@/lib/utils';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
 import { OknWatermark } from '@/components/ui/okn-watermark';
+import { StageCountdownBar } from '@/components/presale/stage-countdown-bar';
 import { toast } from 'sonner';
 
 interface CryptoOption {
@@ -81,7 +82,7 @@ const HOW_TO_STEPS = [
 ];
 
 function CryptoBadge({ ticker, size = 'md' }: { ticker: CryptoOption['ticker']; size?: 'sm' | 'md' | 'lg' }) {
-  const solGradId = useId();
+  const solGradId = `okn-sol-grad-${size}`;
   const dim = size === 'sm' ? 'size-5' : size === 'lg' ? 'size-10' : 'size-8';
   const iconDim = size === 'sm' ? 'size-3' : size === 'lg' ? 'size-5' : 'size-4';
 
@@ -210,16 +211,14 @@ export default function BuyPage() {
   };
 
   return (
-    <main className="space-y-5 md:space-y-6 pb-10">
+    <div className="space-y-5 md:space-y-6 pb-10">
       {/* 1. Compact Stage 1 Presale Banner */}
       <section className="relative overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-6 shadow-sm">
         <OknWatermark variant="tinted" size="md" />
+        <StageCountdownBar variant="surface" />
         <div className="relative z-10 flex items-start justify-between gap-4">
           <div>
-            <span className="inline-flex items-center rounded-full bg-[#7A12F5]/20 border border-[#7A12F5]/30 px-3 py-1 text-xs font-bold text-[#7A12F5] dark:text-[#C084FC]">
-              Presale Stage 1
-            </span>
-            <h1 className="mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--tx)]">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--tx)]">
               Buy $OKN Token
             </h1>
           </div>
@@ -734,7 +733,7 @@ export default function BuyPage() {
           </AnimatePresence>,
           document.body,
         )}
-    </main>
+    </div>
   );
 }
 

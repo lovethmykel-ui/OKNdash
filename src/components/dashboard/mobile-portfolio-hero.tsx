@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from '@/i18n/navigation';
-import { Flame, Eye, EyeOff, Users, ChevronRight } from 'lucide-react';
+import { Flame, Eye, EyeOff, Users, ChevronRight, Share2 } from 'lucide-react';
 import { useClaimEligibility } from '@/lib/hooks/use-claim';
 import { useStreak } from '@/lib/hooks/use-rewards';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { OknWatermark } from '@/components/ui/okn-watermark';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
+import { StageCountdownBar } from '@/components/presale/stage-countdown-bar';
+import { openShareCard } from '@/components/share/share-card-modal';
 
 /**
  * MobilePortfolioHero — Card 1 on mobile portfolio.
@@ -44,14 +46,26 @@ export function MobilePortfolioHero() {
   const currentDays = streak.data?.currentStreak ?? 6;
 
   return (
-    <div className="relative overflow-hidden -mx-3.5 -mt-5 rounded-none rounded-b-[28px] bg-gradient-to-br from-[#7A12F5] via-[#660CD9] to-[#4A00A8] p-4 pt-5 text-white shadow-xl">
+    <div className="relative overflow-hidden -mx-3.5 -mt-5 rounded-none rounded-b-[28px] bg-gradient-to-br from-[#7A12F5] via-[#660CD9] to-[#4A00A8] p-4 pt-4 text-white shadow-xl">
       <OknWatermark variant="hero" size="lg" />
-      <div className="relative z-10 flex items-center justify-between mb-1">
+      <StageCountdownBar variant="hero-dark" />
+      <div className="relative z-10 flex items-center justify-between gap-2 mb-1">
         <span className="text-xs font-bold text-[#E4D3FF]">Your OK Points</span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-bold backdrop-blur-md">
-          <Flame className="size-3.5 fill-current text-[#FFD60A]" />
-          <span>{currentDays}-day streak</span>
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-bold backdrop-blur-md">
+            <Flame className="size-3.5 fill-current text-[#FFD60A]" />
+            <span>{currentDays}-day streak</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => openShareCard('portfolio', 'button')}
+            aria-label="Share portfolio card"
+            data-testid="mobile-share-portfolio-btn"
+            className="flex size-7 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 active:scale-95 transition-all cursor-pointer"
+          >
+            <Share2 className="size-3.5" />
+          </button>
+        </div>
       </div>
 
       <div className="relative z-10 num text-4xl font-extrabold tracking-tight mb-3.5 tabular-nums">

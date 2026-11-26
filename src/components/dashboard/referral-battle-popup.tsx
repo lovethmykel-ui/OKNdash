@@ -36,7 +36,8 @@ const PLACE_TEXT_STYLES = {
 
 export function ReferralBattlePopup() {
   const hydrated = useHydrated();
-  const prefersReducedMotion = useReducedMotion();
+  const rawReducedMotion = useReducedMotion();
+  const prefersReducedMotion = hydrated && Boolean(rawReducedMotion);
   const router = useRouter();
   const [open, setOpen] = useState(false);
 

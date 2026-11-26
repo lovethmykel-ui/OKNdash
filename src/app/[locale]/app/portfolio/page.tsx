@@ -32,7 +32,7 @@ function PortfolioContent() {
   }, [searchParams]);
 
   return (
-    <main className="space-y-4 md:space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Mobile Card 1: Purple Hero Card at very top */}
       <div className="block md:hidden">
         <MobilePortfolioHero />
@@ -117,7 +117,7 @@ function PortfolioContent() {
       <div className="mt-2 md:mt-5">
         {tab === 'overview' ? <OverviewView onSelectActivity={() => setTab('activity')} /> : <ActivityLogView />}
       </div>
-    </main>
+    </div>
   );
 }
 

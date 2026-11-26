@@ -15,6 +15,7 @@ import {
   Gift,
   ListChecks,
   Plus,
+  Share2,
   ShoppingCart,
   Users,
   Wallet,
@@ -23,6 +24,8 @@ import {
 import { StatCard } from '@/components/dashboard/stat-card';
 import { TransactionHistory } from '@/components/dashboard/transaction-history';
 import { AnnouncementCarousel } from '@/components/dashboard/announcement-carousel';
+import { StageCountdownBar } from '@/components/presale/stage-countdown-bar';
+import { openShareCard } from '@/components/share/share-card-modal';
 import { useClaimEligibility } from '@/lib/hooks/use-claim';
 import { useTasks } from '@/lib/hooks/use-tasks';
 import { useReferral } from '@/lib/hooks/use-referral';
@@ -85,9 +88,9 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
           DESKTOP & TABLET VIEW (md and up)
           ========================================================================= */}
       <div className="hidden md:block space-y-6">
-        {/* Account Total Asset Valuation Hero Card with Hide/Unhide Toggle */}
+        {/* Account Total Asset Valuation Hero Card with Stage 1 Countdown & Hide/Unhide Toggle */}
         <div
-          className="relative overflow-hidden flex flex-wrap items-center justify-between gap-4.5 rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-6 shadow-sm transition-all"
+          className="relative overflow-hidden rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-6 shadow-sm transition-all"
           style={{
             background:
               'linear-gradient(135deg, rgba(122, 18, 245, 0.22) 0%, rgba(9, 180, 255, 0.12) 100%), var(--s1)',
@@ -95,7 +98,9 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
           }}
         >
           <OknWatermark variant="card" size="md" />
-          <div className="relative z-10 flex items-center gap-5">
+          <StageCountdownBar variant="surface" />
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-4.5">
+          <div className="flex items-center gap-5">
             <div
               className="flex size-[54px] shrink-0 items-center justify-center rounded-[16px] text-white shadow-[0_0_20px_rgba(122,18,245,0.4)]"
               style={{ background: 'var(--vio, #7A12F5)' }}
@@ -114,6 +119,14 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
                   aria-label={hideBalance ? 'Show balance' : 'Hide balance'}
                 >
                   {hideBalance ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openShareCard('portfolio', 'button')}
+                  className="flex size-7 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] hover:bg-[var(--line)] transition-colors cursor-pointer"
+                  aria-label="Share portfolio card"
+                >
+                  <Share2 className="size-3.5" />
                 </button>
               </div>
               <div className="flex items-baseline gap-3 mt-1">
@@ -165,6 +178,7 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
             </div>
             <span className="ml-1.5 text-xs font-bold text-[#7A12F5] dark:text-[#C9A6FF]">14 invites →</span>
           </Link>
+          </div>
         </div>
 
         {/* 4 KPI Stat Cards */}

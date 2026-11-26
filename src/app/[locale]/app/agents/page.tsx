@@ -1,220 +1,297 @@
 'use client';
 
 /**
- * /app/agents — OKN Autonomous Suite & Unified Agents Hub (Interactive Demo).
+ * /app/agents — Unified OKN Agents & Yield Hub.
  *
- * Sums all agents and autonomous features in one seamless surface:
- *   1. Staking (Lock $OKN, earn APY)
- *   2. AI Trading Agent (24/7 market scanning co-pilot)
- *   3. Polymarket Copy Agent (Auto-mirror top 1% prediction whales)
- *   4. Prediction Markets (Decentralized outcome contracts)
+ * Clean, single-elevation dashboard layout with clear visual hierarchy:
+ *   1. Featured Live Anchor: Polymarket Copy Agent (Top-3 All-Time whale mirroring)
+ *   2. Balanced 2-Column Module Grid: AI Trading Agent & Prediction Markets
+ *   3. Interactive Yield Module: $OKN Staking Vault with selectable lock terms
  */
 import { useState } from 'react';
 import { Link } from '@/i18n/navigation';
 import {
+  ArrowUpRight,
+  BarChart3,
   Lock,
   TrendingUp,
-  BarChart3,
-  ChevronRight,
-  ShieldCheck,
 } from 'lucide-react';
-import { OknWatermark } from '@/components/ui/okn-watermark';
+import { cn } from '@/lib/utils';
 
-const STAKING_PERIODS: { label: string; apy: string }[] = [
-  { label: '30d', apy: '14% APY' },
-  { label: '90d', apy: '28% APY' },
-  { label: '180d', apy: '46% APY' },
-  { label: '365d', apy: '84% APY' },
+interface StakingTier {
+  id: string;
+  term: string;
+  apy: string;
+  multiplier: string;
+}
+
+const STAKING_TIERS: readonly StakingTier[] = [
+  { id: '30d', term: '30 Days', apy: '14% APY', multiplier: '1.0x' },
+  { id: '90d', term: '90 Days', apy: '28% APY', multiplier: '1.5x' },
+  { id: '180d', term: '180 Days', apy: '46% APY', multiplier: '2.2x' },
+  { id: '365d', term: '365 Days', apy: '84% APY', multiplier: '3.5x' },
 ];
 
 export default function AgentsPage() {
-  const [selectedPeriod, setSelectedPeriod] = useState('90d');
+  const [selectedTierId, setSelectedTierId] = useState<string>('90d');
+  const activeTier =
+    STAKING_TIERS.find((tier) => tier.id === selectedTierId) ?? STAKING_TIERS[1];
 
   return (
-    <main className="space-y-4 md:space-y-6 max-w-4xl mx-auto pb-12">
-      {/* Hero Banner — Autonomous Protocol Suite */}
-      <section className="relative overflow-hidden rounded-[28px] md:rounded-[32px] bg-gradient-to-br from-[#7A12F5] via-[#660CD9] to-[#4A00A8] p-6 md:p-8 text-white shadow-xl">
-        <OknWatermark variant="hero" size="md" />
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-extrabold backdrop-blur-md mb-3">
-            <ShieldCheck className="size-3.5" />
-            <span>Autonomous Protocol Suite · Coming Soon</span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
-            OKN Autonomous Suite
-          </h1>
-          <p className="mt-2 text-sm md:text-base font-medium text-[#E4D3FF] leading-relaxed">
-            Explore all four upcoming autonomous modules: mirror whale trades, copy AI crypto signals, trade outcome markets, or stake $OKN for yield.
-          </p>
-        </div>
-
-        {/* Ambient background glow */}
-        <div className="absolute -right-12 -bottom-12 size-64 rounded-full bg-cyan-400/20 blur-3xl pointer-events-none" />
-      </section>
-
-      {/* Feature Card 1: Staking */}
-      <section className="relative overflow-hidden rounded-[24px] bg-[var(--inv-bg)] text-[var(--inv-tx)] p-5 md:p-6 shadow-sm border border-[var(--line)]">
-        <OknWatermark variant="inverse" size="sm" />
-        <div className="relative z-10 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3.5 min-w-0">
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--inv-tx)] text-[var(--inv-bg)] shadow-inner">
-              <Lock className="size-5 stroke-[2.5]" />
-            </span>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-base md:text-lg font-extrabold text-[var(--inv-tx)] leading-tight">
-                  $OKN Staking Vault
-                </h2>
-                <span className="inline-flex items-center rounded-full bg-[#7A12F5]/15 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#7A12F5]">
-                  Coming Soon
-                </span>
-              </div>
-              <p className="text-xs md:text-sm font-semibold text-[var(--inv-mut)] mt-0.5 truncate">
-                Lock $OKN, earn up to 84% APY. Longer locks earn higher multipliers.
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/app/staking"
-            className="shrink-0 inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-[#7A12F5] text-white text-xs font-extrabold shadow-sm hover:opacity-90 transition-opacity"
-          >
-            <span>Coming Soon</span>
-            <ChevronRight className="size-3.5" />
-          </Link>
-        </div>
-
-        {/* Duration Pills */}
-        <div className="relative z-10 grid grid-cols-4 gap-2.5 mt-4 pt-3 border-t border-[var(--line)]/40">
-          {STAKING_PERIODS.map((period) => (
-            <button
-              key={period.label}
-              type="button"
-              onClick={() => setSelectedPeriod(period.label)}
-              className={`h-12 rounded-2xl text-xs font-extrabold transition-all cursor-pointer flex flex-col items-center justify-center ${
-                selectedPeriod === period.label
-                  ? 'bg-[#7A12F5] text-white shadow-[0_2px_10px_rgba(122,18,245,0.4)]'
-                  : 'bg-[var(--inv-chip)] text-[var(--inv-tx)] hover:opacity-80'
-              }`}
-            >
-              <span>{period.label}</span>
-              <span className="text-[10px] opacity-80">{period.apy}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Feature Card 2: AI Trading Agent */}
-      <section className="rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-5 md:p-6 shadow-sm">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3.5 min-w-0">
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[#FFAA00]/20 text-[#FFAA00] shadow-sm">
-              <TrendingUp className="size-5 stroke-[2.5]" />
-            </span>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-base md:text-lg font-extrabold text-[var(--tx)] leading-tight">
-                  AI Trading Agent
-                </h2>
-                <span className="inline-flex items-center rounded-full border border-[#FFD60A]/40 bg-[#FFD60A]/15 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#FFD60A]">
-                  Coming Soon
-                </span>
-              </div>
-              <p className="text-xs md:text-sm font-semibold text-[var(--mut)] mt-0.5 truncate">
-                Your AI co-pilot for automated Long / Short crypto signals
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/app/trade-bot"
-            className="shrink-0 inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-[#FFAA00]/15 text-[#FFAA00] text-xs font-extrabold border border-[#FFAA00]/30 hover:bg-[#FFAA00]/25 transition-colors"
-          >
-            <span>Coming Soon</span>
-            <ChevronRight className="size-3.5" />
-          </Link>
-        </div>
-        <p className="text-xs md:text-sm font-semibold text-[var(--mut)] mt-3 leading-relaxed">
-          24/7 market scanning, automated entry, target and stop levels, confidence scoring, and 1-click signal execution.
+    <div className="mx-auto max-w-5xl space-y-6 pb-10">
+      {/* Compact Page Header */}
+      <header className="space-y-1">
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--tx)]">
+          OKN Agents
+        </h1>
+        <p className="text-sm text-[var(--mut)] max-w-2xl">
+          Automated trade mirroring, market intelligence, and $OKN yield modules in one place.
         </p>
-      </section>
+      </header>
 
-      {/* Feature Card 3: Polymarket Copy Agent */}
-      <section className="rounded-[24px] border-2 border-[#1652F0]/60 bg-gradient-to-br from-[#1652F0]/15 via-[var(--s1)] to-[var(--s1)] p-5 md:p-6 shadow-[0_8px_24px_rgba(22,82,240,0.18)]">
-        <div className="flex items-start sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3.5 min-w-0">
-            <img
-              src="/polymarket.png"
-              alt="Polymarket"
-              className="size-11 md:size-12 rounded-2xl object-cover shadow-[0_4px_12px_rgba(22,82,240,0.45)] border border-white/20 shrink-0"
-            />
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-base md:text-lg font-extrabold text-[var(--tx)] leading-tight">
+      {/* 1. Primary Focal Module — Polymarket Copy Agent */}
+      <article
+        aria-labelledby="polymarket-agent-heading"
+        className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--s1)]"
+      >
+        <div
+          aria-hidden="true"
+          className="h-[2px] w-full bg-gradient-to-r from-[#1652F0] via-[#7A12F5] to-transparent"
+        />
+
+        <div className="p-5 sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--s2)] p-1.5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/polymarket.png"
+                  alt="Polymarket"
+                  referrerPolicy="no-referrer"
+                  className="size-full rounded-lg object-contain"
+                />
+              </div>
+
+              <div className="min-w-0">
+                <h2
+                  id="polymarket-agent-heading"
+                  className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--tx)]"
+                >
                   Polymarket Copy Agent
                 </h2>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FFD60A]/15 text-[#FFD60A] border border-[#FFD60A]/40 text-[10px] font-extrabold uppercase tracking-wider">
-                  <span className="size-1.5 rounded-full bg-[#FFD60A] animate-pulse" />
-                  <span>Coming Soon</span>
-                </span>
+                <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs font-medium text-[var(--mut)]">
+                  <span className="font-semibold text-[#059669] dark:text-[#10B981]">
+                    Active
+                  </span>
+                  <span aria-hidden="true">·</span>
+                  <span>Top-3 All-Time Whales</span>
+                  <span aria-hidden="true">·</span>
+                  <span>Polygon</span>
+                </p>
               </div>
-              <p className="text-xs md:text-sm font-semibold text-[var(--mut)] mt-0.5 truncate">
-                Automated whale prediction mirroring
+            </div>
+
+            <Link
+              href="/app/polymarket-agent"
+              className="inline-flex h-10 w-full sm:w-auto shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#7A12F5] px-4 text-xs font-bold text-white transition-colors hover:bg-[#8C38F7] whitespace-nowrap"
+            >
+              <span>Open Agent</span>
+              <ArrowUpRight className="size-4 shrink-0" aria-hidden="true" />
+            </Link>
+          </div>
+
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--mut)]">
+            Automatically mirror positions from the top 3 Polymarket leaderboard leaders per category with configurable USDC caps and execution logs.
+          </p>
+
+          {/* Unboxed Hairline-Divided Telemetry Strip */}
+          <dl className="mt-5 grid grid-cols-3 gap-4 border-t border-[var(--line)] pt-4">
+            <div>
+              <dt className="text-[11px] font-medium text-[var(--mut)]">7D Copy ROI</dt>
+              <dd className="mt-1 font-mono text-sm sm:text-base font-extrabold text-[#059669] dark:text-[#10B981] tabular-nums">
+                +38.4%
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[11px] font-medium text-[var(--mut)]">Win Rate</dt>
+              <dd className="mt-1 font-mono text-sm sm:text-base font-extrabold text-[var(--tx)] tabular-nums">
+                78.4%
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[11px] font-medium text-[var(--mut)]">Scope</dt>
+              <dd className="mt-1 font-mono text-sm sm:text-base font-extrabold text-[var(--tx)] tabular-nums">
+                Top 3
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </article>
+
+      {/* 2. Secondary Protocol Modules — Uniform 2-Column Grid */}
+      <div role="region" aria-labelledby="agents-trading-heading" className="space-y-3">
+        <h2
+          id="agents-trading-heading"
+          className="text-xs font-semibold tracking-wide text-[var(--mut)]"
+        >
+          Trading &amp; Markets
+        </h2>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 items-stretch">
+          {/* AI Trading Agent */}
+          <article className="flex flex-col justify-between rounded-2xl border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-6">
+            <div>
+              <div className="flex items-center gap-3.5">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#F59E0B]/12 text-[#D97706] dark:text-[#FBBF24]">
+                  <TrendingUp className="size-5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <h3 className="text-base font-extrabold tracking-tight text-[var(--tx)]">
+                    AI Trading Agent
+                  </h3>
+                  <p className="mt-0.5 text-xs font-medium text-[var(--mut)]">
+                    Crypto Signals · Preview
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-3.5 text-sm leading-relaxed text-[var(--mut)]">
+                24/7 market scanning with automated entry, target, and stop levels alongside confidence scoring.
               </p>
             </div>
+
+            <div className="mt-5 flex items-center justify-between border-t border-[var(--line)] pt-3.5">
+              <span className="text-xs font-medium text-[var(--mut)]">
+                Long &amp; Short Co-Pilot
+              </span>
+              <Link
+                href="/app/trade-bot"
+                className="inline-flex h-9 items-center gap-1 rounded-lg px-2.5 text-xs font-bold text-[#7A12F5] dark:text-[#C084FC] transition-colors hover:bg-[#7A12F5]/10 whitespace-nowrap shrink-0"
+              >
+                <span>Open Preview</span>
+                <ArrowUpRight className="size-3.5 shrink-0" aria-hidden="true" />
+              </Link>
+            </div>
+          </article>
+
+          {/* Prediction Markets */}
+          <article className="flex flex-col justify-between rounded-2xl border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-6">
+            <div>
+              <div className="flex items-center gap-3.5">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#7A12F5]/12 text-[#7A12F5] dark:text-[#C084FC]">
+                  <BarChart3 className="size-5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <h3 className="text-base font-extrabold tracking-tight text-[var(--tx)]">
+                    Prediction Markets
+                  </h3>
+                  <p className="mt-0.5 text-xs font-medium text-[var(--mut)]">
+                    Outcome Contracts · Preview
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-3.5 text-sm leading-relaxed text-[var(--mut)]">
+                Trade YES / NO event outcome shares across decentralized prediction protocols with on-chain settlement.
+              </p>
+            </div>
+
+            <div className="mt-5 flex items-center justify-between border-t border-[var(--line)] pt-3.5">
+              <span className="text-xs font-medium text-[var(--mut)]">
+                Binary Event Shares
+              </span>
+              <Link
+                href="/app/prediction-markets"
+                className="inline-flex h-9 items-center gap-1 rounded-lg px-2.5 text-xs font-bold text-[#7A12F5] dark:text-[#C084FC] transition-colors hover:bg-[#7A12F5]/10 whitespace-nowrap shrink-0"
+              >
+                <span>Open Preview</span>
+                <ArrowUpRight className="size-3.5 shrink-0" aria-hidden="true" />
+              </Link>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      {/* 3. Yield Vault — $OKN Staking */}
+      <div role="region" aria-labelledby="agents-yield-heading" className="space-y-3">
+        <h2
+          id="agents-yield-heading"
+          className="text-xs font-semibold tracking-wide text-[var(--mut)]"
+        >
+          Protocol Yield
+        </h2>
+
+        <article className="rounded-2xl border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3.5 min-w-0">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--s2)] text-[var(--tx)] border border-[var(--line)]">
+                <Lock className="size-4.5" aria-hidden="true" />
+              </span>
+              <div className="min-w-0">
+                <h3 className="text-base font-extrabold tracking-tight text-[var(--tx)]">
+                  $OKN Staking Vault
+                </h3>
+                <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs font-medium text-[var(--mut)]">
+                  <span>Selected: {activeTier.term}</span>
+                  <span aria-hidden="true">·</span>
+                  <span className="font-mono font-bold text-[#7A12F5] dark:text-[#C084FC] tabular-nums">
+                    {activeTier.apy} ({activeTier.multiplier})
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href="/app/staking"
+              className="inline-flex h-10 w-full sm:w-auto shrink-0 items-center justify-center gap-1.5 rounded-xl border border-[var(--line)] bg-[var(--s2)] px-4 text-xs font-bold text-[var(--tx)] transition-colors hover:border-[#7A12F5]/50 hover:text-[#7A12F5] dark:hover:text-[#C084FC] whitespace-nowrap"
+            >
+              <span>Explore Vault</span>
+              <ArrowUpRight className="size-4 shrink-0" aria-hidden="true" />
+            </Link>
           </div>
-          <Link
-            href="/app/polymarket-agent"
-            className="shrink-0 inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-[#1652F0] text-white text-xs font-extrabold shadow-[0_4px_12px_rgba(22,82,240,0.4)] hover:bg-[#1E60FF] active:scale-95 transition-all"
+
+          <p className="mt-3.5 text-sm leading-relaxed text-[var(--mut)]">
+            Lock $OKN for fixed durations to earn boosted APY multipliers. Choose a lock window below to preview returns.
+          </p>
+
+          {/* Interactive Lock Term Segmented Selector */}
+          <div
+            role="group"
+            aria-label="Staking lock duration"
+            className="mt-4 grid grid-cols-2 gap-2 border-t border-[var(--line)] pt-4 sm:grid-cols-4"
           >
-            <span>Coming Soon</span>
-            <ChevronRight className="size-3.5" />
-          </Link>
-        </div>
-
-        <p className="text-xs md:text-sm font-semibold text-[var(--mut)] mt-3 leading-relaxed">
-          24/7 whale wallet tracking, probability edge scoring, and 1-click automated copy execution on Polymarket outcome shares.
-        </p>
-
-        <div className="grid grid-cols-3 gap-2.5 mt-4 pt-3.5 border-t border-[var(--line)]">
-          <div className="rounded-xl bg-[var(--s2)]/70 border border-[var(--line)] px-3 py-2">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--mut)]">7D Copy ROI</p>
-            <p className="text-xs md:text-sm font-black text-[#34D399] mt-0.5">+38.4%</p>
+            {STAKING_TIERS.map((tier) => {
+              const isSelected = tier.id === selectedTierId;
+              return (
+                <button
+                  key={tier.id}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => setSelectedTierId(tier.id)}
+                  className={cn(
+                    'flex min-h-[52px] flex-col items-center justify-center rounded-xl border px-3 py-2 text-center transition-colors cursor-pointer',
+                    isSelected
+                      ? 'border-[#7A12F5] bg-[#7A12F5] text-white'
+                      : 'border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] hover:border-[#7A12F5]/40',
+                  )}
+                >
+                  <span className="text-xs font-extrabold whitespace-nowrap">
+                    {tier.id}
+                  </span>
+                  <span
+                    className={cn(
+                      'mt-0.5 font-mono text-[11px] font-semibold tabular-nums whitespace-nowrap',
+                      isSelected ? 'text-white/90' : 'text-[var(--mut)]',
+                    )}
+                  >
+                    {tier.apy}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-          <div className="rounded-xl bg-[var(--s2)]/70 border border-[var(--line)] px-3 py-2">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--mut)]">Win Rate</p>
-            <p className="text-xs md:text-sm font-black text-[#09B4FF] mt-0.5">78.4%</p>
-          </div>
-          <div className="rounded-xl bg-[var(--s2)]/70 border border-[var(--line)] px-3 py-2">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--mut)]">Tracked</p>
-            <p className="text-xs md:text-sm font-black text-[var(--tx)] mt-0.5">142 Whales</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Feature Card 4: Prediction Markets */}
-      <Link
-        href="/app/prediction-markets"
-        className="flex items-center justify-between gap-3 h-[76px] px-5 rounded-[24px] border border-[var(--line)] bg-[var(--s1)] shadow-sm hover:scale-[1.01] active:scale-98 transition-all group"
-      >
-        <div className="flex items-center gap-3.5 min-w-0">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[#E81CFF]/15 text-[#E81CFF] shadow-sm">
-            <BarChart3 className="size-5 stroke-[2.5]" />
-          </span>
-          <div className="min-w-0">
-            <h2 className="text-sm md:text-base font-extrabold text-[var(--tx)] leading-tight group-hover:text-[#E81CFF] transition-colors">
-              Prediction Markets
-            </h2>
-            <p className="text-xs font-semibold text-[var(--mut)] mt-0.5 truncate">
-              Trade YES / NO outcome markets across decentralized protocols
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="px-3 py-1 rounded-full bg-[#FFD60A]/15 text-[#FFD60A] text-[10px] font-extrabold uppercase tracking-wider border border-[#FFD60A]/40">
-            Coming Soon
-          </span>
-          <ChevronRight className="size-4 text-[var(--mut)]" />
-        </div>
-      </Link>
-    </main>
+        </article>
+      </div>
+    </div>
   );
 }

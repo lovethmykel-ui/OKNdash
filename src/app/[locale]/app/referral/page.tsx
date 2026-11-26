@@ -20,6 +20,7 @@ import {
   EyeOff,
   RefreshCw,
   Search,
+  Share2,
   ShieldCheck,
   Sparkles,
   Users,
@@ -28,6 +29,7 @@ import {
 import { AnimatePresence, motion } from 'motion/react';
 import { useReferral } from '@/lib/hooks/use-referral';
 import { OknWatermark } from '@/components/ui/okn-watermark';
+import { openShareCard } from '@/components/share/share-card-modal';
 import { toast } from 'sonner';
 
 interface InvitedFriendRow {
@@ -355,6 +357,16 @@ const DEFAULT_INVITED_FRIENDS: InvitedFriendRow[] = [
                     </motion.span>
                   )}
                 </AnimatePresence>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => openShareCard('referrals', 'button')}
+                aria-label="Generate referral share card"
+                data-testid="referral-share-card-btn"
+                className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white hover:bg-white/20 active:scale-95 transition-all cursor-pointer"
+              >
+                <Share2 className="size-4" />
               </button>
 
               <a

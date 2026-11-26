@@ -37,6 +37,7 @@ import {
   Moon,
   Palette,
   Send,
+  Share2,
   Shield,
   ShieldCheck,
   Sun,
@@ -48,6 +49,7 @@ import { SocialIconRow } from '@/components/landing/social-sidebar';
 import { useToast } from '@/components/ui/use-toast';
 import { AreaThemeSwitch, useTheme } from '@/components/layout/area-theme';
 import { TwoFactorCard } from '@/components/settings/two-factor-card';
+import { openShareCard } from '@/components/share/share-card-modal';
 import { resetReferralBattlePopupForFreshLogin } from '@/lib/referral-battle-popup';
 import {
   useMe,
@@ -190,6 +192,16 @@ export default function SettingsPage() {
                   <h2 className="truncate text-base sm:text-lg md:text-xl font-extrabold tracking-tight text-[var(--tx)]">
                     {displayName}
                   </h2>
+                  <button
+                    type="button"
+                    onClick={() => openShareCard('profile', 'button')}
+                    aria-label="Share profile card"
+                    data-testid="profile-share-card-btn"
+                    className="inline-flex h-7 items-center gap-1.5 rounded-lg border border-[var(--line)] bg-[var(--s2)] px-2.5 text-[11px] font-bold text-[var(--tx)] hover:border-[#7A12F5]/40 transition-colors cursor-pointer"
+                  >
+                    <Share2 className="size-3" />
+                    <span>Share card</span>
+                  </button>
                 </div>
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--mut)] font-medium">
                   {user.username ? <span>@{user.username}</span> : null}

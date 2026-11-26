@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowUpRight, BadgeCheck, Check, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import {
   buildDeterministicSparkline,
   formatCompactUsd,
@@ -111,7 +112,9 @@ export function WhaleCard({
   onToggleFavorite,
   onOpenDetails,
 }: WhaleCardProps) {
-  const prefersReducedMotion = useReducedMotion();
+  const hydrated = useHydrated();
+  const rawReducedMotion = useReducedMotion();
+  const prefersReducedMotion = hydrated && Boolean(rawReducedMotion);
   const positive = trader.pnlUsd >= 0;
   const sparkPoints = buildDeterministicSparkline(
     trader.address,

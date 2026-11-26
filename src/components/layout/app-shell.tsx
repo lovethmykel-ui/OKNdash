@@ -24,6 +24,7 @@ import { DevRoleToggle } from '@/components/admin/dev-role-toggle';
 import { SilentRefresher } from './silent-refresher';
 import { DailyCheckIn } from '@/components/dashboard/daily-check-in';
 import { ReferralBattlePopup } from '@/components/dashboard/referral-battle-popup';
+import { ScreenshotShareListener } from '@/components/share/screenshot-share-listener';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { cn } from '@/lib/utils';
@@ -178,9 +179,10 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
           )}
         </SidebarInset>
 
-        {/* Daily login check-in & fresh-login Referral Battle notification */}
+        {/* Daily login check-in, Referral Battle notification & Auto Share Card */}
         {area === 'app' && <DailyCheckIn />}
         {area === 'app' && <ReferralBattlePopup />}
+        {area === 'app' && <ScreenshotShareListener />}
       </SidebarProvider>
     </AreaThemeProvider>
   );
