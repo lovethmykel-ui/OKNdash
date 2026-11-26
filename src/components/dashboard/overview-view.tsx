@@ -22,6 +22,7 @@ import {
 import { StatCard } from '@/components/dashboard/stat-card';
 import { TransactionHistory } from '@/components/dashboard/transaction-history';
 import { AnnouncementCarousel } from '@/components/dashboard/announcement-carousel';
+import { PolymarketAgentTile } from '@/components/dashboard/polymarket-agent-tile';
 import { openShareCard } from '@/components/share/share-card-modal';
 import { useClaimEligibility } from '@/lib/hooks/use-claim';
 import { useTasks } from '@/lib/hooks/use-tasks';
@@ -444,16 +445,7 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
             </span>
             <span className="text-xs font-extrabold text-white !text-white" style={{ color: '#ffffff' }}>Tasks</span>
           </Link>
-          <Link
-            href="/app/claim"
-            className="flex flex-col items-center justify-center gap-2 h-[88px] rounded-2xl bg-gradient-to-b from-[#7A12F5] to-[#660CD9] text-white shadow-[0_4px_14px_rgba(122,18,245,0.35)] border border-white/20 active:scale-95 transition-transform"
-            style={{ backgroundColor: '#7A12F5', color: '#ffffff' }}
-          >
-            <span className="flex size-10 items-center justify-center rounded-full bg-white/20 text-white shadow-inner">
-              <Download className="size-5 stroke-[2.5] text-white stroke-white" style={{ color: '#ffffff', stroke: '#ffffff' }} />
-            </span>
-            <span className="text-xs font-extrabold text-white !text-white" style={{ color: '#ffffff' }}>Claim</span>
-          </Link>
+          <PolymarketAgentTile />
           <Link
             href="/app/buy"
             className="flex flex-col items-center justify-center gap-2 h-[88px] rounded-2xl bg-gradient-to-b from-[#7A12F5] to-[#660CD9] text-white shadow-[0_4px_14px_rgba(122,18,245,0.35)] border border-white/20 active:scale-95 transition-transform"

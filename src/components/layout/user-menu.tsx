@@ -120,7 +120,7 @@ export function UserMenu() {
   const handleSignOut = async () => {
     setOpen(false);
     resetReferralBattlePopupForFreshLogin(undefined, false);
-    window.location.href = '/app/portfolio';
+    window.location.href = '/login';
   };
 
   return (

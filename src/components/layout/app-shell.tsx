@@ -26,6 +26,7 @@ import { DailyCheckIn } from '@/components/dashboard/daily-check-in';
 import { ReferralBattlePopup } from '@/components/dashboard/referral-battle-popup';
 import { ScreenshotShareListener } from '@/components/share/screenshot-share-listener';
 import { StageCountdownBar } from '@/components/presale/stage-countdown-bar';
+import { AgentsHubSheet } from './agents-hub-sheet';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { cn } from '@/lib/utils';
@@ -57,6 +58,7 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
 
   const hydrated = useHydrated();
   const [open, setOpen] = useState(true);
+  const [agentsSheetOpen, setAgentsSheetOpen] = useState(false);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -77,7 +79,9 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
         <OknSidebar area={area} navItems={navItems} isAdmin={isAdmin} roleLabel={roleLabel} />
         <SidebarInset className="bg-[var(--bg)] transition-colors duration-200">
           <div className="sticky top-0 z-50 w-full shrink-0">
-            <header className="flex h-14 md:h-16 w-full items-center justify-between gap-2 border-b border-[var(--line)] bg-[var(--s1)]/88 px-3 backdrop-blur-xl md:px-6">
+            {area === 'app' && <StageCountdownBar />}
+
+            <header className="flex h-14 md:h-16 w-full items-center justify-between gap-2 border-b border-[var(--line)] bg-[var(--s1)]/92 px-3 backdrop-blur-xl md:px-6">
               <div className="flex items-center gap-2.5 min-w-0">
                 <SidebarTrigger className="size-9 md:size-10 shrink-0 rounded-xl border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] hover:bg-[var(--s1)] transition-colors" />
                 <Separator orientation="vertical" className="hidden md:block h-5 bg-[var(--line)]" />
@@ -96,8 +100,6 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
                 {area === 'admin' ? <AdminUserMenu /> : null}
               </div>
             </header>
-
-            {area === 'app' && <StageCountdownBar />}
           </div>
 
           <div className="app-shell-main flex-1">
@@ -123,21 +125,57 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
                 {MOBILE_BOTTOM_NAV.map((tab) => {
                   const Icon = tab.icon;
                   const isBuy = tab.href === '/app/buy';
+                  const isAgents = tab.href === '/app/agents';
                   const isActive =
                     (tab.href === '/app/portfolio' && (pathname === '/app' || pathname === '/app/portfolio' || pathname.startsWith('/app/portfolio'))) ||
-                    (tab.href === '/app/agents' && (pathname.startsWith('/app/agents') || pathname.startsWith('/app/trade-bot') || pathname.startsWith('/app/polymarket-agent') || pathname.startsWith('/app/prediction-markets'))) ||
-                    (tab.href !== '/app/portfolio' && tab.href !== '/app/agents' && (pathname === tab.href || pathname.startsWith(tab.href + '/')));
+                    (isAgents && (agentsSheetOpen || pathname.startsWith('/app/agents') || pathname.startsWith('/app/trade-bot') || pathname.startsWith('/app/polymarket-agent') || pathname.startsWith('/app/prediction-markets'))) ||
+                    (tab.href !== '/app/portfolio' && !isAgents && (pathname === tab.href || pathname.startsWith(tab.href + '/')));
+
+                  const commonClassName = cn(
+                    'relative flex h-[50px] sm:h-[52px] min-w-0 w-full flex-col items-center justify-center gap-0.5 rounded-[18px] px-1 py-1 transition-all duration-200 active:scale-95 cursor-pointer select-none',
+                    isActive
+                      ? 'bg-gradient-to-br from-[#7A12F5] to-[#8E2BFF] !text-white text-white shadow-[0_6px_18px_rgba(122,18,245,0.45)]'
+                      : 'bg-transparent text-[var(--mut)] hover:text-[var(--tx)] hover:bg-white/[0.04]',
+                  );
+                  const activeStyle = isActive
+                    ? { background: 'linear-gradient(135deg, #7A12F5 0%, #8E2BFF 100%)', color: '#ffffff' }
+                    : undefined;
+
+                  if (isAgents) {
+                    return (
+                      <button
+                        key={tab.href}
+                        type="button"
+                        data-testid="mobile-nav-agents-btn"
+                        aria-haspopup="dialog"
+                        aria-expanded={agentsSheetOpen}
+                        onClick={() => setAgentsSheetOpen((prev) => !prev)}
+                        className={commonClassName}
+                        style={activeStyle}
+                      >
+                        <Icon
+                          className={cn('size-[18px] sm:size-5 shrink-0', isActive ? '!text-white !stroke-white' : 'text-[var(--mut)]')}
+                          style={isActive ? { color: '#ffffff', stroke: '#ffffff' } : undefined}
+                        />
+                        <span
+                          className={cn(
+                            'max-w-full truncate text-[10px] sm:text-[10.5px] leading-tight tracking-tight font-extrabold',
+                            isActive ? '!text-white' : 'text-[var(--mut)]',
+                          )}
+                          style={isActive ? { color: '#ffffff' } : undefined}
+                        >
+                          {tab.label}
+                        </span>
+                      </button>
+                    );
+                  }
+
                   return (
                     <Link
                       key={tab.href}
                       href={tab.href as never}
-                      className={cn(
-                        'relative flex h-[50px] sm:h-[52px] min-w-0 w-full flex-col items-center justify-center gap-0.5 rounded-[18px] px-1 py-1 transition-all duration-200 active:scale-95 cursor-pointer select-none',
-                        isActive
-                          ? 'bg-gradient-to-br from-[#7A12F5] to-[#8E2BFF] !text-white text-white shadow-[0_6px_18px_rgba(122,18,245,0.45)]'
-                          : 'bg-transparent text-[var(--mut)] hover:text-[var(--tx)] hover:bg-white/[0.04]',
-                      )}
-                      style={isActive ? { background: 'linear-gradient(135deg, #7A12F5 0%, #8E2BFF 100%)', color: '#ffffff' } : undefined}
+                      className={commonClassName}
+                      style={activeStyle}
                     >
                       {isBuy ? (
                         <div className="okn-cart-wiggle relative flex items-center justify-center shrink-0">
@@ -184,7 +222,13 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
           )}
         </SidebarInset>
 
-        {/* Daily login check-in, Referral Battle notification & Auto Share Card */}
+        {/* Mobile Agents Hub Pop-up Sheet, Daily Check-In, Campaign Popups & Share Card */}
+        {area === 'app' && (
+          <AgentsHubSheet
+            open={agentsSheetOpen}
+            onClose={() => setAgentsSheetOpen(false)}
+          />
+        )}
         {area === 'app' && <DailyCheckIn />}
         {area === 'app' && <ReferralBattlePopup />}
         {area === 'app' && <ScreenshotShareListener />}
