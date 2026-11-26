@@ -101,8 +101,8 @@ const AD_SLIDES: readonly Web3AdSlide[] = [
  * AnnouncementCarousel — Mobile-only sleek Web3 ad banner slider.
  *
  * Designed specifically for mobile dashboards (`md:hidden`):
- *  - Compact ~172px height, deep jewel-tone backdrop with subtle geometric planes
- *  - Left: crisp 3-line editorial white headline + solid rounded-full pill CTA
+ *  - Compact 124px height, deep jewel-tone backdrop with subtle geometric planes
+ *  - Left: crisp editorial white headline + solid rounded-full pill CTA
  *  - Right: bottom-cropped iPhone device frame with overlapping floating notification toast
  *  - Touch-swipeable + auto-rotating with restrained dot indicator
  */
@@ -145,11 +145,11 @@ export function AnnouncementCarousel({ id = 'mobile-ann-carousel' }: { id?: stri
       role="region"
       aria-roledescription="carousel"
       aria-label="Featured Web3 Announcements"
-      className="md:hidden w-full select-none space-y-2.5"
+      className="md:hidden w-full select-none space-y-2"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="overflow-hidden rounded-[22px] shadow-[0_10px_28px_rgba(0,0,0,0.18)]">
+      <div className="overflow-hidden rounded-[18px] shadow-[0_8px_22px_rgba(0,0,0,0.18)]">
         <div
           className="flex transition-transform duration-500 ease-out will-change-transform"
           style={{ transform: `translate3d(-${activeSlide * 100}%, 0px, 0px)` }}
@@ -160,30 +160,30 @@ export function AnnouncementCarousel({ id = 'mobile-ann-carousel' }: { id?: stri
                 href={slide.href as never}
                 aria-label={slide.ariaLabel}
                 style={{ background: slide.bgStyle }}
-                className="group relative flex h-[176px] w-full items-stretch justify-between overflow-hidden px-4.5 py-4 text-white active:scale-[0.99] transition-transform"
+                className="group relative flex h-[124px] w-full items-stretch justify-between overflow-hidden px-4 py-3 text-white active:scale-[0.99] transition-transform"
               >
                 {/* Subtle Architectural Diagonal Light Planes */}
                 <div
                   aria-hidden="true"
                   className="pointer-events-none absolute inset-0 overflow-hidden"
                 >
-                  <div className="absolute -top-10 left-[30%] h-[230px] w-[76px] rotate-[24deg] bg-white/[0.04]" />
-                  <div className="absolute -top-10 left-[54%] h-[230px] w-[42px] rotate-[24deg] bg-white/[0.03]" />
+                  <div className="absolute -top-8 left-[30%] h-[180px] w-[62px] rotate-[24deg] bg-white/[0.04]" />
+                  <div className="absolute -top-8 left-[54%] h-[180px] w-[36px] rotate-[24deg] bg-white/[0.03]" />
                 </div>
 
                 {/* Left Editorial Copy + Rounded Pill CTA */}
-                <div className="relative z-20 flex w-[54%] flex-col justify-between py-0.5 pr-1">
-                  <h3 className="text-[16px] leading-[1.24] font-semibold tracking-[-0.015em] text-white">
+                <div className="relative z-20 flex w-[55%] flex-col justify-between pr-1">
+                  <h3 className="text-[13.5px] leading-[1.22] font-semibold tracking-[-0.015em] text-white">
                     {slide.headline}
                   </h3>
 
-                  <div className="pt-2">
+                  <div className="pt-1.5">
                     <span
                       style={{ backgroundColor: slide.ctaBg, color: '#ffffff' }}
-                      className="inline-flex h-[38px] items-center gap-1.5 rounded-full px-4 text-[13px] font-semibold !text-white shadow-[0_6px_18px_rgba(0,0,0,0.28)] group-hover:brightness-110 transition-all whitespace-nowrap"
+                      className="inline-flex h-[30px] items-center gap-1 rounded-full px-3.5 text-[11.5px] font-semibold !text-white shadow-[0_4px_14px_rgba(0,0,0,0.28)] group-hover:brightness-110 transition-all whitespace-nowrap"
                     >
                       <span>{slide.ctaLabel}</span>
-                      <ArrowRight className="size-3.5 stroke-[2.2]" />
+                      <ArrowRight className="size-3 stroke-[2.3]" />
                     </span>
                   </div>
                 </div>
@@ -191,41 +191,41 @@ export function AnnouncementCarousel({ id = 'mobile-ann-carousel' }: { id?: stri
                 {/* Right Cropped Smartphone UI Mockup + Overlapping Floating Toast */}
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none relative z-10 w-[44%] shrink-0"
+                  className="pointer-events-none relative z-10 w-[43%] shrink-0"
                 >
                   {/* Cropped iPhone Frame Anchored Flush Bottom-Right */}
-                  <div className="absolute right-0 -bottom-5 h-[174px] w-[124px] rounded-t-[24px] border-[3.5px] border-b-0 border-[#1A1C22] bg-[#F8F9FC] shadow-[0_12px_30px_rgba(0,0,0,0.45)] ring-1 ring-white/25 overflow-hidden">
+                  <div className="absolute right-0 -bottom-4 h-[120px] w-[110px] rounded-t-[18px] border-[3px] border-b-0 border-[#1A1C22] bg-[#F8F9FC] shadow-[0_10px_24px_rgba(0,0,0,0.45)] ring-1 ring-white/25 overflow-hidden">
                     {/* Status Bar + Dynamic Island */}
-                    <div className="flex items-center justify-between px-3 pt-2 pb-1">
-                      <span className="text-[7px] font-bold text-[#111827] tabular-nums">9:41</span>
-                      <span className="h-[8px] w-[32px] rounded-full bg-[#090B10]" />
-                      <span className="flex items-center gap-[2px]">
-                        <span className="h-[4px] w-[2px] rounded-full bg-[#111827]" />
-                        <span className="h-[5px] w-[2px] rounded-full bg-[#111827]" />
-                        <span className="h-[6px] w-[8px] rounded-[2px] bg-[#111827]" />
+                    <div className="flex items-center justify-between px-2.5 pt-1.5 pb-0.5">
+                      <span className="text-[6px] font-bold text-[#111827] tabular-nums">9:41</span>
+                      <span className="h-[6px] w-[26px] rounded-full bg-[#090B10]" />
+                      <span className="flex items-center gap-[1.5px]">
+                        <span className="h-[3.5px] w-[1.5px] rounded-full bg-[#111827]" />
+                        <span className="h-[4.5px] w-[1.5px] rounded-full bg-[#111827]" />
+                        <span className="h-[5px] w-[7px] rounded-[1.5px] bg-[#111827]" />
                       </span>
                     </div>
 
                     {/* Mini App Top Avatar */}
-                    <div className="flex items-center justify-between px-2.5 pt-0.5">
-                      <span className="flex size-4 items-center justify-center rounded-full bg-[#E5E7EB] text-[6.5px] font-extrabold text-[#374151]">
+                    <div className="flex items-center justify-between px-2 pt-0.5">
+                      <span className="flex size-3 items-center justify-center rounded-full bg-[#E5E7EB] text-[5.5px] font-extrabold text-[#374151]">
                         OK
                       </span>
-                      <span className="size-3.5 rounded-full border border-[#E5E7EB] bg-white" />
+                      <span className="size-2.5 rounded-full border border-[#E5E7EB] bg-white" />
                     </div>
 
                     {/* Clear gap reserved for overlapping floating toast */}
-                    <div className="h-[36px]" />
+                    <div className="h-[26px]" />
 
                     {/* Crisp Value Figure Visible Directly Below Toast */}
-                    <div className="px-2 text-center">
-                      <div className="text-[14px] font-extrabold tracking-tight text-[#0F172A] tabular-nums leading-none">
+                    <div className="px-1.5 text-center">
+                      <div className="text-[12px] font-extrabold tracking-tight text-[#0F172A] tabular-nums leading-none">
                         {slide.phoneValue}
                       </div>
                     </div>
 
-                    {/* 3 Circular Action Buttons Row (matching reference phone UI) */}
-                    <div className="mt-2 flex items-center justify-center gap-2.5 px-2">
+                    {/* 3 Circular Action Buttons Row */}
+                    <div className="mt-1.5 flex items-center justify-center gap-2 px-1.5">
                       {slide.phoneActions.map((act) => {
                         const Icon = act.icon;
                         return (
@@ -237,15 +237,15 @@ export function AnnouncementCarousel({ id = 'mobile-ann-carousel' }: { id?: stri
                                   : undefined
                               }
                               className={cn(
-                                'flex size-6 items-center justify-center rounded-full border bg-white shadow-2xs',
+                                'flex size-5 items-center justify-center rounded-full border bg-white shadow-2xs',
                                 act.highlight
-                                  ? 'border-2'
+                                  ? 'border-[1.5px]'
                                   : 'border-[#E2E8F0] text-[#475569]',
                               )}
                             >
-                              <Icon className="size-2.5 stroke-[2.4]" />
+                              <Icon className="size-2 stroke-[2.5]" />
                             </span>
-                            <span className="text-[6.5px] font-semibold text-[#64748B]">
+                            <span className="text-[5.5px] font-semibold text-[#64748B] leading-none">
                               {act.label}
                             </span>
                           </div>
@@ -255,8 +255,8 @@ export function AnnouncementCarousel({ id = 'mobile-ann-carousel' }: { id?: stri
                   </div>
 
                   {/* Signature Floating Notification Toast Overlapping Left Bezel Above Phone Value */}
-                  <div className="absolute right-[8px] top-[34px] z-30 flex items-center gap-2 rounded-xl bg-white px-2.5 py-1.5 text-[#0F172A] shadow-[0_8px_22px_rgba(0,0,0,0.32)] ring-1 ring-black/5">
-                    <span className="flex size-5.5 shrink-0 items-center justify-center rounded-full bg-[#0F172A] p-1">
+                  <div className="absolute right-[6px] top-[21px] z-30 flex items-center gap-1.5 rounded-[10px] bg-white px-2 py-1 text-[#0F172A] shadow-[0_6px_18px_rgba(0,0,0,0.32)] ring-1 ring-black/5">
+                    <span className="flex size-4.5 shrink-0 items-center justify-center rounded-full bg-[#0F172A] p-0.5">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={slide.toastLogo}
@@ -265,10 +265,10 @@ export function AnnouncementCarousel({ id = 'mobile-ann-carousel' }: { id?: stri
                       />
                     </span>
                     <div className="min-w-0 leading-tight">
-                      <div className="whitespace-nowrap text-[8.5px] font-extrabold tracking-tight text-[#0F172A]">
+                      <div className="whitespace-nowrap text-[7.5px] font-extrabold tracking-tight text-[#0F172A]">
                         {slide.toastTitle}
                       </div>
-                      <div className="whitespace-nowrap text-[7.5px] font-medium text-[#64748B]">
+                      <div className="whitespace-nowrap text-[6.5px] font-medium text-[#64748B]">
                         {slide.toastMeta}
                       </div>
                     </div>

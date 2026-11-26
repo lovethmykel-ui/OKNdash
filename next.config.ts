@@ -44,8 +44,12 @@ const nextConfig: NextConfig = {
     ],
   },
   transpilePackages: ['@okn/shared'],
+  onDemandEntries: {
+    maxInactiveAge: 1000 * 60 * 60,
+    pagesBufferLength: 24,
+  },
   experimental: {
-    optimizePackageImports: ['lucide-react', 'motion', 'framer-motion'],
+    optimizePackageImports: ['lucide-react', 'motion', 'framer-motion', 'recharts'],
   },
   serverExternalPackages: ['@coinbase/cdp-sdk', 'pino', 'pino-pretty'],
   async headers() {
@@ -130,10 +134,10 @@ const nextConfig: NextConfig = {
     ];
   },
   webpack: (config, { dev }) => {
+    config.output = config.output ?? {};
+    config.output.chunkLoadTimeout = 300000;
     if (dev) {
       config.devtool = false;
-      config.output = config.output ?? {};
-      config.output.chunkLoadTimeout = 300000;
       if (process.env.DISABLE_HMR === 'true') {
         config.watchOptions = {
           ignored: /.*/,

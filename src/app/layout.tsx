@@ -93,6 +93,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: `(function(){try{var t=localStorage.getItem('okn_theme_v2')||localStorage.getItem('okn-theme-v2:app')||'light';if(t!=='dark'&&t!=='light')t='light';document.documentElement.setAttribute('data-theme',t);if(t==='dark'){document.documentElement.classList.add('dark');document.documentElement.classList.remove('light');}else{document.documentElement.classList.remove('dark');document.documentElement.classList.add('light');}}catch(e){}})();`,
           }}
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){if(typeof window==='undefined')return;var K='okn_head_chunk_retry_v1';function recover(){try{var now=Date.now();var raw=sessionStorage.getItem(K);var s=raw?JSON.parse(raw):{c:0,t:0};if(!s||typeof s.t!=='number'||now-s.t>30000){s={c:0,t:now};}if(s.c>=2)return;s.c+=1;s.t=now;sessionStorage.setItem(K,JSON.stringify(s));window.location.reload();}catch(e){try{window.location.reload();}catch(_){}}}function isChunkErr(x){if(!x)return false;var n=x.name||'';var m=typeof x==='string'?x:(x.message||'');return n==='ChunkLoadError'||m.indexOf('ChunkLoadError')!==-1||m.indexOf('Loading chunk')!==-1||m.indexOf('app-pages-internals')!==-1;}window.addEventListener('error',function(e){if(isChunkErr(e&&e.error)||isChunkErr(e&&e.message)){if(e&&e.preventDefault)e.preventDefault();recover();return;}var el=e&&e.target;if(el&&el.tagName==='SCRIPT'&&el.src&&el.src.indexOf('/_next/static/chunks/')!==-1){recover();}},true);window.addEventListener('unhandledrejection',function(e){if(isChunkErr(e&&e.reason)){if(e&&e.preventDefault)e.preventDefault();recover();}});})();`,
+          }}
+        />
         {/* Structured data for search engines. Inline JSON-LD is the
             documented pattern for App Router (next/script also works but adds
             a deferred script tag; inline guarantees crawlers see it). Uses
