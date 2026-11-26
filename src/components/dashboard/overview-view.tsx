@@ -22,7 +22,6 @@ import {
 import { StatCard } from '@/components/dashboard/stat-card';
 import { TransactionHistory } from '@/components/dashboard/transaction-history';
 import { AnnouncementCarousel } from '@/components/dashboard/announcement-carousel';
-import { StageCountdownBar } from '@/components/presale/stage-countdown-bar';
 import { openShareCard } from '@/components/share/share-card-modal';
 import { useClaimEligibility } from '@/lib/hooks/use-claim';
 import { useTasks } from '@/lib/hooks/use-tasks';
@@ -97,7 +96,6 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
           }}
         >
           <OknWatermark variant="card" size="md" />
-          <StageCountdownBar variant="surface" />
           <div className="relative z-10 flex flex-wrap items-center justify-between gap-4.5">
           <div className="flex items-center gap-5">
             <div

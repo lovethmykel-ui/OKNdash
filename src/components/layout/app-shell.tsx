@@ -25,6 +25,7 @@ import { SilentRefresher } from './silent-refresher';
 import { DailyCheckIn } from '@/components/dashboard/daily-check-in';
 import { ReferralBattlePopup } from '@/components/dashboard/referral-battle-popup';
 import { ScreenshotShareListener } from '@/components/share/screenshot-share-listener';
+import { StageCountdownBar } from '@/components/presale/stage-countdown-bar';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { cn } from '@/lib/utils';
@@ -94,6 +95,8 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
               {area === 'admin' ? <AdminUserMenu /> : null}
             </div>
           </header>
+
+          {area === 'app' && <StageCountdownBar />}
 
           <div className="app-shell-main flex-1 overflow-y-auto">
             <div

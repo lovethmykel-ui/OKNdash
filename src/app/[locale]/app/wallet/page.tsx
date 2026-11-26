@@ -24,7 +24,6 @@ import {
   RefreshCw,
   ShieldCheck,
   ShoppingCart,
-  Sparkles,
   Users,
   X,
 } from 'lucide-react';
@@ -909,7 +908,7 @@ export default function WalletPage() {
               <div className="flex items-center justify-between gap-3 py-3">
                 <span className="font-semibold text-[var(--mut)]">Merkle Distributor</span>
                 <span className="inline-flex items-center gap-1 font-extrabold text-[#2FBD8E]">
-                  <Sparkles className="size-3" />
+                  <ShieldCheck className="size-3" />
                   <span>Root v3 Verified</span>
                 </span>
               </div>

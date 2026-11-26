@@ -31,7 +31,6 @@ import { formatPoints } from '@/lib/utils';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
 import { OknWatermark } from '@/components/ui/okn-watermark';
-import { StageCountdownBar } from '@/components/presale/stage-countdown-bar';
 import { toast } from 'sonner';
 
 interface CryptoOption {
@@ -215,7 +214,6 @@ export default function BuyPage() {
       {/* 1. Compact Stage 1 Presale Banner */}
       <section className="relative overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--s1)] p-5 sm:p-6 shadow-sm">
         <OknWatermark variant="tinted" size="md" />
-        <StageCountdownBar variant="surface" />
         <div className="relative z-10 flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--tx)]">

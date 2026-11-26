@@ -20,7 +20,6 @@ import {
   Search,
   Share2,
   ShieldCheck,
-  Sparkles,
   Users,
   Zap,
 } from 'lucide-react';
@@ -268,7 +267,7 @@ const DEFAULT_INVITED_FRIENDS: InvitedFriendRow[] = [
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/15 px-3 py-1 text-[10.5px] font-extrabold tracking-widest text-white uppercase backdrop-blur-sm">
-                <Sparkles className="size-3" />
+                <Award className="size-3" />
                 <span>Partner Program · Tier 2</span>
               </span>
               <h1 className="mt-2.5 text-2xl font-black tracking-tight text-white sm:text-3xl">

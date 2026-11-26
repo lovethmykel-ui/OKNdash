@@ -9,7 +9,6 @@ import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { OknWatermark } from '@/components/ui/okn-watermark';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
 import { EyeToggleIcon, MaskedBalance } from '@/components/ui/masked-balance';
-import { StageCountdownBar } from '@/components/presale/stage-countdown-bar';
 import { openShareCard } from '@/components/share/share-card-modal';
 
 /**
@@ -49,7 +48,6 @@ export function MobilePortfolioHero() {
   return (
     <div className="relative overflow-hidden -mx-3.5 -mt-5 rounded-none rounded-b-[28px] bg-gradient-to-br from-[#7A12F5] via-[#660CD9] to-[#4A00A8] p-4 pt-4 text-white shadow-xl">
       <OknWatermark variant="hero" size="lg" />
-      <StageCountdownBar variant="hero-dark" />
       <div className="relative z-10 flex items-center justify-between gap-2 mb-1">
         <span className="text-xs font-bold text-[#E4D3FF]">Your OK Points</span>
         <div className="flex items-center gap-1.5">
