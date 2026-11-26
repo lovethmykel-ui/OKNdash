@@ -42,7 +42,7 @@ export default function AppNotFound() {
   };
 
   return (
-    <main className="flex min-h-[70vh] flex-col items-center justify-center px-6 py-16 text-center">
+    <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 py-16 text-center">
       <motion.div
         variants={container}
         initial="hidden"
@@ -119,6 +119,6 @@ export default function AppNotFound() {
           </Link>
         </motion.div>
       </motion.div>
-    </main>
+    </div>
   );
 }

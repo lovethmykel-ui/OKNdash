@@ -41,7 +41,7 @@ export default function LeaderboardPage() {
   const meta = CATEGORIES.find((c) => c.key === category)!;
 
   return (
-    <main className="space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title={t('title')}
         description={t('description')}
@@ -150,7 +150,7 @@ export default function LeaderboardPage() {
           </CardContent>
         </Card>
       )}
-    </main>
+    </div>
   );
 }
 

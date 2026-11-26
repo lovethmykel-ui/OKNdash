@@ -16,8 +16,6 @@ import {
   ChevronUp,
   Coins,
   Copy,
-  Eye,
-  EyeOff,
   RefreshCw,
   Search,
   Share2,
@@ -28,7 +26,9 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useReferral } from '@/lib/hooks/use-referral';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { OknWatermark } from '@/components/ui/okn-watermark';
+import { EyeToggleIcon, MaskedBalance } from '@/components/ui/masked-balance';
 import { openShareCard } from '@/components/share/share-card-modal';
 import { toast } from 'sonner';
 
@@ -94,9 +94,11 @@ const PARTNER_PERKS = [
 ];
 
 export default function ReferralPage() {
+  const hydrated = useHydrated();
   const referral = useReferral();
   const [copied, setCopied] = useState(false);
-  const [hideBalance, setHideBalance] = useState(false);
+  const [hideBalanceState, setHideBalanceState] = useState(false);
+  const hideBalance = hydrated && hideBalanceState;
   const [historyFilter, setHistoryFilter] = useState<'all' | 'l1' | 'buyers'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showAllHistory, setShowAllHistory] = useState(false);
@@ -112,7 +114,7 @@ export default function ReferralPage() {
         startTime = now;
         try {
           const stored = localStorage.getItem('okn_hide_balance') === 'true';
-          if (stored) setHideBalance(true);
+          if (stored) setHideBalanceState(true);
         } catch {}
       }
       const elapsed = now - startTime;
@@ -133,7 +135,7 @@ export default function ReferralPage() {
   const animatedPointsTotal = Math.round(1420 * animProgress).toLocaleString('en-US');
 
   const toggleBalance = () => {
-    setHideBalance((prev) => {
+    setHideBalanceState((prev) => {
       const next = !prev;
       try {
         localStorage.setItem('okn_hide_balance', next ? 'true' : 'false');
@@ -237,7 +239,7 @@ const DEFAULT_INVITED_FRIENDS: InvitedFriendRow[] = [
   )}&text=${encodeURIComponent('Join the $OKN presale and referral program!')}`;
 
   return (
-    <main className="space-y-5 pb-12">
+    <div className="space-y-5 pb-12">
       {/* Error Banner if referral query fails */}
       {referral.isError && (
         <div
@@ -415,9 +417,11 @@ const DEFAULT_INVITED_FRIENDS: InvitedFriendRow[] = [
             <button
               type="button"
               onClick={toggleBalance}
+              data-testid="referral-hide-balance-btn"
+              aria-label={hideBalance ? 'Show balances' : 'Hide balances'}
               className="flex h-8 items-center gap-1.5 px-3 rounded-xl border border-[var(--line)] bg-[var(--s2)] text-xs font-bold text-[var(--tx)] hover:bg-[var(--line)] transition-colors cursor-pointer"
             >
-              {hideBalance ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+              <EyeToggleIcon hidden={hideBalance} className="size-3.5" />
               <span className="hidden sm:inline">Balances</span>
             </button>
           </div>
@@ -436,11 +440,15 @@ const DEFAULT_INVITED_FRIENDS: InvitedFriendRow[] = [
 
           <div className="rounded-2xl border border-[var(--line)] bg-[var(--s2)] p-3.5 sm:p-4">
             <div className="text-[11px] sm:text-xs font-bold text-[var(--mut)]">Total Earned ($)</div>
-            <div className="num text-xl sm:text-2xl font-extrabold text-[#2FBD8E] mt-1">
-              {hideBalance ? '••••••' : `$${animatedCashTotal}`}
+            <div className="num text-xl sm:text-2xl font-extrabold text-[#2FBD8E] mt-1 tabular-nums">
+              <MaskedBalance hidden={hideBalance} mask="••••••">
+                {`$${animatedCashTotal}`}
+              </MaskedBalance>
             </div>
-            <div className="text-[11px] font-bold text-[#D97706] dark:text-[#F3BA2F] mt-1">
-              {hideBalance ? '•••• BNB Payout' : `~${animatedBnbTotal} BNB Payout`}
+            <div className="text-[11px] font-bold text-[#D97706] dark:text-[#F3BA2F] mt-1 tabular-nums">
+              <MaskedBalance hidden={hideBalance} mask="•••• BNB Payout">
+                {`~${animatedBnbTotal} BNB Payout`}
+              </MaskedBalance>
             </div>
           </div>
 
@@ -628,8 +636,10 @@ const DEFAULT_INVITED_FRIENDS: InvitedFriendRow[] = [
                   {/* Right: Earned Cash + OK Points */}
                   <div className="text-right shrink-0">
                     {friend.cashUsd > 0 ? (
-                      <div className="num text-xs sm:text-sm font-extrabold text-[#2FBD8E]">
-                        {hideBalance ? '••••' : `+$${friend.cashUsd.toFixed(2)}`}
+                      <div className="num text-xs sm:text-sm font-extrabold text-[#2FBD8E] tabular-nums">
+                        <MaskedBalance hidden={hideBalance} mask="••••">
+                          {`+$${friend.cashUsd.toFixed(2)}`}
+                        </MaskedBalance>
                       </div>
                     ) : (
                       <div className="text-[11px] font-bold text-[var(--mut)]">
@@ -750,6 +760,6 @@ const DEFAULT_INVITED_FRIENDS: InvitedFriendRow[] = [
           })}
         </div>
       </section>
-    </main>
+    </div>
   );
 }

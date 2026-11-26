@@ -16,8 +16,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 const wagmiConfig = createConfig({
   chains: [bsc, bscTestnet],
   transports: {
-    [bsc.id]: http('https://bsc-rpc.publicnode.com'),
-    [bscTestnet.id]: http('https://bsc-testnet-rpc.publicnode.com'),
+    [bsc.id]: http('https://bsc-dataseed.binance.org'),
+    [bscTestnet.id]: http('https://data-seed-prebsc-1-s1.binance.org:8545'),
   },
   ssr: true,
 });

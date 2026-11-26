@@ -40,7 +40,7 @@ export default function WinnersPage() {
   const groups = groupWinners(winners.data?.winners ?? []);
 
   return (
-    <main className="space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title={t('title')}
         description={t('description')}
@@ -110,7 +110,7 @@ export default function WinnersPage() {
           ))}
         </div>
       )}
-    </main>
+    </div>
   );
 }
 

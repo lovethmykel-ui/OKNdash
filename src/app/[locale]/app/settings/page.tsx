@@ -154,7 +154,7 @@ export default function SettingsPage() {
   ];
 
   return (
-    <main className="space-y-5 md:space-y-6 pb-12">
+    <div className="space-y-5 md:space-y-6 pb-12">
       {/* Page Title */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -402,7 +402,7 @@ export default function SettingsPage() {
           {activeTab === 'session' ? <SessionTab /> : null}
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 

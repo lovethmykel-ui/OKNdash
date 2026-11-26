@@ -9,8 +9,6 @@ import {
   ChevronRight,
   Coins,
   Download,
-  Eye,
-  EyeOff,
   Flame,
   Gift,
   ListChecks,
@@ -36,6 +34,7 @@ import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { OknWatermark } from '@/components/ui/okn-watermark';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
 import { RotatingOknCoin } from '@/components/ui/rotating-okn-coin';
+import { EyeToggleIcon, MaskedBalance } from '@/components/ui/masked-balance';
 import { formatPoints, formatWei } from '@/lib/utils';
 import { useAccount } from 'wagmi';
 
@@ -118,7 +117,7 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
                   className="balance-eye-btn flex size-7 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] hover:bg-[var(--line)] transition-colors cursor-pointer"
                   aria-label={hideBalance ? 'Show balance' : 'Hide balance'}
                 >
-                  {hideBalance ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+                  <EyeToggleIcon hidden={hideBalance} className="size-3.5" />
                 </button>
                 <button
                   type="button"
@@ -131,11 +130,9 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
               </div>
               <div className="flex items-baseline gap-3 mt-1">
                 <span className="num text-3xl font-extrabold text-[var(--tx)] tabular-nums">
-                  {hideBalance ? (
-                    '••••••••'
-                  ) : (
+                  <MaskedBalance hidden={hideBalance} mask="••••••••">
                     <AnimatedCounter target={1428.5} decimals={2} prefix="$" durationMs={1200} />
-                  )}
+                  </MaskedBalance>
                 </span>
                 <span className="rounded-lg bg-[#2FBD8E]/15 px-2.5 py-0.5 text-xs font-extrabold text-[#2FBD8E]">
                   +$142.50 (24h)
@@ -158,9 +155,7 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
               </div>
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="num text-lg font-extrabold text-[var(--tx)] tabular-nums">
-                  {hideBalance ? (
-                    '••••••'
-                  ) : (
+                  <MaskedBalance hidden={hideBalance} mask="••••••">
                     <AnimatedCounter
                       target={142.5}
                       decimals={2}
@@ -168,7 +163,7 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
                       suffix=" USD"
                       durationMs={1150}
                     />
-                  )}
+                  </MaskedBalance>
                 </span>
                 <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#F0B90B]">
                   <img src="/bnb-logo.png" alt="BNB" className="size-3.5 object-contain" />
@@ -209,7 +204,11 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
               icon={Users}
               tint="orange"
               label="Referral Earnings"
-              value={hideBalance ? '••••••' : '$142.50'}
+              value={
+                <MaskedBalance hidden={hideBalance} mask="••••••">
+                  $142.50
+                </MaskedBalance>
+              }
               hint="0.238 BNB · 14 friends invited"
             />
           </Link>
@@ -252,9 +251,6 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
             })}
           </div>
         </div>
-
-        {/* Announcements Slider placed directly under 6-day streak area on web & tablets */}
-        <AnnouncementCarousel id="desktop-ann-carousel" />
 
         {/* Two-Column Split Grid (3fr : 2fr) */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">

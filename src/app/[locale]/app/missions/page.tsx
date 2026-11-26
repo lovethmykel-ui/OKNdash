@@ -35,7 +35,7 @@ export default function MissionsPage() {
   const completed = list.filter((m) => m.status !== 'active');
 
   return (
-    <main className="space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title={t('title')}
         description={t('description')}
@@ -79,7 +79,7 @@ export default function MissionsPage() {
           ) : null}
         </>
       )}
-    </main>
+    </div>
   );
 }
 

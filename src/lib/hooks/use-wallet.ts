@@ -72,13 +72,16 @@ export function useOknBalance() {
 }
 
 export function useRequiredFeeBnb() {
+  const hydrated = useHydrated();
+  const { address: rawAddress } = useAccount();
+  const address = hydrated ? rawAddress : undefined;
   const realContract = isRealDeployedContract(CONTRACTS.merkleDistributor);
   const result = useReadContract({
     address: CONTRACTS.merkleDistributor,
     abi: merkleDistributorAbi,
     functionName: 'getRequiredFeeBnb',
     query: {
-      enabled: realContract,
+      enabled: hydrated && !!address && realContract,
       refetchOnWindowFocus: false,
       staleTime: 60_000,
     },
@@ -93,54 +96,57 @@ export function useRequiredFeeBnb() {
 }
 
 export function useSaleStatus() {
-  const realContract = isRealDeployedContract(CONTRACTS.tokenSale);
+  const hydrated = useHydrated();
+  const { address: rawAddress } = useAccount();
+  const address = hydrated ? rawAddress : undefined;
+  const canReadChain = hydrated && !!address && isRealDeployedContract(CONTRACTS.tokenSale);
   const rate = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'rate',
-    query: { enabled: realContract },
+    query: { enabled: canReadChain },
   });
   const cap = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'capPerWallet',
-    query: { enabled: realContract },
+    query: { enabled: canReadChain },
   });
   const paused = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'paused',
-    query: { enabled: realContract },
+    query: { enabled: canReadChain },
   });
   const raised = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'totalBnbRaised',
-    query: { enabled: realContract },
+    query: { enabled: canReadChain },
   });
   const saleStart = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'saleStart',
-    query: { enabled: realContract },
+    query: { enabled: canReadChain },
   });
   const saleEnd = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'saleEnd',
-    query: { enabled: realContract },
+    query: { enabled: canReadChain },
   });
   const minPurchase = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'minPurchase',
-    query: { enabled: realContract },
+    query: { enabled: canReadChain },
   });
   const bnbHardCap = useReadContract({
     address: CONTRACTS.tokenSale,
     abi: tokenSaleAbi,
     functionName: 'bnbHardCap',
-    query: { enabled: realContract },
+    query: { enabled: canReadChain },
   });
 
   return useMemo(
@@ -190,12 +196,15 @@ export function usePurchasedAmount() {
 }
 
 export function useSaleRemaining() {
+  const hydrated = useHydrated();
+  const { address: rawAddress } = useAccount();
+  const address = hydrated ? rawAddress : undefined;
   const realContract = isRealDeployedContract(CONTRACTS.oknToken);
   const result = useReadContract({
     address: CONTRACTS.oknToken,
     abi: oknTokenAbi,
     functionName: 'saleRemaining',
-    query: { enabled: realContract },
+    query: { enabled: hydrated && !!address && realContract },
   });
   const onChainVal = asBigInt(result.data);
   return {

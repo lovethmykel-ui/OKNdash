@@ -214,6 +214,8 @@ export function OknSidebar({ area, navItems, isAdmin, roleLabel }: OknSidebarPro
           <input
             ref={searchInputRef}
             type="text"
+            autoComplete="off"
+            suppressHydrationWarning
             value={query}
             readOnly={isCompactViewport && !searchArmed}
             inputMode={isCompactViewport && !searchArmed ? 'none' : 'search'}

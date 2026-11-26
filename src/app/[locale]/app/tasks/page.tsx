@@ -212,7 +212,7 @@ export default function TasksPage() {
   };
 
   return (
-    <main className="space-y-6">
+    <div className="space-y-6">
       {/* 1. Earn OK Points Hero Banner */}
       <section className="relative overflow-hidden rounded-[28px] bg-[#7A12F5] p-7 md:p-9 text-white shadow-xl">
         <OknWatermark variant="hero" size="md" />
@@ -402,6 +402,6 @@ export default function TasksPage() {
           <span>Go to Referral</span>
         </Link>
       </div>
-    </main>
+    </div>
   );
 }

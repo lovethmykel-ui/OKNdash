@@ -52,7 +52,7 @@ export function ComingSoonPage({
   footerNote,
 }: ComingSoonPageProps) {
   return (
-    <main className="space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title={title}
         description={description}
@@ -101,6 +101,6 @@ export function ComingSoonPage({
 
       {/* Footer note */}
       <p className="text-center text-xs text-muted-foreground">{footerNote}</p>
-    </main>
+    </div>
   );
 }

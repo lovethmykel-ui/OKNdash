@@ -19,8 +19,6 @@ import {
   Coins,
   Copy,
   ExternalLink,
-  Eye,
-  EyeOff,
   Gift,
   QrCode,
   RefreshCw,
@@ -39,6 +37,7 @@ import { api } from '@/lib/api/client';
 import { AnimatePresence, motion } from 'motion/react';
 import { OknWatermark } from '@/components/ui/okn-watermark';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
+import { EyeToggleIcon, MaskedBalance } from '@/components/ui/masked-balance';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { formatPoints, formatWei } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -347,7 +346,7 @@ export default function WalletPage() {
   );
 
   return (
-    <main className="space-y-5 pb-12">
+    <div className="space-y-5 pb-12">
       {/* Error Alert Banner if balance/profile query fails */}
       {(me.isError || eligibility.isError) && (
         <div
@@ -437,10 +436,11 @@ export default function WalletPage() {
             <button
               type="button"
               onClick={toggleBalance}
+              data-testid="wallet-hide-balance-btn"
               className="flex size-8 items-center justify-center rounded-full border border-white/20 bg-white/15 text-white/90 hover:bg-white/25 transition-colors cursor-pointer"
               aria-label={hideBalance ? 'Show balance' : 'Hide balance'}
             >
-              {hideBalance ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+              <EyeToggleIcon hidden={hideBalance} className="size-3.5" />
             </button>
           </div>
 
@@ -499,21 +499,19 @@ export default function WalletPage() {
             Total Net Asset Value
           </div>
           <div className="mt-1 flex flex-wrap items-baseline gap-3">
-            {hideBalance ? (
-              <span className="num text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight tabular-nums">
-                ••••••••
-              </span>
-            ) : (
-              <span className="num text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight tabular-nums">
+            <span className="num text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight tabular-nums">
+              <MaskedBalance hidden={hideBalance} mask="••••••••">
                 <AnimatedCounter target={1428.5} decimals={2} prefix="$" durationMs={1200} />
-              </span>
-            )}
+              </MaskedBalance>
+            </span>
             <span className="inline-flex items-center gap-1 rounded-full border border-[#34D399]/40 bg-[#10B981]/25 px-2.5 py-0.5 text-xs font-extrabold text-[#6EE7B7] tabular-nums backdrop-blur-sm">
               +$142.50 (+11.1% 24h)
             </span>
           </div>
           <div className="mt-1.5 text-xs font-semibold text-purple-100/85">
-            {hideBalance ? '•••• BNB Equivalent' : '≈ 2.38 BNB Total Portfolio Value · 100% On-Chain Backed'}
+            <MaskedBalance hidden={hideBalance} mask="•••• BNB Equivalent">
+              ≈ 2.38 BNB Total Portfolio Value · 100% On-Chain Backed
+            </MaskedBalance>
           </div>
         </div>
 
@@ -590,7 +588,9 @@ export default function WalletPage() {
           </div>
           <div>
             <p className="num text-lg sm:text-xl font-extrabold text-[var(--tx)] tabular-nums">
-              {hideBalance ? '••••••' : '$870.00'}
+              <MaskedBalance hidden={hideBalance} mask="••••••">
+                $870.00
+              </MaskedBalance>
             </p>
             <p className="mt-0.5 text-[11px] sm:text-xs font-bold text-[#D97706] dark:text-[#F3BA2F] truncate">
               1.45 BNB · Gas Ready
@@ -608,7 +608,9 @@ export default function WalletPage() {
           </div>
           <div>
             <p className="num text-lg sm:text-xl font-extrabold text-[var(--tx)] tabular-nums">
-              {hideBalance ? '••••••' : '$416.00'}
+              <MaskedBalance hidden={hideBalance} mask="••••••">
+                $416.00
+              </MaskedBalance>
             </p>
             <p className="mt-0.5 text-[11px] sm:text-xs font-bold text-[#7A12F5] dark:text-[#C9A6FF] truncate">
               {oknDisplay} Allocated
@@ -625,7 +627,9 @@ export default function WalletPage() {
           </div>
           <div>
             <p className="num text-lg sm:text-xl font-extrabold text-[#2FBD8E] tabular-nums">
-              {hideBalance ? '••••••' : '$142.50'}
+              <MaskedBalance hidden={hideBalance} mask="••••••">
+                $142.50
+              </MaskedBalance>
             </p>
             <p className="mt-0.5 text-[11px] sm:text-xs font-bold text-[var(--mut)] truncate">
               0.238 BNB · 14 Invites
@@ -758,7 +762,12 @@ export default function WalletPage() {
                       {asset.amount}
                     </div>
                     <div className="text-[11px] font-bold text-[var(--mut)] tabular-nums mt-0.5">
-                      {hideBalance && asset.usd.startsWith('$') ? '••••••' : asset.usd}
+                      <MaskedBalance
+                        hidden={hideBalance && asset.usd.startsWith('$')}
+                        mask="••••••"
+                      >
+                        {asset.usd}
+                      </MaskedBalance>
                     </div>
                   </div>
 
@@ -844,10 +853,14 @@ export default function WalletPage() {
                         item.positive ? 'text-[#2FBD8E]' : 'text-[var(--tx)]'
                       }`}
                     >
-                      {hideBalance ? '••••' : item.amountLabel}
+                      <MaskedBalance hidden={hideBalance} mask="••••">
+                        {item.amountLabel}
+                      </MaskedBalance>
                     </div>
                     <div className="num text-[11px] font-semibold text-[var(--mut)] mt-0.5">
-                      {hideBalance ? '••••' : item.usdLabel}
+                      <MaskedBalance hidden={hideBalance} mask="••••">
+                        {item.usdLabel}
+                      </MaskedBalance>
                     </div>
                   </div>
                 </div>
@@ -1244,7 +1257,7 @@ export default function WalletPage() {
           </AnimatePresence>,
           document.body,
         )}
-    </main>
+    </div>
   );
 }
 

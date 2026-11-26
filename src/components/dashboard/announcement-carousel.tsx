@@ -2,240 +2,306 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Link } from '@/i18n/navigation';
-import { ArrowRight } from 'lucide-react';
-import { OknWatermark } from '@/components/ui/okn-watermark';
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Award,
+  Copy,
+  Plus,
+  RefreshCw,
+  TrendingUp,
+  Users,
+  Wallet,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface Web3AdSlide {
+  id: string;
+  href: string;
+  ariaLabel: string;
+  headline: string;
+  ctaLabel: string;
+  bgStyle: string;
+  ctaBg: string;
+  toastLogo: string;
+  toastLogoAlt: string;
+  toastTitle: string;
+  toastMeta: string;
+  phoneValue: string;
+  phoneAccent: string;
+  phoneActions: Array<{ icon: LucideIcon; label: string; highlight?: boolean }>;
+}
+
+const AD_SLIDES: readonly Web3AdSlide[] = [
+  {
+    id: 'presale-stage-1',
+    href: '/app/buy',
+    ariaLabel: 'Buy $OKN Stage 1 Presale',
+    headline: 'Stage 1 presale is live. Lock in $OKN at $0.05.',
+    ctaLabel: 'Buy $OKN',
+    bgStyle: 'linear-gradient(135deg, #4F0832 0%, #3E062D 55%, #2C0524 100%)',
+    ctaBg: '#B21589',
+    toastLogo: '/okn-logo.png',
+    toastLogoAlt: '$OKN',
+    toastTitle: 'Credited +12,000 $OKN',
+    toastMeta: 'Stage 1 · Just now',
+    phoneValue: '$0.05',
+    phoneAccent: '#7A12F5',
+    phoneActions: [
+      { icon: Plus, label: 'Buy', highlight: true },
+      { icon: ArrowUpRight, label: 'Claim' },
+      { icon: RefreshCw, label: 'Swap' },
+    ],
+  },
+  {
+    id: 'polymarket-agent',
+    href: '/app/polymarket-agent',
+    ariaLabel: 'Open Polymarket Copy Agent',
+    headline: 'Auto-mirror top Polymarket whales in real time.',
+    ctaLabel: 'Copy whales',
+    bgStyle: 'linear-gradient(135deg, #091E4E 0%, #0C2A6B 55%, #07173D 100%)',
+    ctaBg: '#1D6BFF',
+    toastLogo: '/polymarket.png',
+    toastLogoAlt: 'Polymarket',
+    toastTitle: 'Whale trade mirrored',
+    toastMeta: '+38.4% 7D ROI',
+    phoneValue: '+$342',
+    phoneAccent: '#1D6BFF',
+    phoneActions: [
+      { icon: Zap, label: 'Auto', highlight: true },
+      { icon: TrendingUp, label: 'Top 3' },
+      { icon: Wallet, label: 'Fund' },
+    ],
+  },
+  {
+    id: 'partner-referrals',
+    href: '/app/referral',
+    ariaLabel: 'Invite friends and earn BNB payouts',
+    headline: 'Invite friends & earn 12.5% instant BNB payouts.',
+    ctaLabel: 'Invite now',
+    bgStyle: 'linear-gradient(135deg, #06382D 0%, #094D3E 55%, #052A22 100%)',
+    ctaBg: '#0FA971',
+    toastLogo: '/bnb-logo.png',
+    toastLogoAlt: 'BNB',
+    toastTitle: 'Payout · 0.238 BNB',
+    toastMeta: 'Tier 2 · Just now',
+    phoneValue: '$142.50',
+    phoneAccent: '#0FA971',
+    phoneActions: [
+      { icon: Users, label: 'Invite', highlight: true },
+      { icon: Copy, label: 'Link' },
+      { icon: Award, label: 'Tier' },
+    ],
+  },
+];
 
 /**
- * AnnouncementCarousel — Pure Graphic announcement slider.
+ * AnnouncementCarousel — Mobile-only sleek Web3 ad banner slider.
  *
- * Design Architecture:
- * - Zero neon colors: clean surfaces matching var(--s1)/var(--s2) and border-[var(--line)].
- * - Pure vector graphics: high-craft SVG geometric line art embedded in background.
- * - Clean auto-rotating & touch-swipeable viewport without bottom clutter pills/arrows.
+ * Designed specifically for mobile dashboards (`md:hidden`):
+ *  - Compact ~172px height, deep jewel-tone backdrop with subtle geometric planes
+ *  - Left: crisp 3-line editorial white headline + solid rounded-full pill CTA
+ *  - Right: bottom-cropped iPhone device frame with overlapping floating notification toast
+ *  - Touch-swipeable + auto-rotating with restrained dot indicator
  */
-export function AnnouncementCarousel({ id = 'ann-carousel' }: { id?: string }) {
+export function AnnouncementCarousel({ id = 'mobile-ann-carousel' }: { id?: string }) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const touchStartX = useRef<number | null>(null);
-  const totalSlides = 2;
+  const totalSlides = AD_SLIDES.length;
 
   useEffect(() => {
     if (isPaused) return;
-    const timer = setInterval(() => {
+    const timer = window.setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % totalSlides);
     }, 5500);
-    return () => clearInterval(timer);
-  }, [isPaused]);
+    return () => window.clearInterval(timer);
+  }, [isPaused, totalSlides, activeSlide]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    setIsPaused(true);
     touchStartX.current = e.touches[0]?.clientX ?? null;
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const endX = e.changedTouches[0]?.clientX ?? touchStartX.current;
-    const deltaX = endX - touchStartX.current;
-    if (Math.abs(deltaX) > 40) {
-      setActiveSlide((prev) =>
-        deltaX < 0 ? (prev + 1) % totalSlides : (prev - 1 + totalSlides) % totalSlides,
-      );
+    if (touchStartX.current !== null) {
+      const endX = e.changedTouches[0]?.clientX ?? touchStartX.current;
+      const deltaX = endX - touchStartX.current;
+      if (Math.abs(deltaX) > 36) {
+        setActiveSlide((prev) =>
+          deltaX < 0 ? (prev + 1) % totalSlides : (prev - 1 + totalSlides) % totalSlides,
+        );
+      }
     }
     touchStartX.current = null;
+    setIsPaused(false);
   };
 
   return (
-    <section
+    <div
       id={id}
-      className="announcement-carousel w-full select-none"
+      role="region"
       aria-roledescription="carousel"
-      aria-label="Featured Announcements"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+      aria-label="Featured Web3 Announcements"
+      className="md:hidden w-full select-none space-y-2.5"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="announcement-carousel-viewport overflow-hidden rounded-[22px] border border-[var(--line)] bg-[var(--s1)] shadow-sm">
+      <div className="overflow-hidden rounded-[22px] shadow-[0_10px_28px_rgba(0,0,0,0.18)]">
         <div
-          className="announcement-carousel-track flex transition-transform duration-500 ease-out"
+          className="flex transition-transform duration-500 ease-out will-change-transform"
           style={{ transform: `translate3d(-${activeSlide * 100}%, 0px, 0px)` }}
         >
-          {/* =================================================================
-              Slide 0: Polymarket Copy Agent
-              ================================================================= */}
-          <div className={`announcement-slide min-w-full shrink-0 ${activeSlide === 0 ? 'active' : ''}`}>
-            <Link
-              href="/app/polymarket-agent"
-              className="group relative block overflow-hidden p-4 sm:p-5 md:px-6 md:py-5 text-[var(--tx)] transition-all hover:bg-[var(--s2)]/50"
-              aria-label="Open Polymarket Copy Agent"
-            >
-              {/* Pure Graphic Background: Fine SVG Prediction Vector Lines */}
-              <svg
-                className="absolute inset-0 size-full pointer-events-none opacity-[0.07] text-[var(--tx)]"
-                viewBox="0 0 800 160"
-                preserveAspectRatio="none"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
+          {AD_SLIDES.map((slide) => (
+            <div key={slide.id} className="w-full min-w-full shrink-0">
+              <Link
+                href={slide.href as never}
+                aria-label={slide.ariaLabel}
+                style={{ background: slide.bgStyle }}
+                className="group relative flex h-[176px] w-full items-stretch justify-between overflow-hidden px-4.5 py-4 text-white active:scale-[0.99] transition-transform"
               >
-                <path d="M-20 130 C120 110, 240 40, 380 60 C520 80, 640 25, 820 15" stroke="currentColor" strokeWidth="1.5" />
-                <path d="M-20 85 C140 70, 260 120, 420 95 C580 70, 680 30, 820 55" stroke="currentColor" strokeWidth="1" strokeDasharray="4 4" />
-                <path d="M-20 40 C100 20, 280 80, 460 50 C620 20, 720 70, 820 40" stroke="currentColor" strokeWidth="1" opacity="0.6" />
-                <circle cx="380" cy="60" r="4" fill="currentColor" />
-                <circle cx="640" cy="25" r="3" fill="currentColor" />
-                <circle cx="720" cy="80" r="48" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" opacity="0.4" />
-              </svg>
-
-              {/* Slide Content — 2-Zone Desktop Hierarchy (Left Identity/Copy + Right Social Proof & CTA) */}
-              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3.5 md:gap-6">
-                {/* Left Zone: Brand Icon + 3-Tier Typographic Stack */}
-                <div className="flex items-start sm:items-center gap-3.5 md:gap-4 min-w-0 flex-1">
-                  <div className="relative size-11 sm:size-12 md:size-14 rounded-2xl bg-[var(--s2)] border border-[var(--line)] flex items-center justify-center shrink-0 shadow-sm group-hover:border-[#7A12F5]/40 transition-colors">
-                    <img
-                      src="/polymarket.png"
-                      alt="Polymarket"
-                      className="size-7 sm:size-8 md:size-9 object-contain"
-                    />
-                  </div>
-
-                  <div className="min-w-0 flex-1 space-y-1">
-                    {/* Tier 1: Unboxed Live Metadata */}
-                    <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-[var(--mut)] tabular-nums">
-                      <span className="font-bold text-[#059669] dark:text-[#10B981]">Live</span>
-                      <span aria-hidden="true">·</span>
-                      <span>+38.4% 7D ROI</span>
-                      <span aria-hidden="true">·</span>
-                      <span>78% Win Rate</span>
-                    </div>
-
-                    {/* Tier 2: Headline */}
-                    <h3 className="text-sm sm:text-base md:text-lg font-extrabold tracking-tight text-[var(--tx)] leading-snug">
-                      Polymarket Copy Agent
-                    </h3>
-
-                    {/* Tier 3: Supporting Description */}
-                    <p className="text-xs sm:text-[13px] text-[var(--mut)] font-medium line-clamp-2 sm:line-clamp-1">
-                      Mirror Top 3 All-Time prediction leaders in real time with 1-click execution.
-                    </p>
-                  </div>
+                {/* Subtle Architectural Diagonal Light Planes */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 overflow-hidden"
+                >
+                  <div className="absolute -top-10 left-[30%] h-[230px] w-[76px] rotate-[24deg] bg-white/[0.04]" />
+                  <div className="absolute -top-10 left-[54%] h-[230px] w-[42px] rotate-[24deg] bg-white/[0.03]" />
                 </div>
 
-                {/* Right Zone: Social Proof + Primary CTA Button */}
-                <div className="flex items-center justify-between md:justify-end gap-3.5 pt-2.5 md:pt-0 border-t border-[var(--line)]/60 md:border-t-0 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <div className="hidden sm:flex items-center -space-x-1.5 shrink-0">
-                      <span className="size-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white bg-[#1652F0] border border-[var(--s1)]">
-                        0x
-                      </span>
-                      <span className="size-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white bg-[#10B981] border border-[var(--s1)]">
-                        W1
-                      </span>
-                      <span className="size-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white bg-[#7A12F5] border border-[var(--s1)]">
-                        +9
-                      </span>
-                    </div>
-                    <span className="text-[11px] sm:text-xs font-semibold text-[var(--mut)] whitespace-nowrap">
-                      142 whales mirrored
+                {/* Left Editorial Copy + Rounded Pill CTA */}
+                <div className="relative z-20 flex w-[54%] flex-col justify-between py-0.5 pr-1">
+                  <h3 className="text-[16px] leading-[1.24] font-semibold tracking-[-0.015em] text-white">
+                    {slide.headline}
+                  </h3>
+
+                  <div className="pt-2">
+                    <span
+                      style={{ backgroundColor: slide.ctaBg, color: '#ffffff' }}
+                      className="inline-flex h-[38px] items-center gap-1.5 rounded-full px-4 text-[13px] font-semibold !text-white shadow-[0_6px_18px_rgba(0,0,0,0.28)] group-hover:brightness-110 transition-all whitespace-nowrap"
+                    >
+                      <span>{slide.ctaLabel}</span>
+                      <ArrowRight className="size-3.5 stroke-[2.2]" />
                     </span>
                   </div>
-
-                  <span className="inline-flex items-center justify-center gap-1.5 h-8 sm:h-9 md:h-10 px-3.5 md:px-4 rounded-xl text-[11px] sm:text-xs font-extrabold bg-[#7A12F5] !text-white text-white shadow-[0_4px_14px_rgba(122,18,245,0.35)] shrink-0 whitespace-nowrap group-hover:bg-[#8C38F7] active:scale-95 transition-all">
-                    <span>Open Agent</span>
-                    <ArrowRight className="size-3.5 stroke-[2.5]" />
-                  </span>
                 </div>
-              </div>
-            </Link>
-          </div>
 
-          {/* =================================================================
-              Slide 1: Buy $OKN Presale Multi-Gateway
-              ================================================================= */}
-          <div className={`announcement-slide min-w-full shrink-0 ${activeSlide === 1 ? 'active' : ''}`}>
-            <Link
-              href="/app/buy"
-              className="group relative block overflow-hidden p-4 sm:p-5 md:px-6 md:py-5 text-[var(--tx)] transition-all hover:bg-[var(--s2)]/50"
-              aria-label="Buy $OKN Presale"
-            >
-              <OknWatermark variant="card" size="sm" />
-              {/* Pure Graphic Background: Fine SVG Blockchain Orbital Vector Lines */}
-              <svg
-                className="absolute inset-0 size-full pointer-events-none opacity-[0.07] text-[var(--tx)]"
-                viewBox="0 0 800 160"
-                preserveAspectRatio="none"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <circle cx="700" cy="80" r="75" stroke="currentColor" strokeWidth="1" strokeDasharray="5 5" />
-                <circle cx="700" cy="80" r="45" stroke="currentColor" strokeWidth="1" />
-                <path d="M-20 120 C140 60, 280 15, 460 70 C620 115, 720 40, 820 20" stroke="currentColor" strokeWidth="1.5" />
-                <path d="M-20 40 C160 85, 300 135, 480 80 C640 30, 740 90, 820 70" stroke="currentColor" strokeWidth="1" opacity="0.6" />
-                <circle cx="460" cy="70" r="4" fill="currentColor" />
-                <circle cx="280" cy="15" r="3" fill="currentColor" />
-              </svg>
-
-              {/* Slide Content — Identical 2-Zone Desktop Hierarchy */}
-              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3.5 md:gap-6">
-                {/* Left Zone: Brand Icon + 3-Tier Typographic Stack */}
-                <div className="flex items-start sm:items-center gap-3.5 md:gap-4 min-w-0 flex-1">
-                  <div className="relative size-11 sm:size-12 md:size-14 rounded-2xl bg-[var(--s2)] border border-[var(--line)] flex items-center justify-center shrink-0 shadow-sm group-hover:border-[#7A12F5]/40 transition-colors">
-                    <img
-                      src="/okn-logo.png"
-                      alt="$OKN Presale"
-                      className="size-7 sm:size-8 md:size-9 object-contain"
-                    />
-                  </div>
-
-                  <div className="min-w-0 flex-1 space-y-1">
-                    {/* Tier 1: Eyebrow Badges */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-extrabold bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/25">
-                        <span className="size-1.5 rounded-full bg-[#F59E0B] animate-pulse" />
-                        PRESALE · STAGE 1
-                      </span>
-                      <span className="px-2.5 py-0.5 rounded-full text-[10.5px] sm:text-[11px] font-bold bg-[var(--s2)] text-[var(--tx)] border border-[var(--line)]">
-                        1 BNB = 12,000 $OKN · Starts at $0.05
+                {/* Right Cropped Smartphone UI Mockup + Overlapping Floating Toast */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none relative z-10 w-[44%] shrink-0"
+                >
+                  {/* Cropped iPhone Frame Anchored Flush Bottom-Right */}
+                  <div className="absolute right-0 -bottom-5 h-[174px] w-[124px] rounded-t-[24px] border-[3.5px] border-b-0 border-[#1A1C22] bg-[#F8F9FC] shadow-[0_12px_30px_rgba(0,0,0,0.45)] ring-1 ring-white/25 overflow-hidden">
+                    {/* Status Bar + Dynamic Island */}
+                    <div className="flex items-center justify-between px-3 pt-2 pb-1">
+                      <span className="text-[7px] font-bold text-[#111827] tabular-nums">9:41</span>
+                      <span className="h-[8px] w-[32px] rounded-full bg-[#090B10]" />
+                      <span className="flex items-center gap-[2px]">
+                        <span className="h-[4px] w-[2px] rounded-full bg-[#111827]" />
+                        <span className="h-[5px] w-[2px] rounded-full bg-[#111827]" />
+                        <span className="h-[6px] w-[8px] rounded-[2px] bg-[#111827]" />
                       </span>
                     </div>
 
-                    {/* Tier 2: Headline */}
-                    <h3 className="text-sm sm:text-base md:text-lg font-extrabold tracking-tight text-[var(--tx)] leading-snug">
-                      Buy $OKN Presale — <span className="text-[#F59E0B] dark:text-[#FBBF24]">Crypto Deposit</span> Live
-                    </h3>
-
-                    {/* Tier 3: Supporting Description */}
-                    <p className="text-xs sm:text-[13px] text-[var(--mut)] font-medium line-clamp-2 sm:line-clamp-1">
-                      Deposit USDT, BTC, ETH, SOL, or BNB with instant presale allocation.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Right Zone: Social Proof + Primary CTA Button */}
-                <div className="flex items-center justify-between md:justify-end gap-3.5 pt-2.5 md:pt-0 border-t border-[var(--line)]/60 md:border-t-0 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <div className="hidden sm:flex items-center -space-x-1.5 shrink-0">
-                      <span className="size-5 rounded-full flex items-center justify-center bg-[#1E2026] border border-[var(--s1)] p-0.5">
-                        <img src="/bnb-logo.png" alt="BNB" className="size-3 object-contain" />
+                    {/* Mini App Top Avatar */}
+                    <div className="flex items-center justify-between px-2.5 pt-0.5">
+                      <span className="flex size-4 items-center justify-center rounded-full bg-[#E5E7EB] text-[6.5px] font-extrabold text-[#374151]">
+                        OK
                       </span>
-                      <span className="size-5 rounded-full flex items-center justify-center text-[7px] font-extrabold text-white bg-[#0066FF] border border-[var(--s1)]">
-                        300+
-                      </span>
+                      <span className="size-3.5 rounded-full border border-[#E5E7EB] bg-white" />
                     </div>
-                    <span className="text-[11px] sm:text-xs font-semibold text-[var(--mut)] whitespace-nowrap">
-                      68.4% Sold · $412.8K
+
+                    {/* Clear gap reserved for overlapping floating toast */}
+                    <div className="h-[36px]" />
+
+                    {/* Crisp Value Figure Visible Directly Below Toast */}
+                    <div className="px-2 text-center">
+                      <div className="text-[14px] font-extrabold tracking-tight text-[#0F172A] tabular-nums leading-none">
+                        {slide.phoneValue}
+                      </div>
+                    </div>
+
+                    {/* 3 Circular Action Buttons Row (matching reference phone UI) */}
+                    <div className="mt-2 flex items-center justify-center gap-2.5 px-2">
+                      {slide.phoneActions.map((act) => {
+                        const Icon = act.icon;
+                        return (
+                          <div key={act.label} className="flex flex-col items-center gap-0.5">
+                            <span
+                              style={
+                                act.highlight
+                                  ? { borderColor: `${slide.phoneAccent}66`, color: slide.phoneAccent }
+                                  : undefined
+                              }
+                              className={cn(
+                                'flex size-6 items-center justify-center rounded-full border bg-white shadow-2xs',
+                                act.highlight
+                                  ? 'border-2'
+                                  : 'border-[#E2E8F0] text-[#475569]',
+                              )}
+                            >
+                              <Icon className="size-2.5 stroke-[2.4]" />
+                            </span>
+                            <span className="text-[6.5px] font-semibold text-[#64748B]">
+                              {act.label}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Signature Floating Notification Toast Overlapping Left Bezel Above Phone Value */}
+                  <div className="absolute right-[8px] top-[34px] z-30 flex items-center gap-2 rounded-xl bg-white px-2.5 py-1.5 text-[#0F172A] shadow-[0_8px_22px_rgba(0,0,0,0.32)] ring-1 ring-black/5">
+                    <span className="flex size-5.5 shrink-0 items-center justify-center rounded-full bg-[#0F172A] p-1">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={slide.toastLogo}
+                        alt={slide.toastLogoAlt}
+                        className="size-full object-contain"
+                      />
                     </span>
+                    <div className="min-w-0 leading-tight">
+                      <div className="whitespace-nowrap text-[8.5px] font-extrabold tracking-tight text-[#0F172A]">
+                        {slide.toastTitle}
+                      </div>
+                      <div className="whitespace-nowrap text-[7.5px] font-medium text-[#64748B]">
+                        {slide.toastMeta}
+                      </div>
+                    </div>
                   </div>
-
-                  <span className="inline-flex items-center justify-center gap-1.5 h-8 sm:h-9 md:h-10 px-3.5 md:px-4 rounded-xl text-[11px] sm:text-xs font-extrabold bg-[#7A12F5] !text-white text-white shadow-[0_4px_14px_rgba(122,18,245,0.35)] shrink-0 whitespace-nowrap group-hover:bg-[#8C38F7] active:scale-95 transition-all">
-                    <span>Buy Presale</span>
-                    <ArrowRight className="size-3.5 stroke-[2.5]" />
-                  </span>
                 </div>
-              </div>
-            </Link>
-          </div>
+              </Link>
+            </div>
+          ))}
         </div>
       </div>
-    </section>
+
+      {/* Minimalist Slide Dots */}
+      <div className="flex items-center justify-center gap-1.5" role="tablist" aria-label="Announcement slides">
+        {AD_SLIDES.map((slide, idx) => {
+          const active = idx === activeSlide;
+          return (
+            <button
+              key={slide.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              aria-label={`Show slide ${idx + 1}: ${slide.ctaLabel}`}
+              onClick={() => setActiveSlide(idx)}
+              className={cn(
+                'h-1.5 rounded-full transition-all duration-300 cursor-pointer',
+                active
+                  ? 'w-5 bg-[#7A12F5] dark:bg-[#C084FC]'
+                  : 'w-1.5 bg-[var(--mut)]/30 hover:bg-[var(--mut)]/55',
+              )}
+            />
+          );
+        })}
+      </div>
+    </div>
   );
 }

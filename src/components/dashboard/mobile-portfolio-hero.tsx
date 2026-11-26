@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from '@/i18n/navigation';
-import { Flame, Eye, EyeOff, Users, ChevronRight, Share2 } from 'lucide-react';
+import { Flame, Users, ChevronRight, Share2 } from 'lucide-react';
 import { useClaimEligibility } from '@/lib/hooks/use-claim';
 import { useStreak } from '@/lib/hooks/use-rewards';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { OknWatermark } from '@/components/ui/okn-watermark';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
+import { EyeToggleIcon, MaskedBalance } from '@/components/ui/masked-balance';
 import { StageCountdownBar } from '@/components/presale/stage-countdown-bar';
 import { openShareCard } from '@/components/share/share-card-modal';
 
@@ -84,15 +85,13 @@ export function MobilePortfolioHero() {
                 className="balance-eye-btn p-0.5 text-white/90 hover:text-white cursor-pointer"
                 aria-label={hideBalance ? 'Show balance' : 'Hide balance'}
               >
-                {hideBalance ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+                <EyeToggleIcon hidden={hideBalance} className="size-3.5" />
               </button>
             </div>
             <div className="num text-2xl font-extrabold text-white leading-tight mt-0.5 tabular-nums">
-              {hideBalance ? (
-                '••••••••'
-              ) : (
+              <MaskedBalance hidden={hideBalance} mask="••••••••">
                 <AnimatedCounter target={1428.5} decimals={2} prefix="$" durationMs={1200} />
-              )}
+              </MaskedBalance>
             </div>
           </div>
           <span className="rounded-xl border border-[#2FBD8E]/40 bg-[#2FBD8E]/20 px-2.5 py-1 text-xs font-extrabold text-[#4EEDB2] whitespace-nowrap">
@@ -116,11 +115,9 @@ export function MobilePortfolioHero() {
                 Referral Earnings
               </div>
               <div className="num text-sm font-extrabold text-white mt-0.5 tabular-nums">
-                {hideBalance ? (
-                  '••••••'
-                ) : (
+                <MaskedBalance hidden={hideBalance} mask="••••••">
                   <AnimatedCounter target={142.5} decimals={2} prefix="$" durationMs={1150} />
-                )}
+                </MaskedBalance>
               </div>
             </div>
           </div>

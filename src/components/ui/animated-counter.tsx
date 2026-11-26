@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { computeCounterFrame } from '@/lib/counter';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { formatPoints } from '@/lib/utils';
 
 interface AnimatedTokenCounterProps {
@@ -28,7 +29,8 @@ function formatCounterNumber(scaledValue: number, decimals: number): string {
 /**
  * Counts up smoothly from 0 to `target` with a soft blue glow and motion-blur
  * reveal that sharpens into crisp focus as the final number settles.
- * Re-runs automatically on mount, login/session changes, or target updates.
+ * Renders the static formatted target during SSR and initial hydration so
+ * server and client attributes match identically, then animates post-hydration.
  */
 export function AnimatedTokenCounter({
   target,
@@ -38,12 +40,14 @@ export function AnimatedTokenCounter({
   durationMs = 1150,
   className,
 }: AnimatedTokenCounterProps) {
+  const hydrated = useHydrated();
   const factor = decimals > 0 ? Math.pow(10, decimals) : 1;
   const scaledTarget = Math.max(0, Math.round((Number.isFinite(target) ? target : 0) * factor));
   const [runKey, setRunKey] = useState(0);
-  const [frame, setFrame] = useState(() => computeCounterFrame(0, scaledTarget));
+  const [frame, setFrame] = useState(() => computeCounterFrame(1, scaledTarget));
 
   useEffect(() => {
+    if (!hydrated) return;
     const handleAuthOrLogin = () => {
       setRunKey((k) => k + 1);
     };
@@ -53,9 +57,10 @@ export function AnimatedTokenCounter({
       window.removeEventListener('okn:login', handleAuthOrLogin);
       window.removeEventListener('focus', handleAuthOrLogin);
     };
-  }, []);
+  }, [hydrated]);
 
   useEffect(() => {
+    if (!hydrated) return;
     const prefersReduced =
       typeof window !== 'undefined' &&
       window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -78,33 +83,38 @@ export function AnimatedTokenCounter({
 
     rafId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(rafId);
-  }, [scaledTarget, durationMs, runKey]);
+  }, [hydrated, scaledTarget, durationMs, runKey]);
 
-  const isAnimating = frame.easedProgress < 1 && frame.blurPx > 0.05;
-  const blueGlowAlpha = Number(((1 - frame.easedProgress) * 0.78).toFixed(3));
-  const blueGlowRadius = Math.max(4, Math.round(frame.blurPx * 3.4));
+  const activeFrame = hydrated ? frame : computeCounterFrame(1, scaledTarget);
+  const isAnimating = hydrated && activeFrame.easedProgress < 1 && activeFrame.blurPx > 0.05;
+  const blueGlowAlpha = Number(((1 - activeFrame.easedProgress) * 0.78).toFixed(3));
+  const blueGlowRadius = Math.max(4, Math.round(activeFrame.blurPx * 3.4));
+  const targetLabel = `${prefix}${formatCounterNumber(scaledTarget, decimals)}${suffix}`;
 
   return (
     <span
       className={className}
-      aria-label={`${prefix}${formatCounterNumber(scaledTarget, decimals)}${suffix}`}
-      style={{
-        display: 'inline-block',
-        filter: isAnimating
-          ? `blur(${frame.blurPx}px) drop-shadow(0 0 ${blueGlowRadius}px rgba(9, 180, 255, ${blueGlowAlpha}))`
-          : 'none',
-        textShadow: isAnimating
-          ? `0 0 ${blueGlowRadius}px rgba(56, 189, 248, ${blueGlowAlpha}), 0 0 ${Math.round(blueGlowRadius * 1.6)}px rgba(9, 180, 255, ${(blueGlowAlpha * 0.65).toFixed(3)})`
-          : 'none',
-        transform: frame.scale !== 1 ? `scale(${frame.scale})` : 'none',
-        opacity: frame.opacity,
-        transformOrigin: 'left center',
-        transition: 'text-shadow 180ms ease-out',
-        willChange: isAnimating ? 'filter, transform, opacity, text-shadow' : 'auto',
-      }}
+      aria-label={targetLabel}
+      style={
+        isAnimating
+          ? {
+              display: 'inline-block',
+              filter: `blur(${activeFrame.blurPx}px) drop-shadow(0 0 ${blueGlowRadius}px rgba(9, 180, 255, ${blueGlowAlpha}))`,
+              textShadow: `0 0 ${blueGlowRadius}px rgba(56, 189, 248, ${blueGlowAlpha}), 0 0 ${Math.round(blueGlowRadius * 1.6)}px rgba(9, 180, 255, ${(blueGlowAlpha * 0.65).toFixed(3)})`,
+              transform: activeFrame.scale !== 1 ? `scale(${activeFrame.scale})` : 'none',
+              opacity: activeFrame.opacity,
+              transformOrigin: 'left center',
+              transition: 'text-shadow 180ms ease-out',
+              willChange: 'filter, transform, opacity, text-shadow',
+            }
+          : {
+              display: 'inline-block',
+              transformOrigin: 'left center',
+            }
+      }
     >
       {prefix}
-      {formatCounterNumber(frame.value, decimals)}
+      {formatCounterNumber(activeFrame.value, decimals)}
       {suffix}
     </span>
   );

@@ -35,7 +35,7 @@ export default function ClaimPage() {
   const hasCommittedRoot = eligibility.data?.latestRootVersion != null;
 
   return (
-    <main className="space-y-6">
+    <div className="space-y-6">
       <PageHeader title={t('title')} description={t('description')} />
 
       {/* Celebratory Web3 hero banner: the user's earned OK Points. */}
@@ -143,7 +143,7 @@ export default function ClaimPage() {
           <Step n={3} title={t('step3Title')} text={t('step3Text')} />
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }
 

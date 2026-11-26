@@ -18,7 +18,7 @@ export default function TradeBotPage() {
   const capabilities = t.raw('capabilities') as unknown as string[];
 
   return (
-    <main className="space-y-6 pb-12">
+    <div className="space-y-6 pb-12">
       {/* Page Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -95,6 +95,6 @@ export default function TradeBotPage() {
         {/* Ambient lighting */}
         <div className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 size-80 rounded-full bg-[#7A12F5]/12 blur-3xl" />
       </section>
-    </main>
+    </div>
   );
 }
