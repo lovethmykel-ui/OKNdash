@@ -31,8 +31,8 @@ const AD_SLIDES: readonly Web3AdSlide[] = [
     ariaLabel: 'Buy $OKN Stage 1 Presale',
     headline: 'Stage 1 presale is live. Lock in $OKN at $0.05.',
     ctaLabel: 'Buy $OKN',
-    bgStyle: 'linear-gradient(135deg, #4F0832 0%, #3E062D 55%, #2C0524 100%)',
-    ctaBg: '#B21589',
+    bgStyle: 'linear-gradient(135deg, #160B2E 0%, #0E0820 55%, #090712 100%)',
+    ctaBg: '#7A12F5',
     artwork: 'phone-toast',
   },
   {
@@ -69,8 +69,15 @@ const SPARK_BARS = [34, 48, 42, 62, 58, 76, 88, 100] as const;
 function PhoneToastArtwork() {
   return (
     <>
-      {/* Subtle Architectural Diagonal Light Planes */}
+      {/* Subtle Obsidian Violet-Cyan Aurora & Architectural Light Planes */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              'radial-gradient(50% 130% at 18% 55%, rgba(122, 18, 245, 0.28) 0%, transparent 72%), radial-gradient(45% 120% at 84% 40%, rgba(56, 189, 248, 0.16) 0%, transparent 70%)',
+          }}
+        />
         <div className="absolute -top-8 left-[30%] h-[180px] w-[62px] rotate-[24deg] bg-white/[0.04]" />
         <div className="absolute -top-8 left-[54%] h-[180px] w-[36px] rotate-[24deg] bg-white/[0.03]" />
       </div>

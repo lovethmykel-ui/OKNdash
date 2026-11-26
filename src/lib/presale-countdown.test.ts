@@ -7,6 +7,8 @@ import {
   INITIAL_COUNTDOWN_SNAPSHOT,
   computePresaleCountdown,
   formatCountdownUnit,
+  buildOdometerReel,
+  planOdometerTransition,
 } from './presale-countdown';
 
 test('Stage 1 duration equals exactly 1 month (30d) + 2 weeks (14d) = 44 days', () => {
@@ -66,4 +68,36 @@ test('formatCountdownUnit zero-pads single digits and preserves multi-digit valu
   assert.equal(formatCountdownUnit(7), '07');
   assert.equal(formatCountdownUnit(44), '44');
   assert.equal(formatCountdownUnit(-5), '00');
+});
+
+test('buildOdometerReel appends duplicate trailing 0 for seamless wrap-around', () => {
+  assert.deepEqual(buildOdometerReel(9), ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']);
+  assert.deepEqual(buildOdometerReel(5), ['0', '1', '2', '3', '4', '5', '0']);
+  assert.deepEqual(buildOdometerReel(2), ['0', '1', '2', '0']);
+});
+
+test('planOdometerTransition jumps cleanly on 0 -> maxDigit wrap without backward rewind', () => {
+  assert.deepEqual(planOdometerTransition(0, 9, 9), { jumpToIndex: 10, targetIndex: 9 });
+  assert.deepEqual(planOdometerTransition(0, 5, 5), { jumpToIndex: 6, targetIndex: 5 });
+  assert.deepEqual(planOdometerTransition(0, 2, 2), { jumpToIndex: 3, targetIndex: 2 });
+  assert.deepEqual(planOdometerTransition(7, 6, 9), { jumpToIndex: null, targetIndex: 6 });
+  assert.deepEqual(planOdometerTransition(1, 0, 9), { jumpToIndex: null, targetIndex: 0 });
+});
+
+test('buildOdometerReel appends duplicate zero slot for seamless downward rollover', () => {
+  assert.deepEqual(buildOdometerReel(9), ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']);
+  assert.deepEqual(buildOdometerReel(5), ['0', '1', '2', '3', '4', '5', '0']);
+  assert.deepEqual(buildOdometerReel(2), ['0', '1', '2', '0']);
+});
+
+test('planOdometerTransition steps downward by 1 slot on 0 -> maxDigit without rewinding', () => {
+  // Normal downward ticks require no jump
+  assert.deepEqual(planOdometerTransition(8, 7, 9), { jumpToIndex: null, targetIndex: 7 });
+  assert.deepEqual(planOdometerTransition(1, 0, 9), { jumpToIndex: null, targetIndex: 0 });
+
+  // Rollover 0 -> 9 snaps instantaneously to trailing duplicate '0' (index 10), then glides to 9
+  assert.deepEqual(planOdometerTransition(0, 9, 9), { jumpToIndex: 10, targetIndex: 9 });
+
+  // Tens rollover 0 -> 5 snaps instantaneously to trailing duplicate '0' (index 6), then glides to 5
+  assert.deepEqual(planOdometerTransition(0, 5, 5), { jumpToIndex: 6, targetIndex: 5 });
 });

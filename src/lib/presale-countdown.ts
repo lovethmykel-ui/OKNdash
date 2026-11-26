@@ -71,3 +71,55 @@ export function formatCountdownUnit(value: number): string {
   const safe = Math.max(0, Math.floor(Number.isFinite(value) ? value : 0));
   return safe < 10 ? `0${safe}` : String(safe);
 }
+
+/**
+ * Builds an extended digit reel ['0', '1', ..., maxDigit, '0'] so wrapping
+ * downward from 0 -> maxDigit steps cleanly by 1 slot with zero backward rewind.
+ */
+export function buildOdometerReel(maxDigit: number = 9): string[] {
+  const clampedMax = Math.max(1, Math.min(9, Math.floor(maxDigit)));
+  const reel: string[] = [];
+  for (let i = 0; i <= clampedMax; i += 1) {
+    reel.push(String(i));
+  }
+  reel.push('0');
+  return reel;
+}
+
+export interface OdometerStepPlan {
+  /** Optional instant jump index (visually identical digit) before animating. */
+  jumpToIndex: number | null;
+  /** Target reel index to animate toward. */
+  targetIndex: number;
+}
+
+/**
+ * Computes the seamless reel transition between two countdown digits.
+ * When wrapping downward from 0 -> maxDigit, snaps instantaneously to the
+ * duplicate trailing '0' slot (index maxDigit + 1) and steps 1 slot to maxDigit.
+ */
+export function planOdometerTransition(
+  prevDigit: number,
+  nextDigit: number,
+  maxDigit: number = 9,
+): OdometerStepPlan {
+  const clampedMax = Math.max(1, Math.min(9, Math.floor(maxDigit)));
+  const safePrev = Number.isFinite(prevDigit)
+    ? Math.max(0, Math.min(clampedMax, Math.floor(prevDigit)))
+    : 0;
+  const safeNext = Number.isFinite(nextDigit)
+    ? Math.max(0, Math.min(clampedMax, Math.floor(nextDigit)))
+    : 0;
+
+  if (safePrev === 0 && safeNext === clampedMax) {
+    return {
+      jumpToIndex: clampedMax + 1,
+      targetIndex: clampedMax,
+    };
+  }
+
+  return {
+    jumpToIndex: null,
+    targetIndex: safeNext,
+  };
+}
