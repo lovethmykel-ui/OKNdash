@@ -1,15 +1,15 @@
 /**
- * lib/auth/bypass.ts — Standalone Demo Dashboard Auth Bypass
- * Always enabled so the interactive demo runs without any environment variables.
+ * lib/auth/bypass.ts — Auth Bypass Configuration
+ * Disabled so dashboard routes enforce server-verified session cookies.
  */
 export function isAuthBypassed(): boolean {
-  return true;
-}
-
-export function hasProductionSecret(): boolean {
   return false;
 }
 
+export function hasProductionSecret(): boolean {
+  return Boolean(process.env.SESSION_SECRET && process.env.SESSION_SECRET.trim().length >= 16);
+}
+
 export function assertNoDangerousBypassInProduction(): void {
-  // No-op for interactive demo
+  // Auth bypass is disabled.
 }

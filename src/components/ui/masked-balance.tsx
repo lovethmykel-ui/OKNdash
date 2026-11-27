@@ -27,6 +27,14 @@ export function MaskedBalance({
   const prefersReduced = useReducedMotion();
   const reduceMotion = hydrated && Boolean(prefersReduced);
 
+  if (!hydrated) {
+    return (
+      <span className={cn('inline-block align-baseline', className)}>
+        <span className="inline-block">{hidden ? mask : children}</span>
+      </span>
+    );
+  }
+
   return (
     <span className={cn('inline-block align-baseline', className)}>
       <AnimatePresence mode="wait" initial={false}>
@@ -69,6 +77,14 @@ export function EyeToggleIcon({ hidden, className = 'size-3.5' }: EyeToggleIconP
   const hydrated = useHydrated();
   const prefersReduced = useReducedMotion();
   const reduceMotion = hydrated && Boolean(prefersReduced);
+
+  if (!hydrated) {
+    return (
+      <span className="inline-flex items-center justify-center">
+        {hidden ? <EyeOff className={className} /> : <Eye className={className} />}
+      </span>
+    );
+  }
 
   return (
     <AnimatePresence mode="wait" initial={false}>

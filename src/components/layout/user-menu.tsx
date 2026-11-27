@@ -118,6 +118,17 @@ export function UserMenu() {
 
   const handleSignOut = async () => {
     setOpen(false);
+    try {
+      await fetch('/api/auth/session', {
+        method: 'DELETE',
+        headers: {
+          'X-Requested-With': 'OKN-Auth',
+        },
+        credentials: 'same-origin',
+      });
+    } catch {
+      // Proceed to /login even if network is transiently unavailable
+    }
     window.location.href = '/login';
   };
 
