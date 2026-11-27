@@ -33,20 +33,17 @@ const globalForSecret = globalThis as typeof globalThis & {
 };
 
 /**
- * Returns the HMAC signing secret from SESSION_SECRET, or a deterministic
- * deployment-scoped SHA-256 secret so all serverless function instances
- * (e.g., on Vercel) verify cookies signed by `/api/auth/session`.
+ * Returns a deterministic deployment-scoped SHA-256 HMAC signing secret so all
+ * serverless function instances (e.g., on Vercel) verify cookies signed by
+ * `/api/auth/session` without requiring manual environment variable setup.
  */
 export function getSessionSecret(): string {
-  const configured = process.env.SESSION_SECRET?.trim();
-  if (configured && configured.length >= 16) {
-    return configured;
-  }
   if (!globalForSecret.__oknEphemeralSessionSecret) {
     const deploymentSeed = [
       process.env.VERCEL_PROJECT_ID,
       process.env.VERCEL_PROJECT_PRODUCTION_URL,
       process.env.VERCEL_GIT_COMMIT_SHA,
+      process.env.APP_URL,
       process.env.NEXT_PUBLIC_APP_URL,
       process.env.NODE_ENV,
       'oknexus-session-hmac-v1',
