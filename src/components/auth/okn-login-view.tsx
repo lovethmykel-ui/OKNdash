@@ -4,36 +4,35 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion, useReducedMotion } from 'motion/react';
 import {
-  Box,
+  ArrowRight,
   ChevronRight,
-  Globe,
   Loader2,
+  Lock,
   Send,
-  ShieldCheck,
   Wallet,
-  Zap,
 } from 'lucide-react';
 import { useRouter } from '@/i18n/navigation';
 import { LanguageSwitcher } from '@/components/landing/language-switcher';
 import { WalletNoticeModal } from '@/components/auth/wallet-notice-modal';
 import { resetReferralBattlePopupForFreshLogin } from '@/lib/referral-battle-popup';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
-import cosmicHorizonStage from '@/assets/images/okn_cosmic_horizon_stage_1795738928961.jpg';
+import obsidianStageImg from '@/assets/images/okn_obsidian_architectural_stage_1795751394657.jpg';
 
 type AuthProvider = 'telegram' | 'wallet';
 
 const LAST_USED_KEY = 'okn_last_auth_provider';
 
 /**
- * OknLoginView — Cosmic dark OKN authentication experience securing the
- * OKNexus dashboard.
+ * OknLoginView — Architectural split-canvas sign-in experience for the OKN dashboard.
  *
- * Visual composition mirrors the cosmic OKN reference:
- *  - Top bar with circular $OKN emblem + OKN wordmark & language switcher
- *  - Floating 3D $OKN coin suspended above the luminous cosmic horizon pedestal
- *  - Frosted obsidian-indigo glass card with Telegram login & Connect Wallet
- *  - Mandatory Wallet Connect notice modal with "I Accept" confirmation gate
- *  - Zero "Scan QR Code" / "Scan to login" option
+ * Left panel (desktop) / compact obsidian banner (mobile):
+ *   Studio obsidian basalt & smoked-glass showcase featuring the authentic
+ *   tilted 3D OKN coin and verified Assure DeFi + BNB Smart Chain marks.
+ *
+ * Right panel (desktop) / main canvas (mobile):
+ *   Clean, distraction-free authentication studio honoring Light & Dark themes
+ *   with Telegram primary login, Connect Wallet (gated behind the mandatory
+ *   existing-accounts-only notice modal), and zero Scan QR Code option.
  */
 export function OknLoginView() {
   const router = useRouter();
@@ -47,7 +46,6 @@ export function OknLoginView() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [lastUsed, setLastUsed] = useState<AuthProvider>('telegram');
 
-  // Read last-used provider strictly after hydration to avoid SSR mismatches
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem(LAST_USED_KEY);
@@ -117,92 +115,55 @@ export function OknLoginView() {
   };
 
   return (
-    <div className="relative min-h-dvh w-full overflow-x-clip bg-[#05040D] text-white selection:bg-[#7A12F5]/40 selection:text-white">
+    <div className="min-h-dvh w-full bg-white dark:bg-[#0B0A11] text-[#0E0D15] dark:text-[#F5F4FA] grid grid-cols-1 lg:grid-cols-[1.08fr_1fr] selection:bg-[#7A12F5]/20">
       {/* =====================================================================
-          AMBIENT COSMIC BACKGROUND STAGE
-          Deep space backdrop + luminous Earth-at-night pedestal + orbital arcs
+          LEFT SHOWCASE PANEL (Desktop) / COMPACT ARCHITECTURAL HEADER (Mobile)
          ===================================================================== */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 overflow-hidden bg-[#05040D]"
+      <section
+        aria-label="OKNexus Brand Showcase"
+        className="relative flex flex-col justify-between overflow-hidden bg-[#08070D] text-white px-6 py-5 sm:px-10 sm:py-7 lg:px-12 lg:py-10 min-h-[228px] lg:min-h-dvh"
       >
-        {/* Cosmic horizon & glowing neon pedestal anchored behind the coin */}
-        <div className="relative mx-auto h-[370px] sm:h-[420px] lg:h-[445px] w-full max-w-[1440px]">
+        {/* Minimalist Architectural Obsidian & Smoked Glass Studio Backdrop */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
           <Image
-            src={cosmicHorizonStage}
+            src={obsidianStageImg}
             alt=""
             fill
             priority
-            sizes="100vw"
+            sizes="(min-width: 1024px) 54vw, 100vw"
             referrerPolicy="no-referrer"
-            className="object-cover object-[50%_76%] opacity-95"
+            className="object-cover object-center opacity-90"
           />
-          {/* Top edge atmospheric vignette */}
-          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#05040D]/80 via-[#05040D]/30 to-transparent" />
-          {/* Smooth bottom blend into deep cosmic obsidian */}
-          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#05040D] via-[#05040D]/80 to-transparent" />
-          {/* Side feathering for ultra-wide viewports */}
-          <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-[#05040D] to-transparent" />
-          <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-[#05040D] to-transparent" />
+          {/* Measured Editorial Scrims for High-Contrast Typography */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#08070D]/75 via-[#08070D]/20 to-[#08070D]/95" />
+          <div className="hidden lg:block absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-[#08070D]/65 to-transparent" />
         </div>
 
-        {/* Lower sweeping ambient violet & sapphire glow ribbons matching reference */}
-        <div
-          className="absolute -bottom-32 -left-24 h-[420px] w-[420px] rounded-full opacity-35 blur-[110px]"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(147,51,234,0.85) 0%, rgba(122,18,245,0.25) 55%, transparent 75%)',
-          }}
-        />
-        <div
-          className="absolute -bottom-28 -right-24 h-[420px] w-[420px] rounded-full opacity-35 blur-[110px]"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(37,99,235,0.85) 0%, rgba(56,189,248,0.28) 55%, transparent 75%)',
-          }}
-        />
-        <div
-          className="absolute inset-x-0 bottom-0 h-px opacity-80"
-          style={{
-            background:
-              'linear-gradient(90deg, transparent 0%, rgba(168,85,247,0.9) 30%, rgba(56,189,248,0.95) 70%, transparent 100%)',
-          }}
-        />
-      </div>
-
-      {/* =====================================================================
-          FOREGROUND LOGIN LAYOUT
-         ===================================================================== */}
-      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-[1160px] flex-col justify-between px-5 py-4 sm:px-8 sm:py-6">
-        {/* Top Bar: Circular $OKN Emblem + Bold OKN Wordmark | Language Switcher */}
-        <header className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="relative flex size-10 sm:size-11 items-center justify-center rounded-full bg-gradient-to-br from-[#A855F7] via-[#7A12F5] to-[#38BDF8] p-[2px] shadow-[0_0_24px_rgba(122,18,245,0.55)]">
-              <span className="flex size-full items-center justify-center rounded-full bg-white p-1.5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/okn-logo.png"
-                  alt="$OKN"
-                  referrerPolicy="no-referrer"
-                  className="size-full object-contain"
-                />
-              </span>
-            </span>
-            <span className="text-[22px] sm:text-[24px] font-black tracking-[0.06em] text-white">
+        {/* Top Lockup: Brand Mark + Mobile Language Switcher */}
+        <header className="relative z-10 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/OKN_logo_transparent.png"
+              alt="OKN"
+              referrerPolicy="no-referrer"
+              className="size-7 sm:size-8 object-contain"
+            />
+            <span className="text-[18px] sm:text-[19px] font-bold tracking-[0.06em] text-white whitespace-nowrap">
               OKN
             </span>
           </div>
 
-          {/* Scoped dark CSS vars so the shared LanguageSwitcher renders as dark glass */}
+          {/* Mobile-only Language Switcher scoped for dark obsidian surface */}
           <div
-            className="dark"
+            className="lg:hidden dark"
             style={
               {
-                '--line': 'rgba(255, 255, 255, 0.16)',
-                '--s1': '#121026',
-                '--s2': 'rgba(16, 14, 34, 0.72)',
-                '--tx': '#F8F7FF',
-                '--mut': '#B6B0D2',
+                '--line': 'rgba(255, 255, 255, 0.14)',
+                '--s1': '#14121E',
+                '--s2': 'rgba(20, 18, 30, 0.72)',
+                '--tx': '#F5F4FA',
+                '--mut': '#A39EB8',
               } as React.CSSProperties
             }
           >
@@ -210,261 +171,242 @@ export function OknLoginView() {
           </div>
         </header>
 
-        {/* Center Main Stage */}
-        <main className="mx-auto flex w-full max-w-[448px] flex-1 flex-col items-center justify-center py-3 sm:py-4">
-          {/* Floating 3D $OKN Coin Hovering Directly Above the Luminous Pedestal */}
-          <div className="relative mb-3 sm:mb-4 flex h-[156px] sm:h-[176px] w-full items-center justify-center">
-            {/* Soft neon violet-blue volumetric halo behind coin */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute size-44 sm:size-52 rounded-full opacity-70 blur-3xl"
-              style={{
-                background:
-                  'radial-gradient(circle, rgba(168,85,247,0.65) 0%, rgba(56,189,248,0.38) 52%, transparent 74%)',
-              }}
+        {/* Center Sculptural Asset: Authentic Studio-Rendered Tilted 3D OKN Coin */}
+        <div className="relative z-10 my-3 lg:my-auto flex flex-col items-center justify-center py-1 lg:py-8">
+          <motion.div
+            animate={animateLive ? { y: [0, -6, 0] } : undefined}
+            transition={
+              animateLive
+                ? { duration: 6, repeat: Infinity, ease: 'easeInOut' }
+                : undefined
+            }
+            className="relative flex items-center justify-center will-change-transform"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/OKN_coin_3d_new_tilted.png"
+              alt="$OKN 3D Token"
+              referrerPolicy="no-referrer"
+              className="w-[126px] sm:w-[152px] lg:w-[242px] xl:w-[268px] h-auto object-contain drop-shadow-[0_28px_42px_rgba(0,0,0,0.68)] [clip-path:inset(0_0_11%_0)]"
             />
+          </motion.div>
 
-            {/* Tilted luminous orbital light ring echoing the reference coin orbit */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute h-[86px] w-[264px] sm:h-[96px] sm:w-[300px] -rotate-[22deg] rounded-[50%] border border-[#A855F7]/55 shadow-[0_0_24px_rgba(168,85,247,0.55),inset_0_0_18px_rgba(56,189,248,0.45)]"
-            />
+          {/* Subtle grounded contact shadow over the basalt plinth */}
+          <div
+            aria-hidden="true"
+            className="-mt-3 lg:-mt-2 h-3 w-28 lg:w-44 rounded-full bg-black/70 blur-md"
+          />
+        </div>
 
-            {/* Crisp Floating $OKN 3D Coin */}
-            <motion.div
-              animate={animateLive ? { y: [0, -7, 0] } : undefined}
-              transition={
-                animateLive
-                  ? { duration: 4.6, repeat: Infinity, ease: 'easeInOut' }
-                  : undefined
-              }
-              className="relative z-10 flex size-[176px] sm:size-[196px] items-center justify-center will-change-transform"
-            >
+        {/* Desktop Editorial Statement & Real Credential Bar */}
+        <div className="relative z-10 hidden lg:block space-y-6">
+          <div className="max-w-[440px] space-y-2.5">
+            <h2 className="text-[32px] xl:text-[36px] font-semibold tracking-[-0.03em] leading-[1.12] text-white [text-wrap:balance]">
+              Your gateway to the{' '}
+              <span className="text-[#C7C2DC]">OKNexus ecosystem.</span>
+            </h2>
+            <p className="text-[14.5px] leading-[1.6] text-[#9A95B0]">
+              Manage Stage 1 presale holdings, autonomous prediction agents, and on-chain BNB rewards from one unified account.
+            </p>
+          </div>
+
+          {/* Unboxed Real Brand Seals & Credentials (Zero Pill Clutter) */}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-white/[0.1] pt-5 text-[12.5px] font-medium text-[#C5C0D8]">
+            <span className="inline-flex items-center gap-2 whitespace-nowrap">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/brand/OKN_coin_transparent_padded.png"
-                alt="$OKN Coin"
+                src="/brand/assure_defi_badge.webp"
+                alt="Assure DeFi"
                 referrerPolicy="no-referrer"
-                className="size-full object-contain drop-shadow-[0_18px_36px_rgba(122,18,245,0.62)]"
+                className="size-5 object-contain"
               />
-            </motion.div>
+              <span>KYC Verified by Assure DeFi</span>
+            </span>
+            <span aria-hidden="true" className="text-white/25">·</span>
+            <span className="inline-flex items-center gap-2 whitespace-nowrap">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/bnb_chain_logo.png"
+                alt="BNB Smart Chain"
+                referrerPolicy="no-referrer"
+                className="size-4 object-contain"
+              />
+              <span>BNB Smart Chain</span>
+            </span>
+            <span aria-hidden="true" className="text-white/25">·</span>
+            <span className="whitespace-nowrap text-[#A49FB8]">Non-Custodial</span>
           </div>
+        </div>
+      </section>
 
-          {/* Headline, Subheading & Unboxed Trust Strip */}
-          <div className="w-full text-center">
-            <h1 className="text-[32px] sm:text-[38px] font-black tracking-[-0.03em] leading-[1.08] text-white">
-              Sign in to{' '}
-              <span className="bg-gradient-to-r from-[#C084FC] via-[#818CF8] to-[#38BDF8] bg-clip-text text-transparent">
-                OKN
-              </span>
+      {/* =====================================================================
+          RIGHT AUTHENTICATION STUDIO (Desktop) / PRIMARY CANVAS (Mobile)
+          Zero nested boxes, crisp typographic hierarchy, pure whitespace.
+         ===================================================================== */}
+      <main className="relative flex flex-col justify-between bg-white dark:bg-[#0B0A11] px-6 py-7 sm:px-10 sm:py-9 lg:px-16 lg:py-10">
+        {/* Desktop Top-Right Language Control */}
+        <div className="hidden lg:flex items-center justify-end">
+          <LanguageSwitcher />
+        </div>
+
+        {/* Centered Precision Auth Stack */}
+        <motion.div
+          initial={animateLive ? { opacity: 0, y: 8 } : undefined}
+          animate={animateLive ? { opacity: 1, y: 0 } : undefined}
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto my-auto w-full max-w-[416px] py-2 lg:py-6"
+        >
+          {/* Header Copy */}
+          <div>
+            <h1 className="text-[27px] sm:text-[31px] font-bold tracking-[-0.03em] leading-[1.12] text-[#0E0D15] dark:text-[#F6F5FB]">
+              Sign in to OKN
             </h1>
-            <p className="mt-1.5 text-[14px] sm:text-[15px] font-medium text-[#CFCBE6]">
-              Your gateway to the OKNexus ecosystem
+            <p className="mt-2 text-[14.5px] leading-[1.55] text-[#605D72] dark:text-[#9893AC]">
+              Continue with Telegram for instant access, or sign in with an existing Web3 wallet.
             </p>
-
-            {/* Unboxed Inline Trust Strip (Secure | Fast | Decentralized) */}
-            <div className="mt-3.5 flex flex-wrap items-center justify-center gap-x-3.5 gap-y-1.5 text-[12px] sm:text-[12.5px] font-semibold text-[#D6D2EC]">
-              <span className="inline-flex items-center gap-1.5">
-                <ShieldCheck className="size-3.5 text-[#E9D5FF]" aria-hidden="true" />
-                <span>Secure</span>
-              </span>
-              <span aria-hidden="true" className="h-3.5 w-px bg-white/20" />
-              <span className="inline-flex items-center gap-1.5">
-                <Zap className="size-3.5 text-[#C084FC]" aria-hidden="true" />
-                <span>Fast</span>
-              </span>
-              <span aria-hidden="true" className="h-3.5 w-px bg-white/20" />
-              <span className="inline-flex items-center gap-1.5">
-                <Globe className="size-3.5 text-[#7DD3FC]" aria-hidden="true" />
-                <span>Decentralized</span>
-              </span>
-            </div>
           </div>
 
-          {/* Frosted Obsidian-Indigo Glass Auth Card with Radiant Rim */}
-          <div className="mt-5 w-full rounded-[28px] bg-gradient-to-b from-[#A855F7]/60 via-[#3B82F6]/38 to-[#7C3AED]/55 p-[1.5px] shadow-[0_24px_70px_rgba(0,0,0,0.65),0_0_44px_rgba(122,18,245,0.22)]">
-            <section
-              aria-label="Sign in methods"
-              className="relative overflow-hidden rounded-[26.5px] bg-[#0B0920]/86 px-4 py-5 sm:px-5 sm:py-6 backdrop-blur-2xl"
+          {/* Primary Action: Solid Architectural OKN Signature Purple CTA */}
+          <div className="mt-7">
+            <button
+              type="button"
+              data-testid="login-telegram-btn"
+              disabled={Boolean(pendingProvider)}
+              onClick={() => void submitSessionSignIn('telegram', false)}
+              className="group flex h-[52px] w-full items-center justify-between gap-3 rounded-[13px] bg-[#7A12F5] px-4 text-white shadow-[0_1px_2px_rgba(12,10,24,0.12),0_12px_26px_-10px_rgba(122,18,245,0.55),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all duration-150 hover:bg-[#690EDD] active:scale-[0.99] disabled:opacity-70 cursor-pointer"
             >
-              {/* Subtle internal radial glow */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -top-24 left-1/2 h-44 w-80 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#9333EA]/22 via-[#2563EB]/20 to-[#38BDF8]/18 blur-3xl"
-              />
-
-              {/* Primary CTA: Login with Telegram */}
-              <motion.div
-                whileHover={animateLive && !pendingProvider ? { scale: 1.012 } : undefined}
-                whileTap={animateLive && !pendingProvider ? { scale: 0.985 } : undefined}
-                transition={{ type: 'spring', stiffness: 450, damping: 26 }}
-                className="relative"
-              >
-                <button
-                  type="button"
-                  data-testid="login-telegram-btn"
-                  disabled={Boolean(pendingProvider)}
-                  onClick={() => void submitSessionSignIn('telegram', false)}
-                  className="group relative flex h-[54px] sm:h-[58px] w-full items-center justify-between gap-3 overflow-hidden rounded-full bg-gradient-to-r from-[#9333EA] via-[#4F46E5] to-[#38BDF8] px-5 text-white shadow-[0_12px_32px_rgba(122,18,245,0.5),inset_0_1px_0_rgba(255,255,255,0.35)] ring-1 ring-inset ring-white/25 transition-[filter] duration-200 hover:brightness-110 disabled:opacity-75 cursor-pointer"
-                >
-                  {/* Sweeping Specular Sheen */}
-                  {animateLive && (
-                    <motion.span
-                      aria-hidden="true"
-                      initial={{ x: '-160%' }}
-                      animate={{ x: ['-160%', '300%'] }}
-                      transition={{
-                        duration: 1.4,
-                        repeat: Infinity,
-                        repeatDelay: 3.2,
-                        ease: [0.22, 1, 0.36, 1],
-                      }}
-                      className="pointer-events-none absolute inset-y-0 left-0 w-16 -skew-x-[24deg] bg-gradient-to-r from-transparent via-white/25 to-transparent will-change-transform"
-                    />
+              <span className="flex items-center gap-3 min-w-0">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-white/[0.15]">
+                  {pendingProvider === 'telegram' ? (
+                    <Loader2 className="size-4 animate-spin text-white" aria-hidden="true" />
+                  ) : (
+                    <Send className="size-4 -translate-x-[0.5px] translate-y-[0.5px] text-white" aria-hidden="true" />
                   )}
-
-                  <span className="relative z-10 flex items-center gap-3">
-                    {pendingProvider === 'telegram' ? (
-                      <Loader2 className="size-5 shrink-0 animate-spin text-white" aria-hidden="true" />
-                    ) : (
-                      <Send className="size-5 shrink-0 -translate-x-[1px] translate-y-[0.5px] text-white" aria-hidden="true" />
-                    )}
-                    <span className="text-[15.5px] sm:text-[16px] font-extrabold tracking-tight text-white">
-                      {pendingProvider === 'telegram'
-                        ? 'Signing in with Telegram...'
-                        : 'Login with Telegram'}
-                    </span>
-                  </span>
-
-                  {lastUsed === 'telegram' && pendingProvider !== 'telegram' && (
-                    <span className="relative z-10 inline-flex items-center gap-1.5 rounded-full bg-[#09152E]/45 px-2.5 py-1 text-[11px] font-bold text-[#E0F2FE] ring-1 ring-inset ring-white/25 whitespace-nowrap">
-                      <span className="size-1.5 rounded-full bg-[#34D399]" aria-hidden="true" />
-                      <span>Last Used</span>
-                    </span>
-                  )}
-                </button>
-              </motion.div>
-
-              {/* OR Hairline Divider */}
-              <div className="my-4 flex items-center gap-3.5" aria-hidden="true">
-                <span className="h-px flex-1 bg-white/15" />
-                <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#B8B2D6]">
-                  OR
                 </span>
-                <span className="h-px flex-1 bg-white/15" />
-              </div>
-
-              {/* Secondary CTA: Connect Wallet (triggers mandatory existing-accounts-only notice modal) */}
-              <button
-                type="button"
-                data-testid="login-wallet-btn"
-                disabled={Boolean(pendingProvider)}
-                onClick={() => {
-                  setErrorMessage(null);
-                  setWalletModalOpen(true);
-                }}
-                className="group relative flex w-full items-center justify-between gap-3 rounded-2xl bg-[#13112B]/88 px-3.5 py-3 text-left text-white ring-1 ring-inset ring-white/16 transition-all duration-150 hover:bg-[#191638]/95 hover:ring-[#A855F7]/55 active:scale-[0.985] disabled:opacity-70 cursor-pointer"
-              >
-                <span className="flex items-center gap-3 min-w-0">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.08] text-white ring-1 ring-inset ring-white/12 transition-colors group-hover:bg-[#7A12F5]/25 group-hover:text-[#E9D5FF]">
-                    {pendingProvider === 'wallet' ? (
-                      <Loader2 className="size-4.5 animate-spin" aria-hidden="true" />
-                    ) : (
-                      <Wallet className="size-4.5" aria-hidden="true" />
-                    )}
-                  </span>
-                  <span className="min-w-0">
-                    <span className="flex items-center gap-2">
-                      <span className="truncate text-[14.5px] sm:text-[15px] font-extrabold text-white">
-                        {pendingProvider === 'wallet'
-                          ? 'Signing in with Wallet...'
-                          : 'Connect Wallet'}
-                      </span>
-                      {lastUsed === 'wallet' && pendingProvider !== 'wallet' && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-[#7A12F5]/25 px-2 py-0.5 text-[10.5px] font-bold text-[#E9D5FF] ring-1 ring-inset ring-[#C084FC]/30 whitespace-nowrap">
-                          Last Used
-                        </span>
-                      )}
-                    </span>
-                    <span className="mt-0.5 block truncate text-[12px] font-medium text-[#A9A3C9]">
-                      MetaMask, WalletConnect, etc.
-                    </span>
-                  </span>
+                <span className="truncate text-[15px] font-semibold tracking-[-0.01em] text-white">
+                  {pendingProvider === 'telegram'
+                    ? 'Signing in with Telegram...'
+                    : 'Login with Telegram'}
                 </span>
+              </span>
 
-                <ChevronRight
-                  className="size-4.5 shrink-0 text-[#9B95BC] transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-white"
+              <span className="flex items-center gap-2 shrink-0">
+                {lastUsed === 'telegram' && pendingProvider !== 'telegram' && (
+                  <span className="text-[12px] font-medium text-white/75 whitespace-nowrap">
+                    Last used
+                  </span>
+                )}
+                <ArrowRight
+                  className="size-4 text-white/80 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-white"
                   aria-hidden="true"
                 />
-              </button>
-
-              {/* Live Auth Status / Error Feedback */}
-              {statusMessage && !errorMessage && (
-                <p
-                  role="status"
-                  aria-live="polite"
-                  className="mt-3.5 text-center text-[12px] font-semibold text-[#C4B5FD]"
-                >
-                  {statusMessage}
-                </p>
-              )}
-
-              {errorMessage && (
-                <p
-                  role="alert"
-                  className="mt-3.5 rounded-xl bg-[#EF4444]/15 px-3 py-2 text-center text-[12px] font-semibold text-[#FCA5A5] ring-1 ring-inset ring-[#EF4444]/35"
-                >
-                  {errorMessage}
-                </p>
-              )}
-            </section>
+              </span>
+            </button>
           </div>
 
-          {/* Privacy Reassurance Capsule */}
-          <div className="mt-4 inline-flex max-w-full items-center gap-2 rounded-full bg-[#0E0C24]/85 px-4 py-2 text-[11.5px] sm:text-[12px] font-medium text-[#D1CCE8] ring-1 ring-inset ring-white/12 backdrop-blur-xl">
-            <ShieldCheck className="size-4 shrink-0 text-[#34D399]" aria-hidden="true" />
+          {/* Minimal Hairline Divider */}
+          <div className="my-5 flex items-center gap-3.5" aria-hidden="true">
+            <span className="h-px flex-1 bg-[#ECEAF3] dark:bg-white/[0.08]" />
+            <span className="text-[12px] font-medium text-[#8B879B] dark:text-[#78748B]">
+              or
+            </span>
+            <span className="h-px flex-1 bg-[#ECEAF3] dark:bg-white/[0.08]" />
+          </div>
+
+          {/* Secondary Action: Connect Wallet (Opens Mandatory Notice Modal, NO Scan QR Code) */}
+          <div>
+            <button
+              type="button"
+              data-testid="login-wallet-btn"
+              disabled={Boolean(pendingProvider)}
+              onClick={() => {
+                setErrorMessage(null);
+                setWalletModalOpen(true);
+              }}
+              className="group flex w-full items-center justify-between gap-3.5 rounded-[13px] bg-[#F7F6FA] dark:bg-[#14121E] px-4 py-3.5 text-left ring-1 ring-inset ring-[#E5E3EE] dark:ring-white/[0.09] transition-all duration-150 hover:bg-[#F0EEF7] dark:hover:bg-[#1A1727] hover:ring-[#7A12F5]/40 active:scale-[0.99] disabled:opacity-70 cursor-pointer"
+            >
+              <span className="flex items-center gap-3.5 min-w-0">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-white dark:bg-[#1E1B2B] text-[#171424] dark:text-[#EAE7F5] ring-1 ring-inset ring-black/[0.06] dark:ring-white/[0.08] transition-colors group-hover:text-[#7A12F5] dark:group-hover:text-[#C084FC]">
+                  {pendingProvider === 'wallet' ? (
+                    <Loader2 className="size-4.5 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Wallet className="size-4.5" aria-hidden="true" />
+                  )}
+                </span>
+                <span className="min-w-0">
+                  <span className="flex items-center gap-2">
+                    <span className="truncate text-[14.5px] font-semibold tracking-[-0.01em] text-[#110F1B] dark:text-[#F4F3F9]">
+                      {pendingProvider === 'wallet'
+                        ? 'Signing in with Wallet...'
+                        : 'Connect Wallet'}
+                    </span>
+                    {lastUsed === 'wallet' && pendingProvider !== 'wallet' && (
+                      <span className="text-[11.5px] font-medium text-[#7A12F5] dark:text-[#C084FC] whitespace-nowrap">
+                        Last used
+                      </span>
+                    )}
+                  </span>
+                  <span className="mt-0.5 block truncate text-[12px] sm:text-[12.5px] text-[#6A677B] dark:text-[#918CA5]">
+                    MetaMask, WalletConnect · Existing accounts
+                  </span>
+                </span>
+              </span>
+
+              <ChevronRight
+                className="size-4 shrink-0 text-[#9490A6] transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-[#7A12F5] dark:group-hover:text-[#C084FC]"
+                aria-hidden="true"
+              />
+            </button>
+          </div>
+
+          {/* Live Auth Status / Error Feedback */}
+          {statusMessage && !errorMessage && (
+            <p
+              role="status"
+              aria-live="polite"
+              className="mt-4 text-[12.5px] font-medium text-[#7A12F5] dark:text-[#C084FC]"
+            >
+              {statusMessage}
+            </p>
+          )}
+
+          {errorMessage && (
+            <p
+              role="alert"
+              className="mt-4 text-[12.5px] font-medium text-[#DC2626] dark:text-[#F87171]"
+            >
+              {errorMessage}
+            </p>
+          )}
+
+          {/* Unboxed Non-Custodial Privacy Note */}
+          <div className="mt-6 flex items-center gap-2 text-[12.5px] text-[#6E6B7E] dark:text-[#8E89A3]">
+            <Lock className="size-3.5 shrink-0 text-[#7A12F5] dark:text-[#A78BFA]" aria-hidden="true" />
             <span>Your data is protected. We never store your private keys.</span>
           </div>
-        </main>
+        </motion.div>
 
-        {/* Bottom Ecosystem Attribution & 3-Column Trust Footer */}
-        <footer className="mx-auto w-full max-w-[448px] pt-2 pb-1">
-          <div className="flex items-center gap-3 text-[11.5px] font-semibold text-[#9E98BD]">
-            <span className="h-px flex-1 bg-white/12" aria-hidden="true" />
-            <span>
-              Powered by <span className="font-bold text-[#A855F7]">OKNexus</span>
+        {/* Quiet Editorial Footer */}
+        <footer className="mx-auto mt-8 w-full max-w-[416px] border-t border-[#EFEDF5] dark:border-white/[0.08] pt-4 flex items-center justify-between gap-4 text-[12px] text-[#7D798E] dark:text-[#827D96]">
+          <span>
+            Powered by{' '}
+            <span className="font-semibold text-[#110F1B] dark:text-[#E8E5F5]">
+              OKNexus
             </span>
-            <span className="h-px flex-1 bg-white/12" aria-hidden="true" />
-          </div>
+          </span>
 
-          <div className="mt-3 grid grid-cols-3 items-center divide-x divide-white/12 text-[11px] sm:text-[11.5px] font-semibold text-[#C9C4E0]">
-            <div className="flex items-center justify-center gap-1.5 pr-2">
-              <ShieldCheck className="size-4 shrink-0 text-[#E9D5FF]" aria-hidden="true" />
-              <span className="leading-tight">
-                KYC Verified
-                <br />
-                by Assured
-              </span>
-            </div>
-            <div className="flex items-center justify-center gap-1.5 px-2">
-              <Box className="size-4 shrink-0 text-[#C084FC]" aria-hidden="true" />
-              <span className="leading-tight">
-                Built on
-                <br />
-                Blockchain
-              </span>
-            </div>
-            <div className="flex items-center justify-center gap-1.5 pl-2">
-              <Globe className="size-4 shrink-0 text-[#7DD3FC]" aria-hidden="true" />
-              <span className="leading-tight">
-                Trusted by
-                <br />
-                Millions
-              </span>
-            </div>
-          </div>
+          <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/assure_defi_badge.webp"
+              alt="Assure DeFi"
+              referrerPolicy="no-referrer"
+              className="size-4 object-contain"
+            />
+            <span>Assure DeFi Verified</span>
+          </span>
         </footer>
-      </div>
+      </main>
 
       {/* Existing-Accounts-Only Wallet Notice Modal */}
       <WalletNoticeModal
