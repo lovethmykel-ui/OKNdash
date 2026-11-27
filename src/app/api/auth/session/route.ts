@@ -34,6 +34,31 @@ export async function GET(req: NextRequest) {
   );
 }
 
+function resolveCookieOptions(req: NextRequest) {
+  const frameContext = req.headers.get('x-frame-context');
+  const secFetchSite = req.headers.get('sec-fetch-site');
+  const host = (
+    req.headers.get('x-forwarded-host')?.split(',')[0]?.trim() ||
+    req.headers.get('host') ||
+    ''
+  ).toLowerCase();
+  const proto =
+    req.headers.get('x-forwarded-proto')?.split(',')[0]?.trim() ||
+    req.nextUrl.protocol.replace(':', '');
+
+  const isIframeOrCrossSite =
+    frameContext === 'iframe' ||
+    secFetchSite === 'cross-site' ||
+    host.endsWith('.run.app');
+
+  if (isIframeOrCrossSite) {
+    return { sameSite: 'none' as const, secure: true };
+  }
+
+  const isHttps = proto === 'https';
+  return { sameSite: 'lax' as const, secure: isHttps };
+}
+
 export async function POST(req: NextRequest) {
   if (!isTrustedAuthRequest(req.headers)) {
     return NextResponse.json(
@@ -62,6 +87,7 @@ export async function POST(req: NextRequest) {
 
   const payload = createSessionPayload(validation.provider);
   const token = signSessionToken(payload);
+  const cookieOpts = resolveCookieOptions(req);
 
   const response = NextResponse.json(
     {
@@ -77,7 +103,10 @@ export async function POST(req: NextRequest) {
     },
   );
 
-  response.headers.append('Set-Cookie', buildSessionSetCookieHeader(token));
+  response.headers.append(
+    'Set-Cookie',
+    buildSessionSetCookieHeader(token, undefined, cookieOpts),
+  );
   return response;
 }
 
@@ -89,6 +118,8 @@ export async function DELETE(req: NextRequest) {
     );
   }
 
+  const cookieOpts = resolveCookieOptions(req);
+
   const response = NextResponse.json(
     { ok: true },
     {
@@ -99,6 +130,10 @@ export async function DELETE(req: NextRequest) {
     },
   );
 
-  response.headers.append('Set-Cookie', buildSessionSetCookieHeader('', 0));
+  response.headers.append(
+    'Set-Cookie',
+    buildSessionSetCookieHeader('', 0, cookieOpts),
+  );
   return response;
 }
+

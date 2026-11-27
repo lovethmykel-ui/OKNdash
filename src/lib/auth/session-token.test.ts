@@ -7,11 +7,25 @@ import {
   validateLoginPayload,
   isTrustedAuthRequest,
   buildSessionSetCookieHeader,
+  getSessionSecret,
   SESSION_COOKIE_NAME,
 } from './session-token';
 import { hasPlausibleSessionCookie } from './session-cookie-check';
 
 const TEST_SECRET = 'test-signing-secret-with-at-least-32-chars-0123456789';
+
+test('getSessionSecret produces identical deterministic key across isolated serverless instances', () => {
+  const g = globalThis as typeof globalThis & { __oknEphemeralSessionSecret?: string };
+  delete g.__oknEphemeralSessionSecret;
+  const secretInstanceA = getSessionSecret();
+
+  // Simulate a separate Vercel serverless function cold start with cleared global memory
+  delete g.__oknEphemeralSessionSecret;
+  const secretInstanceB = getSessionSecret();
+
+  assert.equal(secretInstanceA, secretInstanceB);
+  assert.ok(secretInstanceA.length >= 32);
+});
 
 test('signSessionToken and verifySessionToken round-trip for telegram and wallet', () => {
   const now = 1_800_000_000;
@@ -129,7 +143,7 @@ test('isTrustedAuthRequest requires custom header and matching origin', () => {
   assert.equal(isTrustedAuthRequest(crossOrigin), false);
 });
 
-test('buildSessionSetCookieHeader sets HttpOnly, SameSite=None, Secure, and Partitioned', () => {
+test('buildSessionSetCookieHeader sets HttpOnly, SameSite=None, Secure, and Partitioned by default and supports SameSite=Lax', () => {
   const header = buildSessionSetCookieHeader('abc.def', 3600);
   assert.match(header, new RegExp(`^${SESSION_COOKIE_NAME}=abc\\.def`));
   assert.match(header, /HttpOnly/);
@@ -137,4 +151,13 @@ test('buildSessionSetCookieHeader sets HttpOnly, SameSite=None, Secure, and Part
   assert.match(header, /Secure/);
   assert.match(header, /Partitioned/);
   assert.match(header, /Max-Age=3600/);
+
+  const laxHeader = buildSessionSetCookieHeader('abc.def', 3600, {
+    sameSite: 'lax',
+    secure: true,
+  });
+  assert.match(laxHeader, /SameSite=Lax/);
+  assert.match(laxHeader, /Secure/);
+  assert.doesNotMatch(laxHeader, /Partitioned/);
 });
+

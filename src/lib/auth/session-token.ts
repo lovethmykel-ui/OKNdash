@@ -33,9 +33,9 @@ const globalForSecret = globalThis as typeof globalThis & {
 };
 
 /**
- * Returns the HMAC signing secret from SESSION_SECRET, or an ephemeral runtime
- * CSPRNG secret cached in process memory for local/preview environments.
- * Never falls back to a hardcoded string literal.
+ * Returns the HMAC signing secret from SESSION_SECRET, or a deterministic
+ * deployment-scoped SHA-256 secret so all serverless function instances
+ * (e.g., on Vercel) verify cookies signed by `/api/auth/session`.
  */
 export function getSessionSecret(): string {
   const configured = process.env.SESSION_SECRET?.trim();
@@ -43,9 +43,20 @@ export function getSessionSecret(): string {
     return configured;
   }
   if (!globalForSecret.__oknEphemeralSessionSecret) {
+    const deploymentSeed = [
+      process.env.VERCEL_PROJECT_ID,
+      process.env.VERCEL_PROJECT_PRODUCTION_URL,
+      process.env.VERCEL_GIT_COMMIT_SHA,
+      process.env.NEXT_PUBLIC_APP_URL,
+      process.env.NODE_ENV,
+      'oknexus-session-hmac-v1',
+    ]
+      .filter(Boolean)
+      .join(':');
     globalForSecret.__oknEphemeralSessionSecret = crypto
-      .randomBytes(32)
-      .toString('hex');
+      .createHash('sha256')
+      .update(deploymentSeed)
+      .digest('hex');
   }
   return globalForSecret.__oknEphemeralSessionSecret;
 }
@@ -203,7 +214,8 @@ export function validateLoginPayload(body: unknown): LoginValidationResult {
 
 /**
  * Checks basic CSRF protection on cookie-mutating auth endpoints:
- * requires either a matching Origin header or our custom X-Requested-With header.
+ * requires our custom X-Requested-With header and, when an Origin header is
+ * present, verifies it matches either X-Forwarded-Host or Host.
  */
 export function isTrustedAuthRequest(headers: Headers): boolean {
   const requestedWith = headers.get('x-requested-with');
@@ -212,41 +224,63 @@ export function isTrustedAuthRequest(headers: Headers): boolean {
   }
 
   const origin = headers.get('origin');
-  if (!origin) {
+  if (!origin || origin === 'null') {
     return true;
   }
 
-  const expectedHost =
-    headers.get('x-forwarded-host')?.split(',')[0]?.trim() ||
-    headers.get('host')?.trim();
+  const forwardedHost = headers
+    .get('x-forwarded-host')
+    ?.split(',')[0]
+    ?.trim()
+    .toLowerCase();
+  const host = headers.get('host')?.trim().toLowerCase();
 
-  if (!expectedHost) {
+  if (!forwardedHost && !host) {
     return false;
   }
 
   try {
-    return new URL(origin).host === expectedHost;
+    const originHost = new URL(origin).host.toLowerCase();
+    return originHost === forwardedHost || originHost === host;
   } catch {
     return false;
   }
 }
 
+export interface SessionCookieOptions {
+  sameSite?: 'none' | 'lax';
+  secure?: boolean;
+}
+
 /**
- * Builds an iframe-compatible HttpOnly Set-Cookie header string.
- * Uses SameSite=None; Secure; Partitioned so cookies work inside cross-origin
- * preview iframes as well as localhost (which Chromium treats as secure).
+ * Builds an HttpOnly Set-Cookie header string.
+ * - Defaults to `SameSite=None; Secure; Partitioned` for cross-origin preview iframes.
+ * - Supports `SameSite=Lax` for top-level deployments (e.g., Vercel on iOS Safari).
  */
 export function buildSessionSetCookieHeader(
   token: string,
   maxAgeSeconds = SESSION_MAX_AGE_SECONDS,
+  options?: SessionCookieOptions,
 ): string {
-  return [
+  const sameSite = options?.sameSite ?? 'none';
+  const secure = options?.secure ?? true;
+
+  const parts = [
     `${SESSION_COOKIE_NAME}=${token}`,
     'HttpOnly',
     'Path=/',
     `Max-Age=${maxAgeSeconds}`,
-    'SameSite=None',
-    'Secure',
-    'Partitioned',
-  ].join('; ');
+  ];
+
+  if (sameSite === 'lax') {
+    parts.push('SameSite=Lax');
+    if (secure) {
+      parts.push('Secure');
+    }
+  } else {
+    parts.push('SameSite=None', 'Secure', 'Partitioned');
+  }
+
+  return parts.join('; ');
 }
+

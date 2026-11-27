@@ -9,7 +9,8 @@ import {
   Send,
   Wallet,
 } from 'lucide-react';
-import { useRouter } from '@/i18n/navigation';
+import { useLocale } from 'next-intl';
+import { routing } from '@/i18n/routing';
 import { LanguageSwitcher } from '@/components/landing/language-switcher';
 import { WalletNoticeModal } from '@/components/auth/wallet-notice-modal';
 import { resetReferralBattlePopupForFreshLogin } from '@/lib/referral-battle-popup';
@@ -29,7 +30,7 @@ const LAST_USED_KEY = 'okn_last_auth_provider';
  * - Zero Scan QR Code option.
  */
 export function OknLoginView() {
-  const router = useRouter();
+  const locale = useLocale();
 
   const [pendingProvider, setPendingProvider] = useState<AuthProvider | null>(null);
   const [walletModalOpen, setWalletModalOpen] = useState(false);
@@ -62,13 +63,17 @@ export function OknLoginView() {
     );
 
     try {
+      const isEmbedded =
+        typeof window !== 'undefined' && window.self !== window.top;
+
       const response = await fetch('/api/auth/session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-Requested-With': 'OKN-Auth',
+          'X-Frame-Context': isEmbedded ? 'iframe' : 'top',
         },
-        credentials: 'same-origin',
+        credentials: 'include',
         body: JSON.stringify({
           provider,
           acceptedExistingAccountNotice,
@@ -94,8 +99,11 @@ export function OknLoginView() {
       resetReferralBattlePopupForFreshLogin(undefined, true);
       window.dispatchEvent(new CustomEvent('okn:login', { detail: { provider } }));
 
-      router.replace('/app/portfolio' as never);
-      router.refresh();
+      const targetPath =
+        locale && locale !== routing.defaultLocale
+          ? `/${locale}/app/portfolio`
+          : '/app/portfolio';
+      window.location.assign(targetPath);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Unable to sign in right now. Please try again.';
@@ -113,8 +121,8 @@ export function OknLoginView() {
         className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(60%_50%_at_50%_0%,rgba(122,18,245,0.08),transparent)] dark:bg-[radial-gradient(60%_50%_at_50%_0%,rgba(122,18,245,0.16),transparent)]"
       />
 
-      {/* Top Navigation Bar: Logo + Full Name "OKNexus" on Top Left, Language Switcher on Top Right */}
-      <header className="relative z-10 mx-auto flex w-full max-w-[1120px] items-center justify-between gap-4 px-5 py-4 sm:px-8 sm:py-6">
+      {/* Top Navigation Bar: z-50 so LanguageSwitcher dropdown renders above main content */}
+      <header className="relative z-50 mx-auto flex w-full max-w-[1120px] items-center justify-between gap-4 px-5 py-4 sm:px-8 sm:py-6">
         <div className="flex items-center gap-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

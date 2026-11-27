@@ -49,7 +49,7 @@ export function LanguageSwitcher() {
   }
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative z-50">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -68,9 +68,12 @@ export function LanguageSwitcher() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-[100] mt-2 w-56 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--s1)] p-1.5 text-[var(--tx)] shadow-[0_16px_40px_rgba(0,0,0,0.22)] backdrop-blur-xl">
-          <div className="px-3 py-1.5 border-b border-[var(--line)] mb-1 flex items-center justify-between">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--mut)]">
+        <div
+          data-testid="language-switcher-menu"
+          className="absolute right-0 top-full z-[200] mt-2 w-56 overflow-hidden rounded-2xl border border-[#E2DDEE] dark:border-[#26262D] bg-white dark:bg-[#131316] p-1.5 text-[#15121F] dark:text-[#F5F5F7] shadow-[0_20px_50px_rgba(12,10,24,0.24)]"
+        >
+          <div className="px-3 py-1.5 border-b border-[#E2DDEE] dark:border-[#26262D] mb-1 flex items-center justify-between">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#5C5870] dark:text-[#A3A3AF]">
               {t('label')}
             </span>
             <LocaleFlag locale={locale} size="sm" />
@@ -89,7 +92,7 @@ export function LanguageSwitcher() {
                       'flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-[13px] transition-colors cursor-pointer',
                       isSelected
                         ? 'bg-[#7A12F5]/12 font-extrabold text-[#7A12F5] dark:text-[#C9A6FF]'
-                        : 'font-semibold text-[var(--tx)] hover:bg-[var(--s2)]',
+                        : 'font-semibold text-[#15121F] dark:text-[#F5F5F7] hover:bg-[#EFEBF8] dark:hover:bg-[#1B1B20]',
                     )}
                   >
                     <span className="truncate">{t(`languages.${l}`)}</span>
