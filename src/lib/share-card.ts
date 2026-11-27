@@ -21,6 +21,14 @@ export interface ShareCardUserInput {
   tierLabel: string;
 }
 
+export interface ShareCardOverride {
+  badgeLabel: string;
+  headlineValue: string;
+  deltaLabel?: string;
+  subMetrics?: Array<{ label: string; value: string; tone?: string }>;
+  shareSummary: string;
+}
+
 export interface ShareCardModel {
   variant: ShareCardVariant;
   badgeLabel: string;
@@ -61,7 +69,9 @@ export function resolveShareCardVariant(pathname: string | null | undefined): Sh
   if (
     normalized === '/app' ||
     normalized === '/app/portfolio' ||
-    normalized.startsWith('/app/portfolio/')
+    normalized.startsWith('/app/portfolio/') ||
+    normalized === '/app/wallet' ||
+    normalized.startsWith('/app/wallet/')
   ) {
     return 'portfolio';
   }
@@ -151,9 +161,12 @@ export function buildShareCardModel(
   variant: ShareCardVariant,
   timeframe: ShareCardTimeframe,
   unit: ShareCardUnit,
+  override?: ShareCardOverride | null,
 ): ShareCardModel {
   const delta = DELTA_BY_VARIANT[variant][timeframe];
   const shape = CURVE_SHAPES[variant][timeframe];
+
+  let baseModel: ShareCardModel;
 
   if (variant === 'portfolio') {
     const endVal = Math.max(0, user.portfolioUsd);
@@ -166,7 +179,7 @@ export function buildShareCardModel(
         ? `+${formatCurrencyCompact(delta.usd)}`
         : `+${delta.pct.toFixed(1)}%`;
 
-    return {
+    baseModel = {
       variant,
       badgeLabel: 'Portfolio',
       tabLabel: 'Your portfolio',
@@ -185,9 +198,7 @@ export function buildShareCardModel(
       ],
       shareSummary: `My OKN Portfolio is ${formatCurrencyCompact(endVal)} (${deltaLabel} ${timeframe}). Join with code ${user.referralCode}.`,
     };
-  }
-
-  if (variant === 'referrals') {
+  } else if (variant === 'referrals') {
     const endVal = Math.max(0, user.referralUsd);
     const startVal = Math.max(0, endVal - delta.usd);
     const series = shape.map((n) => Number((startVal + n * (endVal - startVal)).toFixed(2)));
@@ -198,7 +209,7 @@ export function buildShareCardModel(
         ? `+${formatCurrencyCompact(delta.usd)}`
         : `+${delta.pct.toFixed(1)}%`;
 
-    return {
+    baseModel = {
       variant,
       badgeLabel: 'Referrals',
       tabLabel: 'Referrals',
@@ -217,37 +228,53 @@ export function buildShareCardModel(
       ],
       shareSummary: `I've earned ${formatCurrencyCompact(endVal)} in OKN Partner Rewards across ${user.inviteCount} invites. Join with code ${user.referralCode}.`,
     };
+  } else {
+    // Profile card
+    const endPts = Math.max(10, user.okPoints);
+    const startPts = Math.max(0, endPts - delta.pts);
+    const series = shape.map((n) => Math.round(startPts + n * (endPts - startPts)));
+    const minVal = Math.min(...series);
+    const maxVal = Math.max(...series);
+    const deltaLabel =
+      unit === 'usd'
+        ? `+${delta.pts} pts`
+        : `+${delta.pct.toFixed(1)}%`;
+
+    baseModel = {
+      variant,
+      badgeLabel: 'Profile',
+      tabLabel: 'Profile',
+      headlineValue: `${endPts.toLocaleString('en-US')} OK Pts`,
+      deltaLabel,
+      timeframeLabel: timeframe,
+      isPositive: true,
+      series,
+      yMaxLabel: `${maxVal} pts`,
+      yMinLabel: `${minVal} pts`,
+      xLabels: TIMEFRAME_X_LABELS[timeframe],
+      subMetrics: [
+        { label: 'Tier', value: user.tierLabel },
+        { label: 'Streak', value: `${user.streakDays}d` },
+        { label: 'Portfolio', value: formatCurrencyCompact(user.portfolioUsd) },
+      ],
+      shareSummary: `${user.handle} on OKN — ${endPts.toLocaleString('en-US')} OK Points (${user.streakDays}-day streak). Join with code ${user.referralCode}.`,
+    };
   }
 
-  // Profile card
-  const endPts = Math.max(10, user.okPoints);
-  const startPts = Math.max(0, endPts - delta.pts);
-  const series = shape.map((n) => Math.round(startPts + n * (endPts - startPts)));
-  const minVal = Math.min(...series);
-  const maxVal = Math.max(...series);
-  const deltaLabel =
-    unit === 'usd'
-      ? `+${delta.pts} pts`
-      : `+${delta.pct.toFixed(1)}%`;
+  if (!override) {
+    return baseModel;
+  }
 
   return {
-    variant,
-    badgeLabel: 'Profile',
-    tabLabel: 'Profile',
-    headlineValue: `${endPts.toLocaleString('en-US')} OK Pts`,
-    deltaLabel,
-    timeframeLabel: timeframe,
-    isPositive: true,
-    series,
-    yMaxLabel: `${maxVal} pts`,
-    yMinLabel: `${minVal} pts`,
-    xLabels: TIMEFRAME_X_LABELS[timeframe],
-    subMetrics: [
-      { label: 'Tier', value: user.tierLabel },
-      { label: 'Streak', value: `${user.streakDays}d` },
-      { label: 'Portfolio', value: formatCurrencyCompact(user.portfolioUsd) },
-    ],
-    shareSummary: `${user.handle} on OKN — ${endPts.toLocaleString('en-US')} OK Points (${user.streakDays}-day streak). Join with code ${user.referralCode}.`,
+    ...baseModel,
+    badgeLabel: override.badgeLabel || baseModel.badgeLabel,
+    headlineValue: override.headlineValue || baseModel.headlineValue,
+    deltaLabel: override.deltaLabel ?? baseModel.deltaLabel,
+    subMetrics:
+      override.subMetrics && override.subMetrics.length > 0
+        ? override.subMetrics
+        : baseModel.subMetrics,
+    shareSummary: override.shareSummary || baseModel.shareSummary,
   };
 }
 

@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from '@/i18n/navigation';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
-import { resolveShareCardVariant, type ShareCardVariant } from '@/lib/share-card';
+import {
+  resolveShareCardVariant,
+  type ShareCardOverride,
+  type ShareCardVariant,
+} from '@/lib/share-card';
 import {
   OPEN_SHARE_CARD_EVENT,
   ShareCardModal,
@@ -31,6 +35,7 @@ export function ScreenshotShareListener() {
   const [open, setOpen] = useState(false);
   const [variant, setVariant] = useState<ShareCardVariant>('portfolio');
   const [source, setSource] = useState<'button' | 'screenshot'>('button');
+  const [override, setOverride] = useState<ShareCardOverride | null>(null);
 
   const lastAutoTriggerRef = useRef<number>(0);
   const blurTimestampRef = useRef<number | null>(null);
@@ -50,6 +55,7 @@ export function ScreenshotShareListener() {
       const targetVariant = detail?.variant ?? routeVariant ?? 'portfolio';
       setVariant(targetVariant);
       setSource(detail?.source ?? 'button');
+      setOverride(detail?.override ?? null);
       setOpen(true);
     };
 
@@ -70,6 +76,7 @@ export function ScreenshotShareListener() {
       lastAutoTriggerRef.current = now;
       setVariant(routeVariant);
       setSource('screenshot');
+      setOverride(null);
       setOpen(true);
     };
 
@@ -140,6 +147,7 @@ export function ScreenshotShareListener() {
       open={open}
       initialVariant={variant}
       triggerSource={source}
+      initialOverride={override}
       onClose={() => setOpen(false)}
     />
   );

@@ -22,6 +22,7 @@ import {
   Gift,
   QrCode,
   RefreshCw,
+  Share2,
   ShieldCheck,
   ShoppingCart,
   Users,
@@ -37,6 +38,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { OknWatermark } from '@/components/ui/okn-watermark';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
 import { EyeToggleIcon, MaskedBalance } from '@/components/ui/masked-balance';
+import { openShareCard } from '@/components/share/share-card-modal';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { formatPoints, formatWei } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -441,6 +443,16 @@ export default function WalletPage() {
             >
               <EyeToggleIcon hidden={hideBalance} className="size-3.5" />
             </button>
+            <button
+              type="button"
+              onClick={() => openShareCard('portfolio', 'button')}
+              data-testid="wallet-share-vault-btn"
+              aria-label="Share BSC Custody Vault balance"
+              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-full bg-white/18 px-3 text-xs font-extrabold text-white ring-1 ring-inset ring-white/25 hover:bg-white/28 active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0"
+            >
+              <Share2 className="size-3.5 shrink-0" />
+              <span>Share</span>
+            </button>
           </div>
 
           {/* Copyable Wallet Pill + Switch Demo Wallet */}
@@ -580,10 +592,34 @@ export default function WalletPage() {
         <div className="rounded-[22px] border border-[var(--line)] bg-[var(--s1)] p-4 sm:p-5 shadow-sm flex flex-col justify-between gap-2.5">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-bold text-[var(--mut)] truncate">Liquid On-Chain</span>
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#F3BA2F]/15">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/bnb-logo.png" alt="BNB" className="size-4.5 object-contain" />
-            </span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() =>
+                  openShareCard('portfolio', 'button', {
+                    badgeLabel: 'BNB Smart Chain',
+                    headlineValue: '1.45 BNB',
+                    deltaLabel: '$870.00 USD · +4.2% (24h)',
+                    subMetrics: [
+                      { label: 'USD Value', value: '$870.00', tone: 'emerald' },
+                      { label: 'Network', value: 'BEP-20 (BSC)' },
+                      { label: 'Allocation', value: '60.9% Vault', tone: 'purple' },
+                    ],
+                    shareSummary: 'Holding 1.45 BNB ($870.00) in my OKNexus BSC Custody Vault!',
+                  })
+                }
+                data-testid="asset-card-share-btn"
+                aria-label="Share Liquid On-Chain BNB balance"
+                className="inline-flex items-center gap-1 rounded-lg bg-[var(--s2)] px-2 py-1 text-[10.5px] font-bold text-[var(--tx)] ring-1 ring-inset ring-[var(--line)] hover:ring-[#7A12F5]/50 hover:text-[#7A12F5] dark:hover:text-[#C9A6FF] transition-all cursor-pointer whitespace-nowrap shrink-0"
+              >
+                <Share2 className="size-3 shrink-0" />
+                <span>Share</span>
+              </button>
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#F3BA2F]/15">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/bnb-logo.png" alt="BNB" className="size-4.5 object-contain" />
+              </span>
+            </div>
           </div>
           <div>
             <p className="num text-lg sm:text-xl font-extrabold text-[var(--tx)] tabular-nums">
@@ -600,10 +636,34 @@ export default function WalletPage() {
         <div className="rounded-[22px] border border-[var(--line)] bg-[var(--s1)] p-4 sm:p-5 shadow-sm flex flex-col justify-between gap-2.5">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-bold text-[var(--mut)] truncate">Presale $OKN</span>
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#7A12F5]/15">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/okn-logo.png" alt="$OKN" className="size-5 object-contain" />
-            </span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() =>
+                  openShareCard('portfolio', 'button', {
+                    badgeLabel: 'Presale $OKN',
+                    headlineValue: oknDisplay,
+                    deltaLabel: '$416.00 USD · Stage 1 ($0.05)',
+                    subMetrics: [
+                      { label: 'USD Value', value: '$416.00', tone: 'emerald' },
+                      { label: 'Stage 1 Rate', value: '$0.05 / $OKN' },
+                      { label: 'Allocation', value: '29.1% Vault', tone: 'purple' },
+                    ],
+                    shareSummary: `Allocated ${oknDisplay} ($416.00) in OKNexus Stage 1 Presale!`,
+                  })
+                }
+                data-testid="asset-card-share-btn"
+                aria-label="Share Presale $OKN balance"
+                className="inline-flex items-center gap-1 rounded-lg bg-[var(--s2)] px-2 py-1 text-[10.5px] font-bold text-[var(--tx)] ring-1 ring-inset ring-[var(--line)] hover:ring-[#7A12F5]/50 hover:text-[#7A12F5] dark:hover:text-[#C9A6FF] transition-all cursor-pointer whitespace-nowrap shrink-0"
+              >
+                <Share2 className="size-3 shrink-0" />
+                <span>Share</span>
+              </button>
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#7A12F5]/15">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/okn-logo.png" alt="$OKN" className="size-5 object-contain" />
+              </span>
+            </div>
           </div>
           <div>
             <p className="num text-lg sm:text-xl font-extrabold text-[var(--tx)] tabular-nums">
@@ -620,9 +680,21 @@ export default function WalletPage() {
         <div className="rounded-[22px] border border-[var(--line)] bg-[var(--s1)] p-4 sm:p-5 shadow-sm flex flex-col justify-between gap-2.5">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-bold text-[var(--mut)] truncate">Partner Vault</span>
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#2FBD8E]/15 text-[#2FBD8E]">
-              <Users className="size-4" />
-            </span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => openShareCard('referrals', 'button')}
+                data-testid="asset-card-share-btn"
+                aria-label="Share Partner Vault balance"
+                className="inline-flex items-center gap-1 rounded-lg bg-[var(--s2)] px-2 py-1 text-[10.5px] font-bold text-[var(--tx)] ring-1 ring-inset ring-[var(--line)] hover:ring-[#7A12F5]/50 hover:text-[#7A12F5] dark:hover:text-[#C9A6FF] transition-all cursor-pointer whitespace-nowrap shrink-0"
+              >
+                <Share2 className="size-3 shrink-0" />
+                <span>Share</span>
+              </button>
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#2FBD8E]/15 text-[#2FBD8E]">
+                <Users className="size-4" />
+              </span>
+            </div>
           </div>
           <div>
             <p className="num text-lg sm:text-xl font-extrabold text-[#2FBD8E] tabular-nums">
@@ -639,9 +711,33 @@ export default function WalletPage() {
         <div className="rounded-[22px] border border-[var(--line)] bg-[var(--s1)] p-4 sm:p-5 shadow-sm flex flex-col justify-between gap-2.5">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-bold text-[var(--mut)] truncate">OK Points</span>
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#09B4FF]/15 text-[#09B4FF]">
-              <Coins className="size-4" />
-            </span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() =>
+                  openShareCard('portfolio', 'button', {
+                    badgeLabel: 'OK Points',
+                    headlineValue: `${formatPoints(points)} OK Pts`,
+                    deltaLabel: 'Merkle Claim Ready · 1:1 $OKN',
+                    subMetrics: [
+                      { label: 'Conversion', value: '1:1 $OKN', tone: 'emerald' },
+                      { label: 'Merkle Root', value: 'Root v3 Verified' },
+                      { label: 'Pool Cap', value: '250,000 $OKN', tone: 'purple' },
+                    ],
+                    shareSummary: `I've accumulated ${formatPoints(points)} OK Points ready for 1:1 $OKN Merkle claim on OKNexus!`,
+                  })
+                }
+                data-testid="asset-card-share-btn"
+                aria-label="Share OK Points balance"
+                className="inline-flex items-center gap-1 rounded-lg bg-[var(--s2)] px-2 py-1 text-[10.5px] font-bold text-[var(--tx)] ring-1 ring-inset ring-[var(--line)] hover:ring-[#7A12F5]/50 hover:text-[#7A12F5] dark:hover:text-[#C9A6FF] transition-all cursor-pointer whitespace-nowrap shrink-0"
+              >
+                <Share2 className="size-3 shrink-0" />
+                <span>Share</span>
+              </button>
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#09B4FF]/15 text-[#09B4FF]">
+                <Coins className="size-4" />
+              </span>
+            </div>
           </div>
           <div>
             <p className="num text-lg sm:text-xl font-extrabold text-[var(--tx)] tabular-nums">
@@ -755,7 +851,7 @@ export default function WalletPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0">
+                <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
                   <div className="text-right">
                     <div className="num font-extrabold text-xs sm:text-sm text-[var(--tx)] tabular-nums">
                       {asset.amount}
@@ -769,6 +865,37 @@ export default function WalletPage() {
                       </MaskedBalance>
                     </div>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      openShareCard(
+                        asset.id === 'partner' ? 'referrals' : 'portfolio',
+                        'button',
+                        {
+                          badgeLabel: asset.name,
+                          headlineValue: asset.amount,
+                          deltaLabel: `${asset.usd} · ${asset.badge}`,
+                          subMetrics: [
+                            { label: 'Valuation', value: asset.usd, tone: 'emerald' },
+                            { label: 'Status', value: asset.badge },
+                            {
+                              label: 'Vault Share',
+                              value: asset.sharePct > 0 ? `${asset.sharePct}%` : 'Merkle Pool',
+                              tone: 'purple',
+                            },
+                          ],
+                          shareSummary: `My ${asset.name} position on OKNexus: ${asset.amount} (${asset.usd})!`,
+                        },
+                      )
+                    }
+                    data-testid="asset-card-share-btn"
+                    aria-label={`Share ${asset.name} balance`}
+                    className="inline-flex h-8 items-center justify-center gap-1 rounded-xl bg-[var(--s1)] px-2.5 text-xs font-extrabold text-[var(--tx)] ring-1 ring-inset ring-[var(--line)] hover:ring-[#7A12F5] hover:text-[#7A12F5] dark:hover:text-[#C9A6FF] active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0"
+                  >
+                    <Share2 className="size-3.5 shrink-0" />
+                    <span>Share</span>
+                  </button>
 
                   {asset.actionHref ? (
                     <Link
@@ -805,20 +932,40 @@ export default function WalletPage() {
                   Latest on-chain settlements &amp; payouts
                 </p>
               </div>
-              <Link
-                href="/app/portfolio?tab=activity"
-                className="inline-flex items-center gap-1 text-xs font-extrabold text-[#7A12F5] dark:text-[#C9A6FF] hover:underline"
-              >
-                <span>Full Log</span>
-                <ExternalLink className="size-3" />
-              </Link>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    openShareCard('portfolio', 'button', {
+                      badgeLabel: 'Vault Activity',
+                      headlineValue: '$1,428.50',
+                      deltaLabel: `${activityList.length} Verified On-Chain Settlements`,
+                      shareSummary:
+                        'Tracking my verified on-chain BNB & $OKN settlements in the OKNexus Custody Vault!',
+                    })
+                  }
+                  data-testid="asset-card-share-btn"
+                  aria-label="Share Recent Vault Activity"
+                  className="inline-flex h-7 items-center justify-center gap-1 rounded-lg bg-[var(--s2)] px-2.5 text-xs font-extrabold text-[var(--tx)] ring-1 ring-inset ring-[var(--line)] hover:ring-[#7A12F5] hover:text-[#7A12F5] dark:hover:text-[#C9A6FF] transition-all cursor-pointer whitespace-nowrap shrink-0"
+                >
+                  <Share2 className="size-3 shrink-0" />
+                  <span>Share</span>
+                </button>
+                <Link
+                  href="/app/portfolio?tab=activity"
+                  className="inline-flex items-center gap-1 text-xs font-extrabold text-[#7A12F5] dark:text-[#C9A6FF] hover:underline whitespace-nowrap"
+                >
+                  <span>Full Log</span>
+                  <ExternalLink className="size-3" />
+                </Link>
+              </div>
             </div>
 
             <div className="divide-y divide-[var(--line)] rounded-2xl border border-[var(--line)] bg-[var(--s2)] overflow-hidden">
               {activityList.slice(0, 4).map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between gap-3 px-3.5 py-3 hover:bg-[var(--s1)]/60 transition-colors"
+                  className="flex items-center justify-between gap-2.5 px-3.5 py-3 hover:bg-[var(--s1)]/60 transition-colors"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <span
@@ -846,21 +993,45 @@ export default function WalletPage() {
                     </div>
                   </div>
 
-                  <div className="text-right shrink-0">
-                    <div
-                      className={`num text-xs font-extrabold tabular-nums ${
-                        item.positive ? 'text-[#2FBD8E]' : 'text-[var(--tx)]'
-                      }`}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="text-right">
+                      <div
+                        className={`num text-xs font-extrabold tabular-nums ${
+                          item.positive ? 'text-[#2FBD8E]' : 'text-[var(--tx)]'
+                        }`}
+                      >
+                        <MaskedBalance hidden={hideBalance} mask="••••">
+                          {item.amountLabel}
+                        </MaskedBalance>
+                      </div>
+                      <div className="num text-[11px] font-semibold text-[var(--mut)] mt-0.5">
+                        <MaskedBalance hidden={hideBalance} mask="••••">
+                          {item.usdLabel}
+                        </MaskedBalance>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openShareCard('portfolio', 'button', {
+                          badgeLabel: item.title,
+                          headlineValue: item.amountLabel,
+                          deltaLabel: `${item.usdLabel} · ${item.subtitle}`,
+                          subMetrics: [
+                            { label: 'Value', value: item.usdLabel, tone: 'emerald' },
+                            { label: 'Time', value: item.timeAgo },
+                            { label: 'Tx Hash', value: item.txShort, tone: 'purple' },
+                          ],
+                          shareSummary: `${item.title} on OKNexus: ${item.amountLabel} (${item.usdLabel})!`,
+                        })
+                      }
+                      data-testid="activity-row-share-btn"
+                      aria-label={`Share ${item.title}`}
+                      className="inline-flex h-7 items-center justify-center gap-1 rounded-lg bg-[var(--s1)] px-2 text-[10.5px] font-bold text-[var(--tx)] ring-1 ring-inset ring-[var(--line)] hover:ring-[#7A12F5] hover:text-[#7A12F5] dark:hover:text-[#C9A6FF] transition-all cursor-pointer whitespace-nowrap shrink-0"
                     >
-                      <MaskedBalance hidden={hideBalance} mask="••••">
-                        {item.amountLabel}
-                      </MaskedBalance>
-                    </div>
-                    <div className="num text-[11px] font-semibold text-[var(--mut)] mt-0.5">
-                      <MaskedBalance hidden={hideBalance} mask="••••">
-                        {item.usdLabel}
-                      </MaskedBalance>
-                    </div>
+                      <Share2 className="size-3 shrink-0" />
+                      <span>Share</span>
+                    </button>
                   </div>
                 </div>
               ))}

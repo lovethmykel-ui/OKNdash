@@ -60,9 +60,10 @@ export function MobilePortfolioHero() {
             onClick={() => openShareCard('portfolio', 'button')}
             aria-label="Share portfolio card"
             data-testid="mobile-share-portfolio-btn"
-            className="flex size-7 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 active:scale-95 transition-all cursor-pointer"
+            className="inline-flex h-7 items-center justify-center gap-1 rounded-full bg-white/18 px-2.5 text-[11px] font-extrabold text-white ring-1 ring-inset ring-white/25 hover:bg-white/25 active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0"
           >
-            <Share2 className="size-3.5" />
+            <Share2 className="size-3 shrink-0" />
+            <span>Share</span>
           </button>
         </div>
       </div>
@@ -92,9 +93,21 @@ export function MobilePortfolioHero() {
               </MaskedBalance>
             </div>
           </div>
-          <span className="rounded-xl border border-[#2FBD8E]/40 bg-[#2FBD8E]/20 px-2.5 py-1 text-xs font-extrabold text-[#4EEDB2] whitespace-nowrap">
-            +$142.50
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="rounded-xl border border-[#2FBD8E]/40 bg-[#2FBD8E]/20 px-2.5 py-1 text-xs font-extrabold text-[#4EEDB2] whitespace-nowrap">
+              +$142.50
+            </span>
+            <button
+              type="button"
+              onClick={() => openShareCard('portfolio', 'button')}
+              data-testid="asset-card-share-btn"
+              aria-label="Share Total Asset Value"
+              className="inline-flex h-7 items-center justify-center gap-1 rounded-xl bg-white/15 px-2.5 text-[11px] font-extrabold text-white ring-1 ring-inset ring-white/20 hover:bg-white/25 active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0"
+            >
+              <Share2 className="size-3 shrink-0" />
+              <span>Share</span>
+            </button>
+          </div>
         </div>
 
         <div className="h-[1px] bg-white/12" />

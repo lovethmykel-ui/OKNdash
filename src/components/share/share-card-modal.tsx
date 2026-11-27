@@ -25,6 +25,7 @@ import {
   buildChartSvgPaths,
   buildShareCardModel,
   renderShareCardToBlob,
+  type ShareCardOverride,
   type ShareCardTimeframe,
   type ShareCardUnit,
   type ShareCardUserInput,
@@ -37,6 +38,7 @@ export const OPEN_SHARE_CARD_EVENT = 'okn:open-share-card';
 export interface OpenShareCardDetail {
   variant?: ShareCardVariant;
   source?: 'button' | 'screenshot';
+  override?: ShareCardOverride | null;
 }
 
 /**
@@ -45,11 +47,12 @@ export interface OpenShareCardDetail {
 export function openShareCard(
   variant?: ShareCardVariant,
   source: 'button' | 'screenshot' = 'button',
+  override?: ShareCardOverride | null,
 ) {
   if (typeof window === 'undefined') return;
   window.dispatchEvent(
     new CustomEvent<OpenShareCardDetail>(OPEN_SHARE_CARD_EVENT, {
-      detail: { variant, source },
+      detail: { variant, source, override: override ?? null },
     }),
   );
 }
@@ -58,6 +61,7 @@ interface ShareCardModalProps {
   open: boolean;
   initialVariant: ShareCardVariant;
   triggerSource: 'button' | 'screenshot';
+  initialOverride?: ShareCardOverride | null;
   onClose: () => void;
 }
 
@@ -71,6 +75,7 @@ export function ShareCardModal({
   open,
   initialVariant,
   triggerSource,
+  initialOverride = null,
   onClose,
 }: ShareCardModalProps) {
   const hydrated = useHydrated();
@@ -84,20 +89,20 @@ export function ShareCardModal({
   const streak = useStreak();
 
   const [variant, setVariant] = useState<ShareCardVariant>(initialVariant);
+  const [override, setOverride] = useState<ShareCardOverride | null>(initialOverride);
   const [timeframe, setTimeframe] = useState<ShareCardTimeframe>('24h');
   const [unit, setUnit] = useState<ShareCardUnit>('usd');
   const [showRefCode, setShowRefCode] = useState(true);
   const [busyAction, setBusyAction] = useState<'share' | 'copy' | 'save' | null>(null);
   const [copiedImage, setCopiedImage] = useState(false);
-  const [showShareSheet, setShowShareSheet] = useState(false);
 
-  // Sync active tab whenever modal opens with a new initialVariant
+  // Sync active tab and custom override whenever modal opens
   useEffect(() => {
     if (open) {
       setVariant(initialVariant);
-      setShowShareSheet(false);
+      setOverride(initialOverride ?? null);
     }
-  }, [open, initialVariant]);
+  }, [open, initialVariant, initialOverride]);
 
   // Escape key closes modal + lock body scroll while open
   useEffect(() => {
@@ -146,8 +151,8 @@ export function ShareCardModal({
   }, [me.data, eligibility.data?.points, referral.data?.code, referral.data?.recent?.length, streak.data?.currentStreak]);
 
   const model = useMemo(
-    () => buildShareCardModel(userInput, variant, timeframe, unit),
-    [userInput, variant, timeframe, unit],
+    () => buildShareCardModel(userInput, variant, timeframe, unit, override),
+    [userInput, variant, timeframe, unit, override],
   );
 
   const chartSvg = useMemo(
@@ -248,9 +253,10 @@ export function ShareCardModal({
         }
       }
 
-      setShowShareSheet((prev) => !prev);
+      // Copy share caption & link as fallback when Web Share API is unavailable in iframe
+      await handleCopyShareLink();
     } catch {
-      setShowShareSheet(true);
+      await handleCopyShareLink();
     } finally {
       setBusyAction(null);
     }
@@ -312,7 +318,10 @@ export function ShareCardModal({
                     type="button"
                     role="tab"
                     aria-selected={active}
-                    onClick={() => setVariant(key)}
+                    onClick={() => {
+                      setVariant(key);
+                      setOverride(null);
+                    }}
                     className={cn(
                       'relative pb-1.5 text-[15px] font-bold tracking-tight transition-colors cursor-pointer whitespace-nowrap',
                       active ? 'text-white' : 'text-white/40 hover:text-white/70',
@@ -329,7 +338,7 @@ export function ShareCardModal({
 
             {/* Framed Share Card */}
             <motion.div
-              key={`${variant}-${timeframe}-${unit}`}
+              key={`${variant}-${timeframe}-${unit}-${override?.badgeLabel ?? 'default'}`}
               initial={reduceMotion ? false : { opacity: 0.9, y: 6, scale: 0.985 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
@@ -365,7 +374,7 @@ export function ShareCardModal({
                 <div className="mt-4">
                   <div
                     data-testid="share-card-headline"
-                    className="text-[34px] font-extrabold tracking-tight text-white leading-none tabular-nums"
+                    className="text-[32px] sm:text-[34px] font-extrabold tracking-tight text-white leading-none tabular-nums"
                   >
                     {model.headlineValue}
                   </div>
@@ -538,43 +547,34 @@ export function ShareCardModal({
               </button>
             </div>
 
-            {/* Optional Fallback Social Share Strip (when Web Share API is unavailable) */}
-            <AnimatePresence>
-              {showShareSheet ? (
-                <motion.div
-                  initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 4 }}
-                  className="mt-3.5 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.05] p-2"
-                >
-                  <a
-                    href={xShareUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl bg-white/10 px-3 text-xs font-bold text-white hover:bg-white/16 transition-colors"
-                  >
-                    <span>Post on X</span>
-                  </a>
-                  <a
-                    href={tgShareUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#229ED9]/25 px-3 text-xs font-bold text-[#7AD5FF] hover:bg-[#229ED9]/35 transition-colors"
-                  >
-                    <Send className="size-3.5" />
-                    <span>Telegram</span>
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => void handleCopyShareLink()}
-                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-white/10 px-3 text-xs font-bold text-white hover:bg-white/16 transition-colors cursor-pointer"
-                  >
-                    <Link2 className="size-3.5" />
-                    <span>Link</span>
-                  </button>
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
+            {/* Direct Social Media Share Strip (Post on X, Telegram, Copy Link) */}
+            <div className="mt-3.5 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.05] p-2">
+              <a
+                href={xShareUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl bg-white/10 px-3 text-xs font-bold text-white hover:bg-white/16 transition-colors whitespace-nowrap"
+              >
+                <span>Post on X</span>
+              </a>
+              <a
+                href={tgShareUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#229ED9]/25 px-3 text-xs font-bold text-[#7AD5FF] hover:bg-[#229ED9]/35 transition-colors whitespace-nowrap"
+              >
+                <Send className="size-3.5" />
+                <span>Telegram</span>
+              </a>
+              <button
+                type="button"
+                onClick={() => void handleCopyShareLink()}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-white/10 px-3 text-xs font-bold text-white hover:bg-white/16 transition-colors cursor-pointer whitespace-nowrap"
+              >
+                <Link2 className="size-3.5" />
+                <span>Copy link</span>
+              </button>
+            </div>
           </div>
 
           {/* Bottom Thumb-Zone Circular Action Buttons */}

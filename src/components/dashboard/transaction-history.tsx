@@ -10,9 +10,11 @@ import {
   Gift,
   Lock,
   Search,
+  Share2,
   ShoppingBag,
   Users,
 } from 'lucide-react';
+import { openShareCard } from '@/components/share/share-card-modal';
 import {
   ACTIVITY_TRANSACTIONS,
   filterActivityTransactions,
@@ -113,6 +115,20 @@ export function TransactionHistory({
     }, 1500);
   };
 
+  const handleShareTransaction = (tx: ActivityTransaction) => {
+    openShareCard(tx.category === 'referral' ? 'referrals' : 'portfolio', 'button', {
+      badgeLabel: tx.asset,
+      headlineValue: tx.amount,
+      deltaLabel: `${tx.title} · ${tx.status}`,
+      subMetrics: [
+        { label: 'Activity', value: tx.title },
+        { label: 'Value', value: tx.fiatValue ?? tx.asset, tone: 'emerald' },
+        { label: 'Date', value: tx.date, tone: 'purple' },
+      ],
+      shareSummary: `${tx.title} on OKNexus: ${tx.amount}${tx.fiatValue ? ` (${tx.fiatValue})` : ''} — ${tx.status}!`,
+    });
+  };
+
   return (
     <section
       data-testid="transaction-history-section"
@@ -124,13 +140,30 @@ export function TransactionHistory({
       {/* Header + Controls */}
       <div className="flex flex-col gap-3.5 md:flex-row md:items-center md:justify-between mb-5">
         <div>
-          <div className="flex items-baseline gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5">
             <h3 className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--tx)]">
               {heading}
             </h3>
             <span className="num text-xs font-semibold text-[var(--mut)] tabular-nums">
               {filtered.length} {filtered.length === 1 ? 'entry' : 'entries'}
             </span>
+            <button
+              type="button"
+              onClick={() =>
+                openShareCard('portfolio', 'button', {
+                  badgeLabel: filter === 'All' ? 'OKN Activity' : `${filter} Activity`,
+                  headlineValue: `${filtered.length} Transactions`,
+                  deltaLabel: 'Verified OKNexus Ledger Activity',
+                  shareSummary: `Tracking ${filtered.length} verified ${filter === 'All' ? 'ecosystem' : filter} transactions on OKNexus!`,
+                })
+              }
+              data-testid="transaction-history-share-btn"
+              aria-label="Share transaction history"
+              className="inline-flex h-7 items-center justify-center gap-1 rounded-lg bg-[var(--s2)] px-2.5 text-[11px] font-bold text-[var(--tx)] ring-1 ring-inset ring-[var(--line)] hover:ring-[#7A12F5]/50 hover:text-[#7A12F5] dark:hover:text-[#C9A6FF] transition-all cursor-pointer whitespace-nowrap shrink-0"
+            >
+              <Share2 className="size-3 shrink-0" />
+              <span>Share</span>
+            </button>
           </div>
           <p className="mt-0.5 text-xs sm:text-sm text-[var(--mut)]">
             Presale buys, BNB payouts, staking, tasks, and OK Points movements.
@@ -258,20 +291,32 @@ export function TransactionHistory({
                     </div>
                   </div>
 
-                  <div className="shrink-0 text-right">
-                    <p
-                      className={cn(
-                        'num text-[13px] font-extrabold tabular-nums whitespace-nowrap',
-                        row.direction === 'in'
-                          ? 'text-[#169C72] dark:text-[#34D399]'
-                          : 'text-[var(--tx)]',
-                      )}
+                  <div className="shrink-0 text-right flex flex-col items-end gap-1.5">
+                    <div>
+                      <p
+                        className={cn(
+                          'num text-[13px] font-extrabold tabular-nums whitespace-nowrap',
+                          row.direction === 'in'
+                            ? 'text-[#169C72] dark:text-[#34D399]'
+                            : 'text-[var(--tx)]',
+                        )}
+                      >
+                        {row.amount}
+                      </p>
+                      <p className="mt-0.5 num text-[11px] font-semibold text-[var(--mut)] tabular-nums">
+                        {row.fiatValue ?? row.asset}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleShareTransaction(row)}
+                      data-testid="transaction-row-share-btn"
+                      aria-label={`Share ${row.title}`}
+                      className="inline-flex h-6 items-center justify-center gap-1 rounded-md bg-[var(--s2)] px-2 text-[10px] font-bold text-[var(--tx)] ring-1 ring-inset ring-[var(--line)] hover:text-[#7A12F5] dark:hover:text-[#C9A6FF] cursor-pointer whitespace-nowrap shrink-0"
                     >
-                      {row.amount}
-                    </p>
-                    <p className="mt-0.5 num text-[11px] font-semibold text-[var(--mut)] tabular-nums">
-                      {row.fiatValue ?? row.asset}
-                    </p>
+                      <Share2 className="size-2.5 shrink-0" />
+                      <span>Share</span>
+                    </button>
                   </div>
                 </div>
               );
@@ -280,14 +325,15 @@ export function TransactionHistory({
 
           {/* Desktop Tabular Ledger (md+) */}
           <div className="hidden md:block overflow-x-auto">
-            <table className="w-full min-w-[640px] border-collapse text-left text-xs md:text-sm">
+            <table className="w-full min-w-[680px] border-collapse text-left text-xs md:text-sm">
               <thead>
                 <tr className="border-b border-[var(--line)] text-[11px] font-bold uppercase tracking-wider text-[var(--mut)]">
                   <th className="py-3 pr-4 pl-1">Transaction</th>
                   <th className="py-3 px-4">Date</th>
                   <th className="py-3 px-4">Asset</th>
                   <th className="py-3 px-4 text-right">Amount</th>
-                  <th className="py-3 pl-4 pr-1 text-right">Status</th>
+                  <th className="py-3 px-4 text-right">Status</th>
+                  <th className="py-3 pl-4 pr-1 text-right">Share</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--line)]/50">
@@ -362,10 +408,22 @@ export function TransactionHistory({
                           </div>
                         )}
                       </td>
-                      <td className="py-3.5 pl-4 pr-1 text-right whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
                         <span className={cn('text-xs font-bold', statusTone(row.status))}>
                           {row.status}
                         </span>
+                      </td>
+                      <td className="py-3.5 pl-4 pr-1 text-right whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => handleShareTransaction(row)}
+                          data-testid="transaction-row-share-btn"
+                          aria-label={`Share ${row.title}`}
+                          className="inline-flex h-7 items-center justify-center gap-1 rounded-lg bg-[var(--s2)] px-2.5 text-[11px] font-bold text-[var(--tx)] ring-1 ring-inset ring-[var(--line)] hover:ring-[#7A12F5]/50 hover:text-[#7A12F5] dark:hover:text-[#C9A6FF] active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0"
+                        >
+                          <Share2 className="size-3 shrink-0" />
+                          <span>Share</span>
+                        </button>
                       </td>
                     </tr>
                   );

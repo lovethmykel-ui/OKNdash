@@ -1,7 +1,9 @@
 'use client';
 
 import { useMemo } from 'react';
+import { Share2 } from 'lucide-react';
 import { TransactionHistory } from '@/components/dashboard/transaction-history';
+import { openShareCard } from '@/components/share/share-card-modal';
 import {
   ACTIVITY_TRANSACTIONS,
   summarizeTransactions,
@@ -24,9 +26,33 @@ export function ActivityLogView() {
 
         <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-semibold text-white/80">
-              Account Ledger
-            </p>
+            <div className="flex items-center gap-2.5">
+              <p className="text-xs font-semibold text-white/80">
+                Account Ledger
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  openShareCard('portfolio', 'button', {
+                    badgeLabel: 'Account Activity',
+                    headlineValue: `${summary.total} Transactions`,
+                    deltaLabel: `${summary.onChainCount} On-Chain · ${summary.awaitingCommit} Pending Commit`,
+                    subMetrics: [
+                      { label: 'Total Ledger', value: `${summary.total} Entries` },
+                      { label: 'On-Chain', value: `${summary.onChainCount} Verified`, tone: 'emerald' },
+                      { label: 'Merkle Queue', value: `${summary.awaitingCommit} Pending`, tone: 'purple' },
+                    ],
+                    shareSummary: `Verified ${summary.total} transactions (${summary.onChainCount} on-chain settlements) on my OKNexus Account Ledger!`,
+                  })
+                }
+                data-testid="activity-hero-share-btn"
+                aria-label="Share activity summary"
+                className="inline-flex h-7 items-center justify-center gap-1.5 rounded-full bg-white/18 px-3 text-[11px] font-extrabold text-white ring-1 ring-inset ring-white/25 hover:bg-white/28 active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0"
+              >
+                <Share2 className="size-3 shrink-0" />
+                <span>Share</span>
+              </button>
+            </div>
             <h2 className="mt-1 text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white">
               Activity &amp; Transactions
             </h2>

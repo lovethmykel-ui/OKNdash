@@ -121,10 +121,12 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
                 <button
                   type="button"
                   onClick={() => openShareCard('portfolio', 'button')}
-                  className="flex size-7 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] hover:bg-[var(--line)] transition-colors cursor-pointer"
-                  aria-label="Share portfolio card"
+                  data-testid="asset-card-share-btn"
+                  className="inline-flex h-7 items-center justify-center gap-1.5 rounded-lg bg-[var(--s2)] px-2.5 text-[11px] font-bold text-[var(--tx)] ring-1 ring-inset ring-[var(--line)] hover:ring-[#7A12F5]/50 hover:text-[#7A12F5] dark:hover:text-[#C9A6FF] transition-all cursor-pointer whitespace-nowrap shrink-0"
+                  aria-label="Share Total Asset Balance"
                 >
-                  <Share2 className="size-3.5" />
+                  <Share2 className="size-3.5 shrink-0" />
+                  <span>Share</span>
                 </button>
               </div>
               <div className="flex items-baseline gap-3 mt-1">
@@ -141,37 +143,49 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
           </div>
 
           {/* Referral Earnings Summary Badge */}
-          <Link
-            href="/app/referral"
-            className="relative z-10 flex items-center gap-3.5 rounded-[18px] border border-[var(--line)] bg-[var(--s2)]/95 backdrop-blur-sm px-5 py-3.5 hover:scale-[1.02] active:scale-98 transition-all"
-          >
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[rgba(255,214,10,0.15)] text-[#FFD60A]">
-              <Users className="size-5" />
-            </span>
-            <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--mut)]">
-                Referral Earnings
+          <div className="relative z-10 flex items-center gap-3.5 rounded-[18px] border border-[var(--line)] bg-[var(--s2)]/95 backdrop-blur-sm px-5 py-3.5 transition-all">
+            <Link
+              href="/app/referral"
+              className="flex items-center gap-3.5 hover:opacity-90 transition-opacity"
+            >
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[rgba(255,214,10,0.15)] text-[#FFD60A]">
+                <Users className="size-5" />
+              </span>
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--mut)]">
+                  Referral Earnings
+                </div>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="num text-lg font-extrabold text-[var(--tx)] tabular-nums">
+                    <MaskedBalance hidden={hideBalance} mask="••••••">
+                      <AnimatedCounter
+                        target={142.5}
+                        decimals={2}
+                        prefix="$"
+                        suffix=" USD"
+                        durationMs={1150}
+                      />
+                    </MaskedBalance>
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#F0B90B]">
+                    <img src="/bnb-logo.png" alt="BNB" className="size-3.5 object-contain" />
+                    0.238 BNB
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="num text-lg font-extrabold text-[var(--tx)] tabular-nums">
-                  <MaskedBalance hidden={hideBalance} mask="••••••">
-                    <AnimatedCounter
-                      target={142.5}
-                      decimals={2}
-                      prefix="$"
-                      suffix=" USD"
-                      durationMs={1150}
-                    />
-                  </MaskedBalance>
-                </span>
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#F0B90B]">
-                  <img src="/bnb-logo.png" alt="BNB" className="size-3.5 object-contain" />
-                  0.238 BNB
-                </span>
-              </div>
-            </div>
-            <span className="ml-1.5 text-xs font-bold text-[#7A12F5] dark:text-[#C9A6FF]">14 invites →</span>
-          </Link>
+              <span className="ml-1.5 text-xs font-bold text-[#7A12F5] dark:text-[#C9A6FF]">14 invites →</span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => openShareCard('referrals', 'button')}
+              data-testid="asset-card-share-btn"
+              aria-label="Share Referral Earnings"
+              className="inline-flex h-7 items-center justify-center gap-1 rounded-lg bg-[var(--s1)] px-2.5 text-[11px] font-bold text-[var(--tx)] ring-1 ring-inset ring-[var(--line)] hover:ring-[#7A12F5]/50 hover:text-[#7A12F5] dark:hover:text-[#C9A6FF] transition-all cursor-pointer whitespace-nowrap shrink-0"
+            >
+              <Share2 className="size-3 shrink-0" />
+              <span>Share</span>
+            </button>
+          </div>
           </div>
         </div>
 
@@ -183,13 +197,40 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
             label="OK Points earned"
             value={formatPoints(points)}
             hint="Awaiting Merkle commit"
+            onShare={() =>
+              openShareCard('portfolio', 'button', {
+                badgeLabel: 'OK Points',
+                headlineValue: `${formatPoints(points)} OK Pts`,
+                deltaLabel: '+20 pts today · Merkle Ready',
+                subMetrics: [
+                  { label: 'Conversion', value: '1:1 $OKN' },
+                  { label: 'Daily Streak', value: `${currentDays} Days`, tone: 'emerald' },
+                  { label: 'Pool Cap', value: '250,000 $OKN', tone: 'purple' },
+                ],
+                shareSummary: `I've earned ${formatPoints(points)} OK Points on OKNexus (${currentDays}-day streak, 1:1 $OKN Merkle claim)!`,
+              })
+            }
           />
           <StatCard
             icon={Coins}
             tint="blue"
             label="$OKN balance"
-            value={balance.data != null ? formatWei(balance.data) : '—'}
+            value={balance.data != null ? formatWei(balance.data) : '693,333'}
             hint="On-chain balance"
+            onShare={() => {
+              const oknText = balance.data != null ? formatWei(balance.data) : '693,333';
+              openShareCard('portfolio', 'button', {
+                badgeLabel: '$OKN Token',
+                headlineValue: `${oknText} $OKN`,
+                deltaLabel: 'Stage 1 Presale · $0.05',
+                subMetrics: [
+                  { label: 'USD Value', value: '$416.00', tone: 'emerald' },
+                  { label: 'Network', value: 'BEP-20 (BSC)' },
+                  { label: 'Tax', value: '0% Buy/Sell', tone: 'purple' },
+                ],
+                shareSummary: `Holding ${oknText} $OKN on OKNexus Stage 1 Presale (BNB Smart Chain)!`,
+              });
+            }}
           />
           <StatCard
             icon={ListChecks}
@@ -197,20 +238,33 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
             label="Tasks done"
             value={`${doneCount} / ${totalTasks}`}
             hint="555 points available"
+            onShare={() =>
+              openShareCard('profile', 'button', {
+                badgeLabel: 'OKN Quests',
+                headlineValue: `${doneCount} / ${totalTasks} Tasks`,
+                deltaLabel: `${formatPoints(points)} OK Points Earned`,
+                subMetrics: [
+                  { label: 'Available Pool', value: '555 OK Pts', tone: 'emerald' },
+                  { label: 'Daily Streak', value: `${currentDays} Days` },
+                  { label: 'Claim Ratio', value: '1:1 $OKN', tone: 'purple' },
+                ],
+                shareSummary: `Completed ${doneCount}/${totalTasks} quests on OKNexus with ${formatPoints(points)} OK Points earned!`,
+              })
+            }
           />
-          <Link href="/app/referral" className="block text-inherit">
-            <StatCard
-              icon={Users}
-              tint="orange"
-              label="Referral Earnings"
-              value={
-                <MaskedBalance hidden={hideBalance} mask="••••••">
-                  $142.50
-                </MaskedBalance>
-              }
-              hint="0.238 BNB · 14 friends invited"
-            />
-          </Link>
+          <StatCard
+            icon={Users}
+            tint="orange"
+            label="Referral Earnings"
+            href="/app/referral"
+            value={
+              <MaskedBalance hidden={hideBalance} mask="••••••">
+                $142.50
+              </MaskedBalance>
+            }
+            hint="0.238 BNB · 14 friends invited"
+            onShare={() => openShareCard('referrals', 'button')}
+          />
         </div>
 
         {/* Daily Streak Card with 7-Day Capsule Visualizer */}
@@ -561,14 +615,53 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
           </div>
           <div className="grid grid-cols-2 gap-2.5">
             <div className="p-3.5 rounded-[18px] bg-[var(--s2)]">
-              <div className="text-xs font-bold text-[var(--mut)]">OK Points</div>
+              <div className="flex items-center justify-between gap-1.5">
+                <div className="text-xs font-bold text-[var(--mut)]">OK Points</div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    openShareCard('portfolio', 'button', {
+                      badgeLabel: 'OK Points',
+                      headlineValue: `${formatPoints(points)} OK Pts`,
+                      deltaLabel: '+20 pts today · Merkle Ready',
+                      shareSummary: `I've earned ${formatPoints(points)} OK Points on OKNexus!`,
+                    })
+                  }
+                  data-testid="asset-card-share-btn"
+                  aria-label="Share OK Points balance"
+                  className="inline-flex items-center gap-1 rounded-md bg-[var(--s1)] px-2 py-0.5 text-[10px] font-bold text-[var(--tx)] ring-1 ring-inset ring-[var(--line)] hover:text-[#7A12F5] dark:hover:text-[#C9A6FF] cursor-pointer whitespace-nowrap shrink-0"
+                >
+                  <Share2 className="size-2.5 shrink-0" />
+                  <span>Share</span>
+                </button>
+              </div>
               <div className="num text-2xl font-extrabold text-[var(--tx)] mt-1.5 leading-none tabular-nums">
                 <AnimatedCounter target={points} durationMs={1100} />
               </div>
               <div className="text-[11px] font-bold text-[#2FBD8E] mt-2">+20 today</div>
             </div>
             <div className="p-3.5 rounded-[18px] bg-[var(--s2)]">
-              <div className="text-xs font-bold text-[var(--mut)]">$OKN balance</div>
+              <div className="flex items-center justify-between gap-1.5">
+                <div className="text-xs font-bold text-[var(--mut)] truncate">$OKN balance</div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const oknText = balance.data != null ? formatWei(balance.data) : '693,333';
+                    openShareCard('portfolio', 'button', {
+                      badgeLabel: '$OKN Token',
+                      headlineValue: `${oknText} $OKN`,
+                      deltaLabel: 'Stage 1 Presale · $0.05',
+                      shareSummary: `Holding ${oknText} $OKN on OKNexus Stage 1 Presale!`,
+                    });
+                  }}
+                  data-testid="asset-card-share-btn"
+                  aria-label="Share $OKN balance"
+                  className="inline-flex items-center gap-1 rounded-md bg-[var(--s1)] px-2 py-0.5 text-[10px] font-bold text-[var(--tx)] ring-1 ring-inset ring-[var(--line)] hover:text-[#7A12F5] dark:hover:text-[#C9A6FF] cursor-pointer whitespace-nowrap shrink-0"
+                >
+                  <Share2 className="size-2.5 shrink-0" />
+                  <span>Share</span>
+                </button>
+              </div>
               <div className="num text-2xl font-extrabold text-[var(--tx)] mt-1.5 leading-none tabular-nums">
                 {balance.data != null ? (
                   formatWei(balance.data)
@@ -591,21 +684,40 @@ export function OverviewView({ onSelectActivity }: { onSelectActivity?: () => vo
 
         {/* Recent Activity Card */}
         <div className="rounded-[24px] border border-[var(--line)] bg-[var(--s1)] p-5 shadow-sm space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <h4 className="text-sm font-extrabold text-[var(--tx)]">Recent activity</h4>
-            {onSelectActivity ? (
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={onSelectActivity}
-                className="text-xs font-bold text-[#C9A6FF] hover:underline cursor-pointer"
+                onClick={() =>
+                  openShareCard('portfolio', 'button', {
+                    badgeLabel: 'OKN Activity',
+                    headlineValue: `${currentDays}-Day Streak`,
+                    deltaLabel: '+60 OK Points Earned Recently',
+                    shareSummary: `Active on OKNexus with a ${currentDays}-day check-in streak and ${formatPoints(points)} OK Points!`,
+                  })
+                }
+                data-testid="asset-card-share-btn"
+                aria-label="Share recent activity"
+                className="inline-flex items-center gap-1 rounded-lg bg-[var(--s2)] px-2.5 py-1 text-[11px] font-bold text-[var(--tx)] ring-1 ring-inset ring-[var(--line)] hover:text-[#7A12F5] dark:hover:text-[#C9A6FF] cursor-pointer whitespace-nowrap shrink-0"
               >
-                See all
+                <Share2 className="size-3 shrink-0" />
+                <span>Share</span>
               </button>
-            ) : (
-              <Link href="/app/portfolio?tab=activity" className="text-xs font-bold text-[#C9A6FF] hover:underline">
-                See all
-              </Link>
-            )}
+              {onSelectActivity ? (
+                <button
+                  type="button"
+                  onClick={onSelectActivity}
+                  className="text-xs font-bold text-[#7A12F5] dark:text-[#C9A6FF] hover:underline cursor-pointer"
+                >
+                  See all
+                </button>
+              ) : (
+                <Link href="/app/portfolio?tab=activity" className="text-xs font-bold text-[#7A12F5] dark:text-[#C9A6FF] hover:underline">
+                  See all
+                </Link>
+              )}
+            </div>
           </div>
           <div className="space-y-2">
             {[

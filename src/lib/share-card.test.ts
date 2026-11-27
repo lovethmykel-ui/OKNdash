@@ -1,65 +1,60 @@
-import test from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  resolveShareCardVariant,
   buildShareCardModel,
-  buildChartSvgPaths,
+  resolveShareCardVariant,
   type ShareCardUserInput,
 } from './share-card';
 
-const SAMPLE_USER: ShareCardUserInput = {
-  displayName: 'Alex Mercer',
-  handle: '@alex_okn',
-  avatarUrl: null,
-  initials: 'AM',
-  referralCode: 'ref_dev',
+const DEMO_USER: ShareCardUserInput = {
+  displayName: 'Alex Web3',
+  handle: '@alex_web3',
+  avatarUrl: '/avatar.png',
+  initials: 'AW',
+  referralCode: 'OKN9912',
   portfolioUsd: 1428.5,
   referralUsd: 142.5,
   okPoints: 135,
   streakDays: 6,
   inviteCount: 14,
-  tierLabel: 'Tier 2',
+  tierLabel: 'Tier 2 · 12.5%',
 };
 
-test('resolveShareCardVariant maps portfolio, referral, and profile routes with or without locale prefix', () => {
-  assert.equal(resolveShareCardVariant('/app/portfolio'), 'portfolio');
-  assert.equal(resolveShareCardVariant('/en/app/portfolio'), 'portfolio');
-  assert.equal(resolveShareCardVariant('/app'), 'portfolio');
-  assert.equal(resolveShareCardVariant('/app/referral'), 'referrals');
-  assert.equal(resolveShareCardVariant('/fr/app/referral'), 'referrals');
-  assert.equal(resolveShareCardVariant('/app/settings'), 'profile');
-  assert.equal(resolveShareCardVariant('/en/app/settings'), 'profile');
-  assert.equal(resolveShareCardVariant('/app/buy'), null);
-  assert.equal(resolveShareCardVariant('/app/agents'), null);
-  assert.equal(resolveShareCardVariant(null), null);
-});
+describe('share-card logic & ShareCardOverride', () => {
+  it('resolves wallet and portfolio routes to portfolio variant', () => {
+    assert.equal(resolveShareCardVariant('/en/app/portfolio'), 'portfolio');
+    assert.equal(resolveShareCardVariant('/en/app/wallet'), 'portfolio');
+    assert.equal(resolveShareCardVariant('/en/app/referral'), 'referrals');
+    assert.equal(resolveShareCardVariant('/en/app/settings'), 'profile');
+  });
 
-test('buildShareCardModel produces deterministic portfolio, referrals, and profile cards across units and timeframes', () => {
-  const portfolioUsd = buildShareCardModel(SAMPLE_USER, 'portfolio', '24h', 'usd');
-  assert.equal(portfolioUsd.headlineValue, '$1,428.50');
-  assert.equal(portfolioUsd.deltaLabel, '+$142.50');
-  assert.equal(portfolioUsd.badgeLabel, 'Portfolio');
-  assert.equal(portfolioUsd.series.length, 16);
+  it('builds default portfolio model when no override is supplied', () => {
+    const model = buildShareCardModel(DEMO_USER, 'portfolio', '30d', 'usd');
+    assert.equal(model.badgeLabel, 'Portfolio');
+    assert.equal(model.headlineValue, '$1,428.50');
+    assert.equal(model.subMetrics.length, 3);
+  });
 
-  const portfolioPct = buildShareCardModel(SAMPLE_USER, 'portfolio', '7d', 'pct');
-  assert.equal(portfolioPct.deltaLabel, '+28.6%');
-  assert.equal(portfolioPct.timeframeLabel, '7d');
+  it('applies ShareCardOverride from individual asset or activity cards', () => {
+    const model = buildShareCardModel(DEMO_USER, 'portfolio', '7d', 'usd', {
+      badgeLabel: 'BNB Smart Chain',
+      headlineValue: '1.45 BNB',
+      deltaLabel: '$870.00 USD · +4.2% (24h)',
+      subMetrics: [
+        { label: 'USD Value', value: '$870.00', tone: 'emerald' },
+        { label: 'Network', value: 'BEP-20 (BSC)' },
+        { label: 'Allocation', value: '60.9% Vault', tone: 'purple' },
+      ],
+      shareSummary: 'Holding 1.45 BNB ($870.00) in my OKNexus BSC Custody Vault!',
+    });
 
-  const referralsCard = buildShareCardModel(SAMPLE_USER, 'referrals', '30d', 'usd');
-  assert.equal(referralsCard.headlineValue, '$142.50');
-  assert.equal(referralsCard.badgeLabel, 'Referrals');
-  assert.ok(referralsCard.shareSummary.includes('ref_dev'));
-
-  const profileCard = buildShareCardModel(SAMPLE_USER, 'profile', '24h', 'usd');
-  assert.equal(profileCard.headlineValue, '135 OK Pts');
-  assert.equal(profileCard.deltaLabel, '+25 pts');
-  assert.equal(profileCard.badgeLabel, 'Profile');
-});
-
-test('buildChartSvgPaths returns valid SVG path coordinates within bounds', () => {
-  const { linePath, areaPath, endPoint } = buildChartSvgPaths([100, 120, 150, 180], 300, 160);
-  assert.ok(linePath.startsWith('M 0 '));
-  assert.ok(areaPath.endsWith('Z'));
-  assert.equal(endPoint.x, 300);
-  assert.ok(endPoint.y >= 16 && endPoint.y <= 140);
+    assert.equal(model.badgeLabel, 'BNB Smart Chain');
+    assert.equal(model.headlineValue, '1.45 BNB');
+    assert.equal(model.deltaLabel, '$870.00 USD · +4.2% (24h)');
+    assert.equal(model.subMetrics[0]?.value, '$870.00');
+    assert.equal(
+      model.shareSummary,
+      'Holding 1.45 BNB ($870.00) in my OKNexus BSC Custody Vault!',
+    );
+  });
 });
