@@ -17,19 +17,24 @@ import { OverviewView } from '@/components/dashboard/overview-view';
 import { ActivityLogView } from '@/components/dashboard/activity-log-view';
 import { MobilePortfolioHero } from '@/components/dashboard/mobile-portfolio-hero';
 
-function PortfolioContent() {
-  const t = useTranslations('dashboard.portfolio');
+function TabParamSync({
+  onTabChange,
+}: {
+  onTabChange: (tab: 'overview' | 'activity') => void;
+}) {
   const searchParams = useSearchParams();
-  const [tab, setTab] = useState<'overview' | 'activity'>('overview');
 
   useEffect(() => {
     const requested = searchParams.get('tab');
-    if (requested === 'activity') {
-      setTab('activity');
-    } else {
-      setTab('overview');
-    }
-  }, [searchParams]);
+    onTabChange(requested === 'activity' ? 'activity' : 'overview');
+  }, [searchParams, onTabChange]);
+
+  return null;
+}
+
+export default function PortfolioPage() {
+  const t = useTranslations('dashboard.portfolio');
+  const [tab, setTab] = useState<'overview' | 'activity'>('overview');
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -117,14 +122,9 @@ function PortfolioContent() {
       <div className="mt-2 md:mt-5">
         {tab === 'overview' ? <OverviewView onSelectActivity={() => setTab('activity')} /> : <ActivityLogView />}
       </div>
+      <Suspense fallback={null}>
+        <TabParamSync onTabChange={setTab} />
+      </Suspense>
     </div>
-  );
-}
-
-export default function PortfolioPage() {
-  return (
-    <Suspense fallback={<div className="min-h-[320px]" />}>
-      <PortfolioContent />
-    </Suspense>
   );
 }

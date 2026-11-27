@@ -1,5 +1,10 @@
 {
   "pages": {
+    "/api/auth/session/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/auth/session/route.js"
+    ],
     "/global-error": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -25,16 +30,6 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/[locale]/not-found.js"
-    ],
-    "/[locale]/login/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/[locale]/login/page.js"
-    ],
-    "/api/auth/session/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/auth/session/route.js"
     ],
     "/[locale]/app/layout": [
       "static/chunks/webpack.js",
@@ -71,15 +66,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/[locale]/app/portfolio/page.js"
     ],
-    "/[locale]/app/wallet/loading": [
+    "/[locale]/login/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/[locale]/app/wallet/loading.js"
-    ],
-    "/[locale]/app/wallet/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/[locale]/app/wallet/page.js"
+      "static/chunks/app/[locale]/login/page.js"
     ]
   }
 }

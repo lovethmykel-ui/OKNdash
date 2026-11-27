@@ -179,6 +179,8 @@ export function TransactionHistory({
             />
             <input
               type="search"
+              autoComplete="off"
+              suppressHydrationWarning
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search hash or type..."

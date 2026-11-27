@@ -59,7 +59,7 @@ export function useOknBalance() {
     initialData: () => getDemoOknBalanceWei(),
     staleTime: Infinity,
   });
-  const onChainVal = asBigInt(result.data);
+  const onChainVal = hydrated ? asBigInt(result.data) : undefined;
   return {
     ...result,
     data: onChainVal !== undefined && onChainVal > 0n ? onChainVal : demoQuery.data,
@@ -86,7 +86,7 @@ export function useRequiredFeeBnb() {
       staleTime: 60_000,
     },
   });
-  const onChainFee = asBigInt(result.data);
+  const onChainFee = hydrated ? asBigInt(result.data) : undefined;
   return {
     ...result,
     // Default demo claim fee: 0.005 BNB (~$3.00)
@@ -151,17 +151,17 @@ export function useSaleStatus() {
 
   return useMemo(
     () => ({
-      rate: asBigInt(rate.data) ?? 12_000n * 10n ** 18n,
-      capPerWallet: asBigInt(cap.data) ?? 50n * 10n ** 18n,
-      paused: asBool(paused.data) ?? false,
-      totalBnbRaised: asBigInt(raised.data) ?? 342_500_000_000_000_000_000n,
-      saleStart: asBigInt(saleStart.data) ?? 0n,
-      saleEnd: asBigInt(saleEnd.data) ?? 1_900_000_000n,
-      minPurchase: asBigInt(minPurchase.data) ?? 10_000_000_000_000_000n,
-      bnbHardCap: asBigInt(bnbHardCap.data) ?? 500n * 10n ** 18n,
+      rate: (hydrated ? asBigInt(rate.data) : undefined) ?? 12_000n * 10n ** 18n,
+      capPerWallet: (hydrated ? asBigInt(cap.data) : undefined) ?? 50n * 10n ** 18n,
+      paused: (hydrated ? asBool(paused.data) : undefined) ?? false,
+      totalBnbRaised: (hydrated ? asBigInt(raised.data) : undefined) ?? 342_500_000_000_000_000_000n,
+      saleStart: (hydrated ? asBigInt(saleStart.data) : undefined) ?? 0n,
+      saleEnd: (hydrated ? asBigInt(saleEnd.data) : undefined) ?? 1_900_000_000n,
+      minPurchase: (hydrated ? asBigInt(minPurchase.data) : undefined) ?? 10_000_000_000_000_000n,
+      bnbHardCap: (hydrated ? asBigInt(bnbHardCap.data) : undefined) ?? 500n * 10n ** 18n,
       isLoading: false,
     }),
-    [rate.data, cap.data, paused.data, raised.data, saleStart.data, saleEnd.data, minPurchase.data, bnbHardCap.data],
+    [hydrated, rate.data, cap.data, paused.data, raised.data, saleStart.data, saleEnd.data, minPurchase.data, bnbHardCap.data],
   );
 }
 
@@ -183,7 +183,7 @@ export function usePurchasedAmount() {
     initialData: () => getDemoPurchasedBnbWei(),
     staleTime: Infinity,
   });
-  const onChainVal = asBigInt(result.data);
+  const onChainVal = hydrated ? asBigInt(result.data) : undefined;
   return {
     ...result,
     data: onChainVal !== undefined && onChainVal > 0n ? onChainVal : demoQuery.data,
@@ -206,7 +206,7 @@ export function useSaleRemaining() {
     functionName: 'saleRemaining',
     query: { enabled: hydrated && !!address && realContract },
   });
-  const onChainVal = asBigInt(result.data);
+  const onChainVal = hydrated ? asBigInt(result.data) : undefined;
   return {
     ...result,
     data: onChainVal !== undefined && onChainVal > 0n ? onChainVal : 157_500_000n * 10n ** 18n,

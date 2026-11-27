@@ -362,7 +362,12 @@ export function AnnouncementCarousel({ id = 'mobile-ann-carousel' }: { id?: stri
       <div className="overflow-hidden rounded-[18px] shadow-[0_8px_22px_rgba(0,0,0,0.18)]">
         <div
           className="flex transition-transform duration-500 ease-out will-change-transform"
-          style={{ transform: `translate3d(-${activeSlide * 100}%, 0px, 0px)` }}
+          style={{
+            transform:
+              activeSlide === 0
+                ? 'translate3d(0%, 0px, 0px)'
+                : `translate3d(-${activeSlide * 100}%, 0px, 0px)`,
+          }}
         >
           {AD_SLIDES.map((slide) => (
             <div key={slide.id} className="w-full min-w-full shrink-0">

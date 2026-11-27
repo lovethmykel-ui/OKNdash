@@ -59,7 +59,10 @@ function OdometerColumn({
     ? Math.max(0, Math.min(maxDigit, parsed))
     : 0;
 
-  const indexToPct = (idx: number) => -(idx / reel.length) * 100;
+  const indexToPct = (idx: number) => {
+    const raw = -(idx / reel.length) * 100;
+    return raw === 0 ? 0 : Number(raw.toFixed(4));
+  };
   const reelPct = useMotionValue(indexToPct(safeNum));
   const y = useTransform(reelPct, (v) => `${v}%`);
   const prevDigitRef = useRef<number | null>(null);
@@ -286,13 +289,8 @@ function PresaleBuyCta({
 }) {
   const animateLive = hydrated && !reduceMotion;
 
-  return (
-    <motion.div
-      className="relative shrink-0"
-      whileHover={animateLive ? { scale: 1.04, y: -0.5 } : undefined}
-      whileTap={animateLive ? { scale: 0.94 } : undefined}
-      transition={{ type: 'spring', stiffness: 460, damping: 24 }}
-    >
+  const innerContent = (
+    <>
       {/* Ambient Breathing Berry-Rose Glow Halo */}
       {animateLive && (
         <motion.span
@@ -381,6 +379,21 @@ function PresaleBuyCta({
           </span>
         </Link>
       </span>
+    </>
+  );
+
+  if (!animateLive) {
+    return <div className="relative shrink-0">{innerContent}</div>;
+  }
+
+  return (
+    <motion.div
+      className="relative shrink-0"
+      whileHover={{ scale: 1.04, y: -0.5 }}
+      whileTap={{ scale: 0.94 }}
+      transition={{ type: 'spring', stiffness: 460, damping: 24 }}
+    >
+      {innerContent}
     </motion.div>
   );
 }

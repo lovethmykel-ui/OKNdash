@@ -18,13 +18,35 @@ export function PolymarketAgentTile() {
   const prefersReducedMotion = useReducedMotion();
   const animateLive = hydrated && !prefersReducedMotion;
 
-  return (
-    <motion.div
-      whileHover={animateLive ? { y: -2, scale: 1.025 } : undefined}
-      whileTap={animateLive ? { scale: 0.94 } : undefined}
-      transition={{ type: 'spring', stiffness: 460, damping: 24 }}
-      className="relative"
-    >
+  const coreLogo = (
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/polymarket.png"
+        alt="Polymarket"
+        referrerPolicy="no-referrer"
+        className="size-full scale-[1.06] object-cover"
+      />
+      {/* Optical Glass Glaze Sweep Across Logo Face */}
+      {animateLive && (
+        <motion.span
+          aria-hidden="true"
+          initial={{ x: '-140%' }}
+          animate={{ x: ['-140%', '220%'] }}
+          transition={{
+            duration: 1.0,
+            repeat: Infinity,
+            repeatDelay: 2.85,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="pointer-events-none absolute inset-y-0 left-0 w-4 -skew-x-[22deg] bg-gradient-to-r from-transparent via-white/55 to-transparent will-change-transform"
+        />
+      )}
+    </>
+  );
+
+  const innerContent = (
+    <>
       {/* Subtle Cobalt-Violet Ambient Halo */}
       {animateLive && (
         <motion.span
@@ -109,46 +131,23 @@ export function PolymarketAgentTile() {
           )}
 
           {/* 3D Gyroscopic Floating Polymarket Logo Core */}
-          <motion.span
-            animate={
-              animateLive
-                ? {
-                    rotateY: [-11, 11, -11],
-                    rotateX: [4, -4, 4],
-                    y: [0, -1.5, 0],
-                  }
-                : undefined
-            }
-            transition={
-              animateLive
-                ? { duration: 4.2, repeat: Infinity, ease: 'easeInOut' }
-                : undefined
-            }
-            className="relative z-10 flex size-[34px] items-center justify-center overflow-hidden rounded-full bg-[#1652F0] ring-1 ring-white/55 shadow-[0_4px_12px_rgba(7,18,64,0.5)] will-change-transform"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/polymarket.png"
-              alt="Polymarket"
-              referrerPolicy="no-referrer"
-              className="size-full scale-[1.06] object-cover"
-            />
-            {/* Optical Glass Glaze Sweep Across Logo Face */}
-            {animateLive && (
-              <motion.span
-                aria-hidden="true"
-                initial={{ x: '-140%' }}
-                animate={{ x: ['-140%', '220%'] }}
-                transition={{
-                  duration: 1.0,
-                  repeat: Infinity,
-                  repeatDelay: 2.85,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-                className="pointer-events-none absolute inset-y-0 left-0 w-4 -skew-x-[22deg] bg-gradient-to-r from-transparent via-white/55 to-transparent will-change-transform"
-              />
-            )}
-          </motion.span>
+          {animateLive ? (
+            <motion.span
+              animate={{
+                rotateY: [-11, 11, -11],
+                rotateX: [4, -4, 4],
+                y: [0, -1.5, 0],
+              }}
+              transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut' }}
+              className="relative z-10 flex size-[34px] items-center justify-center overflow-hidden rounded-full bg-[#1652F0] ring-1 ring-white/55 shadow-[0_4px_12px_rgba(7,18,64,0.5)] will-change-transform"
+            >
+              {coreLogo}
+            </motion.span>
+          ) : (
+            <span className="relative z-10 flex size-[34px] items-center justify-center overflow-hidden rounded-full bg-[#1652F0] ring-1 ring-white/55 shadow-[0_4px_12px_rgba(7,18,64,0.5)]">
+              {coreLogo}
+            </span>
+          )}
         </span>
 
         <span
@@ -158,6 +157,21 @@ export function PolymarketAgentTile() {
           Agent
         </span>
       </Link>
+    </>
+  );
+
+  if (!animateLive) {
+    return <div className="relative">{innerContent}</div>;
+  }
+
+  return (
+    <motion.div
+      whileHover={{ y: -2, scale: 1.025 }}
+      whileTap={{ scale: 0.94 }}
+      transition={{ type: 'spring', stiffness: 460, damping: 24 }}
+      className="relative"
+    >
+      {innerContent}
     </motion.div>
   );
 }
