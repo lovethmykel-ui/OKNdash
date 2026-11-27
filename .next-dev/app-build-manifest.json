@@ -1,10 +1,5 @@
 {
   "pages": {
-    "/api/auth/session/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/auth/session/route.js"
-    ],
     "/global-error": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -30,6 +25,16 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/[locale]/not-found.js"
+    ],
+    "/[locale]/login/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/[locale]/login/page.js"
+    ],
+    "/api/auth/session/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/auth/session/route.js"
     ],
     "/[locale]/app/layout": [
       "static/chunks/webpack.js",
@@ -66,10 +71,50 @@
       "static/chunks/main-app.js",
       "static/chunks/app/[locale]/app/portfolio/page.js"
     ],
-    "/[locale]/login/page": [
+    "/[locale]/app/polymarket-agent/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/[locale]/login/page.js"
+      "static/chunks/app/[locale]/app/polymarket-agent/page.js"
+    ],
+    "/[locale]/app/wallet/loading": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/[locale]/app/wallet/loading.js"
+    ],
+    "/[locale]/app/wallet/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/[locale]/app/wallet/page.js"
+    ],
+    "/[locale]/app/tasks/loading": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/[locale]/app/tasks/loading.js"
+    ],
+    "/[locale]/app/tasks/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/[locale]/app/tasks/page.js"
+    ],
+    "/[locale]/app/referral/loading": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/[locale]/app/referral/loading.js"
+    ],
+    "/[locale]/app/referral/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/[locale]/app/referral/page.js"
+    ],
+    "/[locale]/app/claim/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/[locale]/app/claim/page.js"
+    ],
+    "/[locale]/app/settings/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/[locale]/app/settings/page.js"
     ]
   }
 }

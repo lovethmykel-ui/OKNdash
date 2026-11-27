@@ -3,7 +3,7 @@ import createIntlMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
 import {
   SESSION_COOKIE_NAME,
-  hasPlausibleSessionCookie,
+  hasAnyPlausibleSessionCookie,
 } from './lib/auth/session-cookie-check';
 
 const intlMiddleware = createIntlMiddleware(routing);
@@ -30,8 +30,8 @@ function stripLocalePrefix(pathname: string): {
 export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const { localePrefix, normalizedPath } = stripLocalePrefix(pathname);
-  const sessionCookie = req.cookies.get(SESSION_COOKIE_NAME)?.value;
-  const hasSession = hasPlausibleSessionCookie(sessionCookie);
+  const sessionTokens = req.cookies.getAll(SESSION_COOKIE_NAME).map((c) => c.value);
+  const hasSession = hasAnyPlausibleSessionCookie(sessionTokens);
 
   const isRoot = normalizedPath === '/';
   const isAppRoot = normalizedPath === '/app';

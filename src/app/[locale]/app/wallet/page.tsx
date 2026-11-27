@@ -463,31 +463,38 @@ export default function WalletPage() {
               className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/25 px-3 py-1.5 text-xs font-mono font-bold text-white hover:bg-black/35 transition-colors cursor-pointer backdrop-blur-md"
               title="Copy wallet address"
             >
-              <AnimatePresence mode="wait" initial={false}>
-                {copied ? (
-                  <motion.span
-                    key="copied"
-                    initial={{ opacity: 0, scale: 0.85, filter: 'blur(4px)' }}
-                    animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                    exit={{ opacity: 0 }}
-                    className="inline-flex items-center gap-1 text-[#34D399] font-sans font-extrabold"
-                  >
-                    <Check className="size-3.5 stroke-[2.8]" />
-                    <span>✔️ Copied</span>
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="addr"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="inline-flex items-center gap-1.5"
-                  >
-                    <span>{displayAddress}</span>
-                    <Copy className="size-3 text-purple-200/80" />
-                  </motion.span>
-                )}
-              </AnimatePresence>
+              {!hydrated ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <span>{displayAddress}</span>
+                  <Copy className="size-3 text-purple-200/80" />
+                </span>
+              ) : (
+                <AnimatePresence mode="wait" initial={false}>
+                  {copied ? (
+                    <motion.span
+                      key="copied"
+                      initial={{ opacity: 0, scale: 0.85, filter: 'blur(4px)' }}
+                      animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                      exit={{ opacity: 0 }}
+                      className="inline-flex items-center gap-1 text-[#34D399] font-sans font-extrabold"
+                    >
+                      <Check className="size-3.5 stroke-[2.8]" />
+                      <span>✔️ Copied</span>
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="addr"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="inline-flex items-center gap-1.5"
+                    >
+                      <span>{displayAddress}</span>
+                      <Copy className="size-3 text-purple-200/80" />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              )}
             </button>
 
             <button
@@ -965,19 +972,10 @@ export default function WalletPage() {
               data-testid="recent-vault-activity-list"
               className="divide-y divide-[var(--line)] rounded-2xl border border-[var(--line)] bg-[var(--s2)] overflow-hidden"
             >
-              <AnimatePresence initial={true} mode="popLayout">
-                {activityList.slice(0, 4).map((item, idx) => (
-                  <motion.div
+              {!hydrated ? (
+                activityList.slice(0, 4).map((item) => (
+                  <div
                     key={item.id}
-                    layout="position"
-                    initial={{ opacity: 0, y: -12, scale: 0.985, filter: 'blur(4px)' }}
-                    animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-                    exit={{ opacity: 0, y: 12, scale: 0.985, filter: 'blur(4px)' }}
-                    transition={{
-                      duration: 0.34,
-                      delay: idx * 0.05,
-                      ease: [0.16, 1, 0.3, 1],
-                    }}
                     data-testid="recent-vault-activity-item"
                     className="flex items-center justify-between gap-2.5 px-3.5 py-3 hover:bg-[var(--s1)]/60 transition-colors"
                   >
@@ -1047,9 +1045,95 @@ export default function WalletPage() {
                         <span>Share</span>
                       </button>
                     </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                  </div>
+                ))
+              ) : (
+                <AnimatePresence initial={true} mode="popLayout">
+                  {activityList.slice(0, 4).map((item, idx) => (
+                    <motion.div
+                      key={item.id}
+                      layout="position"
+                      initial={{ opacity: 0, y: -12, scale: 0.985, filter: 'blur(4px)' }}
+                      animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                      exit={{ opacity: 0, y: 12, scale: 0.985, filter: 'blur(4px)' }}
+                      transition={{
+                        duration: 0.34,
+                        delay: idx * 0.05,
+                        ease: [0.16, 1, 0.3, 1],
+                      }}
+                      data-testid="recent-vault-activity-item"
+                      className="flex items-center justify-between gap-2.5 px-3.5 py-3 hover:bg-[var(--s1)]/60 transition-colors"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span
+                          className={`flex size-8 shrink-0 items-center justify-center rounded-xl border ${
+                            item.positive
+                              ? 'border-[#2FBD8E]/30 bg-[#2FBD8E]/15 text-[#2FBD8E]'
+                              : 'border-[#F3BA2F]/30 bg-[#F3BA2F]/15 text-[#D97706] dark:text-[#F3BA2F]'
+                          }`}
+                        >
+                          {item.positive ? (
+                            <ArrowDownLeft className="size-4 stroke-[2.4]" />
+                          ) : (
+                            <ArrowUpRight className="size-4 stroke-[2.4]" />
+                          )}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="text-xs font-extrabold text-[var(--tx)] truncate">
+                            {item.title}
+                          </div>
+                          <div className="mt-0.5 flex items-center gap-1.5 text-[11px] font-medium text-[var(--mut)] truncate">
+                            <span className="truncate">{item.subtitle}</span>
+                            <span>·</span>
+                            <span className="shrink-0">{item.timeAgo}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="text-right">
+                          <div
+                            className={`num text-xs font-extrabold tabular-nums ${
+                              item.positive ? 'text-[#2FBD8E]' : 'text-[var(--tx)]'
+                            }`}
+                          >
+                            <MaskedBalance hidden={hideBalance} mask="••••">
+                              {item.amountLabel}
+                            </MaskedBalance>
+                          </div>
+                          <div className="num text-[11px] font-semibold text-[var(--mut)] mt-0.5">
+                            <MaskedBalance hidden={hideBalance} mask="••••">
+                              {item.usdLabel}
+                            </MaskedBalance>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openShareCard('portfolio', 'button', {
+                              badgeLabel: item.title,
+                              headlineValue: item.amountLabel,
+                              deltaLabel: `${item.usdLabel} · ${item.subtitle}`,
+                              subMetrics: [
+                                { label: 'Value', value: item.usdLabel, tone: 'emerald' },
+                                { label: 'Time', value: item.timeAgo },
+                                { label: 'Tx Hash', value: item.txShort, tone: 'purple' },
+                              ],
+                              shareSummary: `${item.title} on OKNexus: ${item.amountLabel} (${item.usdLabel})!`,
+                            })
+                          }
+                          data-testid="activity-row-share-btn"
+                          aria-label={`Share ${item.title}`}
+                          className="inline-flex h-7 items-center justify-center gap-1 rounded-lg bg-[var(--s1)] px-2 text-[10.5px] font-bold text-[var(--tx)] ring-1 ring-inset ring-[var(--line)] hover:ring-[#7A12F5] hover:text-[#7A12F5] dark:hover:text-[#C9A6FF] transition-all cursor-pointer whitespace-nowrap shrink-0"
+                        >
+                          <Share2 className="size-3 shrink-0" />
+                          <span>Share</span>
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              )}
             </div>
           </section>
 

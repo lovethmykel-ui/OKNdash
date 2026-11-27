@@ -23,8 +23,6 @@ interface AgentGridItem {
   caption: string;
   href: string;
   icon: LucideIcon;
-  lightIconSurface: string;
-  darkIconSurface: string;
 }
 
 const SECONDARY_AGENTS: readonly AgentGridItem[] = [
@@ -34,8 +32,6 @@ const SECONDARY_AGENTS: readonly AgentGridItem[] = [
     caption: 'Auto trade bot',
     href: '/app/trade-bot',
     icon: Bot,
-    lightIconSurface: 'bg-[#7A12F5]/12 text-[#7A12F5] ring-[#7A12F5]/20',
-    darkIconSurface: 'bg-[#7A12F5]/28 text-[#E2C8FF] ring-[#A855F7]/40',
   },
   {
     id: 'predictions',
@@ -43,8 +39,6 @@ const SECONDARY_AGENTS: readonly AgentGridItem[] = [
     caption: 'Live markets',
     href: '/app/prediction-markets',
     icon: BarChart3,
-    lightIconSurface: 'bg-[#8C38F7]/12 text-[#6D28D9] ring-[#8C38F7]/20',
-    darkIconSurface: 'bg-[#8C38F7]/26 text-[#D8B8FF] ring-[#C084FC]/40',
   },
   {
     id: 'staking',
@@ -52,8 +46,6 @@ const SECONDARY_AGENTS: readonly AgentGridItem[] = [
     caption: 'Earn $OKN APY',
     href: '/app/staking',
     icon: Lock,
-    lightIconSurface: 'bg-emerald-500/12 text-emerald-700 ring-emerald-500/20',
-    darkIconSurface: 'bg-emerald-400/18 text-emerald-300 ring-emerald-400/35',
   },
   {
     id: 'agents-hub',
@@ -61,8 +53,6 @@ const SECONDARY_AGENTS: readonly AgentGridItem[] = [
     caption: 'Directory',
     href: '/app/agents',
     icon: Cpu,
-    lightIconSurface: 'bg-[#7A12F5]/12 text-[#7A12F5] ring-[#7A12F5]/20',
-    darkIconSurface: 'bg-[#7A12F5]/28 text-[#E2C8FF] ring-[#A855F7]/40',
   },
   {
     id: 'missions',
@@ -70,8 +60,6 @@ const SECONDARY_AGENTS: readonly AgentGridItem[] = [
     caption: 'Bonus points',
     href: '/app/missions',
     icon: Target,
-    lightIconSurface: 'bg-fuchsia-500/12 text-fuchsia-700 ring-fuchsia-500/20',
-    darkIconSurface: 'bg-fuchsia-400/18 text-fuchsia-300 ring-fuchsia-400/35',
   },
   {
     id: 'leaderboard',
@@ -79,10 +67,11 @@ const SECONDARY_AGENTS: readonly AgentGridItem[] = [
     caption: 'Top earners',
     href: '/app/leaderboard',
     icon: Trophy,
-    lightIconSurface: 'bg-amber-500/14 text-amber-700 ring-amber-500/22',
-    darkIconSurface: 'bg-amber-400/18 text-amber-300 ring-amber-400/35',
   },
 ] as const;
+
+/** Apple iOS native sheet deceleration curve — silky, zero overshoot */
+const SHEET_EASE: [number, number, number, number] = [0.32, 0.72, 0, 1];
 
 interface AgentsHubSheetProps {
   open: boolean;
@@ -90,13 +79,12 @@ interface AgentsHubSheetProps {
 }
 
 /**
- * AgentsHubSheet — Theme-adaptive Light & Dark OKN Purple mobile command sheet.
+ * AgentsHubSheet — Clean, high-contrast mobile action sheet for OKN Agents.
  *
- * Uses `useTheme()` for guaranteed zero-conflict Light & Dark surfaces paired
- * with OKN signature purple (#7A12F5 / #8C38F7) focal hierarchy:
- *  - Featured Polymarket Agent hero card at top with crisp /polymarket.png emblem
- *  - Symmetrical 2x3 grid of OKN agents & ecosystem modules with >=44px touch targets
- *  - Ergonomic thumb-zone OKN purple Close button at bottom
+ * Follows disciplined 60-30-10 color restraint:
+ *  - Neutral surface canvas & uniform monochrome module tiles (light & dark)
+ *  - Single restrained OKN purple focal accent on the Polymarket Agent CTA
+ *  - Single GPU-composited slide-up transition (transform-only, zero blur jank)
  */
 export function AgentsHubSheet({ open, onClose }: AgentsHubSheetProps) {
   const router = useRouter();
@@ -106,11 +94,19 @@ export function AgentsHubSheet({ open, onClose }: AgentsHubSheetProps) {
 
   useEffect(() => {
     if (!open) return;
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
   }, [open, onClose]);
 
   const handleSelect = (href: string) => {
@@ -121,75 +117,74 @@ export function AgentsHubSheet({ open, onClose }: AgentsHubSheetProps) {
   return (
     <AnimatePresence>
       {open && (
-        <motion.div
+        <div
           role="dialog"
           aria-modal="true"
           aria-label="OKN Agents Menu"
           data-testid="mobile-agents-sheet"
           data-sheet-theme={isDark ? 'dark' : 'light'}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18 }}
-          onClick={onClose}
-          className={cn(
-            'fixed inset-0 z-[115] flex items-end justify-center md:hidden',
-            isDark
-              ? 'bg-black/75 backdrop-blur-[10px]'
-              : 'bg-[#160B2E]/42 backdrop-blur-[8px]',
-          )}
+          className="fixed inset-0 z-[115] flex items-end justify-center md:hidden"
         >
+          {/* Scrim — pure opacity transition, no backdrop-blur repaint jank */}
+          <motion.div
+            aria-hidden="true"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0.12 : 0.24, ease: SHEET_EASE }}
+            onClick={onClose}
+            className={cn(
+              'fixed inset-0',
+              isDark ? 'bg-black/68' : 'bg-black/40',
+            )}
+          />
+
+          {/* Sliding Sheet Panel — single GPU-composited transform layer */}
           <motion.div
             data-testid="mobile-agents-sheet-panel"
-            initial={prefersReducedMotion ? { opacity: 0 } : { y: 120, opacity: 0 }}
-            animate={prefersReducedMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
-            exit={prefersReducedMotion ? { opacity: 0 } : { y: 120, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 34 }}
+            initial={prefersReducedMotion ? { opacity: 0 } : { y: '100%' }}
+            animate={prefersReducedMotion ? { opacity: 1 } : { y: '0%' }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { y: '100%' }}
+            transition={{
+              duration: prefersReducedMotion ? 0.14 : 0.34,
+              ease: SHEET_EASE,
+            }}
+            style={{ willChange: 'transform' }}
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              'relative w-full max-w-[460px] overflow-hidden rounded-t-[30px] px-5 pt-3 pb-[max(22px,env(safe-area-inset-bottom,22px))] backdrop-blur-2xl ring-1 ring-inset',
+              'relative z-10 w-full max-w-[460px] rounded-t-[26px] border-t border-x px-5 pt-2.5 pb-[max(20px,env(safe-area-inset-bottom,20px))]',
               isDark
-                ? 'bg-[#120E1F]/98 text-[#F8F7FC] ring-[#A855F7]/25 shadow-[0_-24px_64px_rgba(0,0,0,0.82)]'
-                : 'bg-white/98 text-[#120E24] ring-[#7A12F5]/16 shadow-[0_-18px_50px_rgba(32,14,72,0.18)]',
+                ? 'bg-[#121216] text-[#F5F5F7] border-white/[0.08] shadow-[0_-18px_48px_rgba(0,0,0,0.68)]'
+                : 'bg-white text-[#111114] border-black/[0.08] shadow-[0_-16px_40px_rgba(15,23,42,0.12)]',
             )}
           >
-            {/* Subtle OKN Purple Atmospheric Top Wash */}
+            {/* Drag Handle */}
             <div
               aria-hidden="true"
               className={cn(
-                'pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b to-transparent',
-                isDark
-                  ? 'from-[#7A12F5]/26 via-[#7A12F5]/[0.08]'
-                  : 'from-[#7A12F5]/[0.08] via-[#7A12F5]/[0.025]',
+                'mx-auto mb-3.5 h-1 w-9 rounded-full',
+                isDark ? 'bg-white/20' : 'bg-black/15',
               )}
             />
 
-            {/* Drag Handle */}
-            <div
-              className={cn(
-                'relative z-10 mx-auto mb-4 h-1 w-11 rounded-full',
-                isDark ? 'bg-[#C9A6FF]/40' : 'bg-[#7A12F5]/25',
-              )}
-            />
-
-            {/* Sheet Header */}
-            <div className="relative z-10 mb-4 flex items-center justify-between gap-3">
-              <div>
+            {/* Header */}
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div className="min-w-0">
                 <h2
                   className={cn(
-                    'text-[17px] font-extrabold tracking-tight',
-                    isDark ? 'text-white' : 'text-[#120E24]',
+                    'text-[17px] font-semibold tracking-tight leading-snug',
+                    isDark ? 'text-[#F5F5F7]' : 'text-[#111114]',
                   )}
                 >
                   OKN Agents
                 </h2>
                 <p
                   className={cn(
-                    'text-xs font-medium',
-                    isDark ? 'text-[#B4ACD0]' : 'text-[#5F5878]',
+                    'text-[13px] font-normal leading-snug',
+                    isDark ? 'text-[#8E8E98]' : 'text-[#6B6B76]',
                   )}
                 >
-                  Autonomous strategies &amp; ecosystem tools
+                  Strategies, markets &amp; staking
                 </p>
               </div>
               <button
@@ -197,136 +192,148 @@ export function AgentsHubSheet({ open, onClose }: AgentsHubSheetProps) {
                 onClick={onClose}
                 aria-label="Dismiss Agents sheet"
                 className={cn(
-                  'flex size-10 shrink-0 items-center justify-center rounded-full ring-1 ring-inset transition-colors active:scale-95 cursor-pointer',
+                  'flex size-10 shrink-0 items-center justify-center rounded-full transition-[background-color,transform] duration-150 active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7A12F5]',
                   isDark
-                    ? 'bg-[#241C3C] text-[#E9D5FF] ring-[#A855F7]/30 hover:bg-[#312554]'
-                    : 'bg-[#F3ECFF] text-[#6D0EE2] ring-[#7A12F5]/18 hover:bg-[#E8DBFE]',
+                    ? 'bg-white/[0.07] text-[#D4D4DC] hover:bg-white/[0.12]'
+                    : 'bg-black/[0.05] text-[#3F3F46] hover:bg-black/[0.09]',
                 )}
               >
-                <X className="size-4.5 stroke-[2.2]" />
+                <X className="size-[18px] stroke-[2]" />
               </button>
             </div>
 
-            {/* Featured Primary Agent Spotlight: Polymarket Agent */}
-            <motion.button
+            {/* Focal Spotlight: Polymarket Agent */}
+            <button
               type="button"
               data-testid="agents-sheet-polymarket-btn"
               onClick={() => handleSelect('/app/polymarket-agent')}
-              whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
               className={cn(
-                'group relative z-10 mb-3.5 flex w-full items-center gap-3.5 overflow-hidden rounded-[22px] p-3.5 text-left transition-all cursor-pointer',
-                'bg-gradient-to-r from-[#7A12F5] via-[#7016EE] to-[#1652F0] text-white shadow-[0_10px_26px_rgba(122,18,245,0.34)]',
-                'ring-1 ring-inset ring-white/25 hover:brightness-105',
+                'group mb-3 flex min-h-[72px] w-full items-center gap-3.5 rounded-2xl border p-3.5 text-left transition-[background-color,border-color,transform] duration-150 active:scale-[0.985] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7A12F5]',
+                isDark
+                  ? 'bg-[#1B1B22] border-white/[0.09] hover:bg-[#22222B] hover:border-white/[0.14]'
+                  : 'bg-[#F5F5F8] border-black/[0.07] hover:bg-[#ECECF1] hover:border-black/[0.12]',
               )}
-              style={{ color: '#ffffff' }}
             >
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-x-4 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent"
-              />
-              <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#1652F0] ring-2 ring-white/45 shadow-[0_6px_16px_rgba(11,16,54,0.35)]">
+              <span className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[12px] bg-[#1652F0]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/polymarket.png"
                   alt="Polymarket"
                   referrerPolicy="no-referrer"
-                  className="size-full scale-[1.06] object-cover"
+                  className="size-full object-cover"
                 />
               </span>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="truncate text-sm font-extrabold tracking-tight text-white">
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className={cn(
+                      'truncate text-[14.5px] font-semibold tracking-tight leading-tight',
+                      isDark ? 'text-[#F5F5F7]' : 'text-[#111114]',
+                    )}
+                  >
                     Polymarket Agent
                   </span>
-                  <span className="text-[11px] font-semibold text-white/75">
-                    · Featured
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      'text-xs',
+                      isDark ? 'text-white/30' : 'text-black/25',
+                    )}
+                  >
+                    ·
+                  </span>
+                  <span
+                    className={cn(
+                      'shrink-0 text-[12px] font-medium',
+                      isDark ? 'text-[#A78BFA]' : 'text-[#7A12F5]',
+                    )}
+                  >
+                    Featured
                   </span>
                 </div>
-                <p className="mt-0.5 truncate text-xs font-medium text-white/85">
-                  Auto-copy top prediction whales
+                <p
+                  className={cn(
+                    'mt-0.5 truncate text-[12.5px] font-normal leading-snug',
+                    isDark ? 'text-[#9A9AA6]' : 'text-[#62626E]',
+                  )}
+                >
+                  Copy top prediction traders
                 </p>
               </div>
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-white transition-transform duration-200 group-hover:translate-x-0.5">
-                <ChevronRight className="size-4 stroke-[2.5]" />
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#7A12F5] text-white transition-transform duration-150 group-hover:translate-x-0.5">
+                <ChevronRight className="size-4 stroke-[2.25]" />
               </span>
-            </motion.button>
+            </button>
 
-            {/* Symmetrical 2x3 Theme-Adaptive Agent & Module Grid */}
-            <div className="relative z-10 grid grid-cols-2 gap-2.5">
-              {SECONDARY_AGENTS.map((item, idx) => {
+            {/* Unified Monochrome 2x3 Module Grid */}
+            <div className="grid grid-cols-2 gap-2.5">
+              {SECONDARY_AGENTS.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <motion.button
+                  <button
                     key={item.id}
                     type="button"
                     data-testid={`agents-sheet-item-${item.id}`}
                     onClick={() => handleSelect(item.href)}
-                    initial={prefersReducedMotion ? undefined : { opacity: 0, y: 10 }}
-                    animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-                    transition={{
-                      delay: 0.03 + idx * 0.025,
-                      duration: 0.22,
-                      ease: [0.16, 1, 0.3, 1],
-                    }}
-                    whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
                     className={cn(
-                      'group flex min-h-[64px] items-center gap-3 rounded-2xl px-3 py-2.5 text-left ring-1 ring-inset transition-all cursor-pointer select-none',
+                      'group flex min-h-[64px] items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7A12F5]',
                       isDark
-                        ? 'bg-[#1E1832] ring-[#A855F7]/20 hover:bg-[#281F44] hover:ring-[#A855F7]/45'
-                        : 'bg-[#F6F2FE] ring-[#7A12F5]/14 hover:bg-[#EDE4FD] hover:ring-[#7A12F5]/35',
+                        ? 'bg-[#19191F] border-white/[0.06] hover:bg-[#212129] hover:border-white/[0.11]'
+                        : 'bg-[#F7F7F9] border-black/[0.05] hover:bg-[#EFEFF3] hover:border-black/[0.09]',
                     )}
                   >
                     <span
                       className={cn(
-                        'flex size-10 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset transition-transform duration-200 group-hover:scale-105',
-                        isDark ? item.darkIconSurface : item.lightIconSurface,
+                        'flex size-10 shrink-0 items-center justify-center rounded-[11px] transition-colors duration-150',
+                        isDark
+                          ? 'bg-white/[0.06] text-[#DCDCE5] group-hover:bg-white/[0.10] group-hover:text-white'
+                          : 'bg-white text-[#18181B] border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
                       )}
                     >
-                      <Icon className="size-[18px] stroke-[2.2]" />
+                      <Icon className="size-[18px] stroke-[1.9]" />
                     </span>
                     <div className="min-w-0 flex-1">
                       <p
                         className={cn(
-                          'truncate text-[13px] font-extrabold leading-tight',
-                          isDark ? 'text-white' : 'text-[#151029]',
+                          'truncate text-[13.5px] font-semibold leading-tight',
+                          isDark ? 'text-[#F5F5F7]' : 'text-[#111114]',
                         )}
                       >
                         {item.label}
                       </p>
                       <p
                         className={cn(
-                          'mt-0.5 truncate text-[11px] font-medium',
-                          isDark ? 'text-[#AFA7CB]' : 'text-[#60597A]',
+                          'mt-0.5 truncate text-[11.5px] font-normal leading-tight',
+                          isDark ? 'text-[#8E8E98]' : 'text-[#6B6B76]',
                         )}
                       >
                         {item.caption}
                       </p>
                     </div>
-                  </motion.button>
+                  </button>
                 );
               })}
             </div>
 
-            {/* Bottom Ergonomic Thumb-Zone Close Button (OKN Purple Brand Anchor) */}
-            <div className="relative z-10 mt-4">
+            {/* Clean Neutral Thumb-Zone Dismiss Button */}
+            <div className="mt-3.5">
               <button
                 type="button"
                 data-testid="agents-sheet-close-btn"
                 onClick={onClose}
                 aria-label="Close Agents menu"
                 className={cn(
-                  'flex h-11 w-full items-center justify-center gap-2 rounded-2xl text-xs font-extrabold tracking-tight ring-1 ring-inset transition-all active:scale-[0.98] cursor-pointer',
+                  'flex h-12 w-full items-center justify-center rounded-2xl border text-[14px] font-semibold tracking-tight transition-[background-color,transform] duration-150 active:scale-[0.985] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7A12F5]',
                   isDark
-                    ? 'bg-[#7A12F5]/32 text-[#F5F3FF] ring-[#A855F7]/45 hover:bg-[#7A12F5]/44'
-                    : 'bg-[#7A12F5]/12 text-[#6D0EE2] ring-[#7A12F5]/20 hover:bg-[#7A12F5]/18',
+                    ? 'bg-[#1B1B21] text-[#E4E4EC] border-white/[0.07] hover:bg-[#24242C]'
+                    : 'bg-[#F2F2F5] text-[#18181B] border-black/[0.06] hover:bg-[#E7E7EC]',
                 )}
               >
-                <X className="size-4 stroke-[2.4]" />
-                <span>Close</span>
+                Close
               </button>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );

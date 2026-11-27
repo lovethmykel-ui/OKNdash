@@ -1,5 +1,11 @@
 {
   "/api/auth/session/route": "app/api/auth/session/route.js",
   "/[locale]/login/page": "app/[locale]/login/page.js",
-  "/[locale]/app/portfolio/page": "app/[locale]/app/portfolio/page.js"
+  "/[locale]/app/portfolio/page": "app/[locale]/app/portfolio/page.js",
+  "/[locale]/app/wallet/page": "app/[locale]/app/wallet/page.js",
+  "/[locale]/app/polymarket-agent/page": "app/[locale]/app/polymarket-agent/page.js",
+  "/[locale]/app/referral/page": "app/[locale]/app/referral/page.js",
+  "/[locale]/app/tasks/page": "app/[locale]/app/tasks/page.js",
+  "/[locale]/app/claim/page": "app/[locale]/app/claim/page.js",
+  "/[locale]/app/settings/page": "app/[locale]/app/settings/page.js"
 }

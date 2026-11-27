@@ -1,7 +1,8 @@
 import crypto from 'node:crypto';
 import type { AdminRole } from './permissions';
 
-export const SESSION_COOKIE_NAME = 'okn_session';
+export const SESSION_COOKIE_NAME = 'okn_session_v2';
+export const LEGACY_SESSION_COOKIE_NAME = 'okn_session';
 export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
 export type AuthProvider = 'telegram' | 'wallet';
@@ -42,11 +43,10 @@ export function getSessionSecret(): string {
     const deploymentSeed = [
       process.env.VERCEL_PROJECT_ID,
       process.env.VERCEL_PROJECT_PRODUCTION_URL,
-      process.env.VERCEL_GIT_COMMIT_SHA,
       process.env.APP_URL,
       process.env.NEXT_PUBLIC_APP_URL,
       process.env.NODE_ENV,
-      'oknexus-session-hmac-v1',
+      'oknexus-session-hmac-v2',
     ]
       .filter(Boolean)
       .join(':');
@@ -167,6 +167,23 @@ export function verifySessionToken(
 }
 
 /**
+ * Verifies a list of candidate cookie values (e.g., from `cookies.getAll`) and
+ * returns the first valid, unexpired session payload. Prevents stale duplicate
+ * cookies from blocking a freshly issued session.
+ */
+export function verifyAnySessionToken(
+  tokens: readonly (string | undefined | null)[],
+  secret = getSessionSecret(),
+  nowSeconds = Math.floor(Date.now() / 1000),
+): SessionPayload | null {
+  for (const token of tokens) {
+    const verified = verifySessionToken(token, secret, nowSeconds);
+    if (verified) return verified;
+  }
+  return null;
+}
+
+/**
  * Validates the POST /api/auth/session request body.
  * Strictly requires explicit acceptance of the existing-accounts-only notice
  * whenever signing in with a Web3 wallet.
@@ -209,8 +226,28 @@ export function validateLoginPayload(body: unknown): LoginValidationResult {
   };
 }
 
+function matchesRequestHost(urlHeader: string, headers: Headers): boolean {
+  const forwardedHost = headers
+    .get('x-forwarded-host')
+    ?.split(',')[0]
+    ?.trim()
+    .toLowerCase();
+  const host = headers.get('host')?.trim().toLowerCase();
+
+  if (!forwardedHost && !host) {
+    return false;
+  }
+
+  try {
+    const parsedHost = new URL(urlHeader).host.toLowerCase();
+    return parsedHost === forwardedHost || parsedHost === host;
+  } catch {
+    return false;
+  }
+}
+
 /**
- * Checks basic CSRF protection on cookie-mutating auth endpoints:
+ * Checks CSRF protection on JSON/XHR cookie-mutating auth endpoints:
  * requires our custom X-Requested-With header and, when an Origin header is
  * present, verifies it matches either X-Forwarded-Host or Host.
  */
@@ -225,23 +262,54 @@ export function isTrustedAuthRequest(headers: Headers): boolean {
     return true;
   }
 
-  const forwardedHost = headers
-    .get('x-forwarded-host')
-    ?.split(',')[0]
-    ?.trim()
-    .toLowerCase();
-  const host = headers.get('host')?.trim().toLowerCase();
+  return matchesRequestHost(origin, headers);
+}
 
-  if (!forwardedHost && !host) {
+/**
+ * Checks CSRF protection for native HTML `<form method="POST">` top-level login
+ * submissions (which do not send custom headers like `X-Requested-With`).
+ * Verifies Origin or Referer matches Host / X-Forwarded-Host and rejects
+ * cross-site Sec-Fetch-Site forged posts.
+ */
+export function isTrustedFormOrigin(headers: Headers): boolean {
+  const secFetchSite = headers.get('sec-fetch-site')?.trim().toLowerCase();
+  if (secFetchSite === 'cross-site') {
     return false;
   }
 
-  try {
-    const originHost = new URL(origin).host.toLowerCase();
-    return originHost === forwardedHost || originHost === host;
-  } catch {
-    return false;
+  const origin = headers.get('origin');
+  if (origin && origin !== 'null') {
+    return matchesRequestHost(origin, headers);
   }
+
+  const referer = headers.get('referer');
+  if (referer) {
+    return matchesRequestHost(referer, headers);
+  }
+
+  // Fallback for privacy-stripped Referer/Origin on same-origin navigations
+  return secFetchSite === 'same-origin' || secFetchSite === 'same-site' || secFetchSite === 'none';
+}
+
+/**
+ * Ensures post-login redirect targets are strictly relative same-origin paths
+ * (preventing open redirect attacks).
+ */
+export function resolveSafeRedirectPath(
+  raw: unknown,
+  fallback = '/app/portfolio',
+): string {
+  if (typeof raw !== 'string') return fallback;
+  const trimmed = raw.trim();
+  if (
+    !trimmed.startsWith('/') ||
+    trimmed.startsWith('//') ||
+    trimmed.includes('\\') ||
+    /[\r\n\0]/.test(trimmed)
+  ) {
+    return fallback;
+  }
+  return trimmed;
 }
 
 export interface SessionCookieOptions {
@@ -252,18 +320,19 @@ export interface SessionCookieOptions {
 /**
  * Builds an HttpOnly Set-Cookie header string.
  * - Defaults to `SameSite=None; Secure; Partitioned` for cross-origin preview iframes.
- * - Supports `SameSite=Lax` for top-level deployments (e.g., Vercel on iOS Safari).
+ * - Supports `SameSite=Lax` for top-level deployments (e.g., Vercel on iOS Safari/Chrome).
  */
 export function buildSessionSetCookieHeader(
   token: string,
   maxAgeSeconds = SESSION_MAX_AGE_SECONDS,
   options?: SessionCookieOptions,
+  cookieName = SESSION_COOKIE_NAME,
 ): string {
   const sameSite = options?.sameSite ?? 'none';
   const secure = options?.secure ?? true;
 
   const parts = [
-    `${SESSION_COOKIE_NAME}=${token}`,
+    `${cookieName}=${token}`,
     'HttpOnly',
     'Path=/',
     `Max-Age=${maxAgeSeconds}`,
@@ -280,4 +349,3 @@ export function buildSessionSetCookieHeader(
 
   return parts.join('; ');
 }
-

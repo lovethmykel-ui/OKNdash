@@ -147,60 +147,67 @@ export function ClaimButton() {
               : 'cursor-pointer bg-[#7A12F5] text-white hover:bg-[#8C38F7]'
           }`}
         >
-          <AnimatePresence mode="wait" initial={false}>
-            {isDone ? (
-              <motion.span
-                key="done"
-                initial={{ opacity: 0, scale: 0.72, y: 6, filter: 'blur(6px)' }}
-                animate={{ opacity: 1, scale: [0.85, 1.06, 1], y: 0, filter: 'blur(0px)' }}
-                transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-                className="inline-flex items-center gap-2 text-[#2FBD8E]"
-              >
-                <span className="flex size-5 items-center justify-center rounded-full bg-[#2FBD8E] text-white shadow-[0_0_12px_rgba(47,189,142,0.6)]">
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="size-3"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={3.5}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <motion.path
-                      d="M5 13l4 4L19 7"
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1 }}
-                      transition={{ duration: 0.34, delay: 0.06, ease: 'easeOut' }}
-                    />
-                  </svg>
-                </span>
-                <span>Done · Claimed {formatWei(entitlement)} $OKN</span>
-              </motion.span>
-            ) : confirming ? (
-              <motion.span
-                key="confirming"
-                initial={{ opacity: 0, y: 5, filter: 'blur(4px)' }}
-                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, y: -5, filter: 'blur(4px)' }}
-                transition={{ duration: 0.18 }}
-                className="inline-flex items-center gap-2"
-              >
-                <Loader2 className="size-4 animate-spin" />
-                <span>{t('btnConfirming')}</span>
-              </motion.span>
-            ) : (
-              <motion.span
-                key="idle"
-                initial={false}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0, scale: 0.92, filter: 'blur(4px)' }}
-                className="inline-flex items-center gap-2"
-              >
-                <Gift className="size-4" />
-                <span>{`${t('btnIdle')} (${formatWei(entitlement)} $OKN)`}</span>
-              </motion.span>
-            )}
-          </AnimatePresence>
+          {!hydrated ? (
+            <span className="inline-flex items-center gap-2">
+              <Gift className="size-4" />
+              <span>{`${t('btnIdle')} (${formatWei(entitlement)} $OKN)`}</span>
+            </span>
+          ) : (
+            <AnimatePresence mode="wait" initial={false}>
+              {isDone ? (
+                <motion.span
+                  key="done"
+                  initial={{ opacity: 0, scale: 0.72, y: 6, filter: 'blur(6px)' }}
+                  animate={{ opacity: 1, scale: [0.85, 1.06, 1], y: 0, filter: 'blur(0px)' }}
+                  transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+                  className="inline-flex items-center gap-2 text-[#2FBD8E]"
+                >
+                  <span className="flex size-5 items-center justify-center rounded-full bg-[#2FBD8E] text-white shadow-[0_0_12px_rgba(47,189,142,0.6)]">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="size-3"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={3.5}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <motion.path
+                        d="M5 13l4 4L19 7"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 0.34, delay: 0.06, ease: 'easeOut' }}
+                      />
+                    </svg>
+                  </span>
+                  <span>Done · Claimed {formatWei(entitlement)} $OKN</span>
+                </motion.span>
+              ) : confirming ? (
+                <motion.span
+                  key="confirming"
+                  initial={{ opacity: 0, y: 5, filter: 'blur(4px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, y: -5, filter: 'blur(4px)' }}
+                  transition={{ duration: 0.18 }}
+                  className="inline-flex items-center gap-2"
+                >
+                  <Loader2 className="size-4 animate-spin" />
+                  <span>{t('btnConfirming')}</span>
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="idle"
+                  initial={false}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, scale: 0.92, filter: 'blur(4px)' }}
+                  className="inline-flex items-center gap-2"
+                >
+                  <Gift className="size-4" />
+                  <span>{`${t('btnIdle')} (${formatWei(entitlement)} $OKN)`}</span>
+                </motion.span>
+              )}
+            </AnimatePresence>
+          )}
         </Button>
 
         {claimedTxHash && (

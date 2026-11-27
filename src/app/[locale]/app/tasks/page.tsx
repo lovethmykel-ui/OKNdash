@@ -21,6 +21,7 @@ import {
 import { AnimatePresence, motion } from 'motion/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import { OknWatermark } from '@/components/ui/okn-watermark';
 import { toast } from 'sonner';
 
@@ -171,6 +172,7 @@ const ALL_TASKS: TaskItem[] = [
 ];
 
 export default function TasksPage() {
+  const hydrated = useHydrated();
   const qc = useQueryClient();
   const [filter, setFilter] = useState<'all' | 'social' | 'daily' | 'referral'>('all');
   const [completedIds, setCompletedIds] = useState<string[]>(['t-checkin']);
@@ -323,19 +325,9 @@ export default function TasksPage() {
                       : 'bg-[#7A12F5] text-white shadow-md hover:bg-[#8C38F7] active:scale-95 cursor-pointer'
                 }`}
               >
-                <AnimatePresence mode="wait" initial={false}>
-                  {isDone ? (
-                    <motion.span
-                      key="done"
-                      initial={
-                        isFreshlyDone
-                          ? { opacity: 0, scale: 0.65, y: 6, filter: 'blur(6px)' }
-                          : false
-                      }
-                      animate={{ opacity: 1, scale: [0.85, 1.08, 1], y: 0, filter: 'blur(0px)' }}
-                      transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-                      className="inline-flex items-center gap-1.5"
-                    >
+                {!hydrated ? (
+                  isDone ? (
+                    <span className="inline-flex items-center gap-1.5">
                       <span className="relative flex size-4 items-center justify-center rounded-full bg-[#2FBD8E] text-white shadow-[0_0_10px_rgba(47,189,142,0.55)]">
                         <svg
                           viewBox="0 0 24 24"
@@ -346,40 +338,73 @@ export default function TasksPage() {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         >
-                          <motion.path
-                            d="M5 13l4 4L19 7"
-                            initial={isFreshlyDone ? { pathLength: 0 } : false}
-                            animate={{ pathLength: 1 }}
-                            transition={{ duration: 0.32, delay: 0.06, ease: 'easeOut' }}
-                          />
+                          <path d="M5 13l4 4L19 7" />
                         </svg>
                       </span>
                       <span>Done</span>
-                    </motion.span>
-                  ) : isLoading ? (
-                    <motion.span
-                      key="verifying"
-                      initial={{ opacity: 0, y: 5, filter: 'blur(4px)' }}
-                      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                      exit={{ opacity: 0, y: -5, filter: 'blur(4px)' }}
-                      transition={{ duration: 0.18 }}
-                      className="inline-flex items-center gap-1.5"
-                    >
-                      <span className="size-3 rounded-full border-2 border-white/35 border-t-white animate-spin" />
-                      <span>Verifying...</span>
-                    </motion.span>
+                    </span>
                   ) : (
-                    <motion.span
-                      key="claim"
-                      initial={false}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.88, filter: 'blur(4px)' }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      Claim
-                    </motion.span>
-                  )}
-                </AnimatePresence>
+                    <span>Claim</span>
+                  )
+                ) : (
+                  <AnimatePresence mode="wait" initial={false}>
+                    {isDone ? (
+                      <motion.span
+                        key="done"
+                        initial={
+                          isFreshlyDone
+                            ? { opacity: 0, scale: 0.65, y: 6, filter: 'blur(6px)' }
+                            : false
+                        }
+                        animate={{ opacity: 1, scale: [0.85, 1.08, 1], y: 0, filter: 'blur(0px)' }}
+                        transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+                        className="inline-flex items-center gap-1.5"
+                      >
+                        <span className="relative flex size-4 items-center justify-center rounded-full bg-[#2FBD8E] text-white shadow-[0_0_10px_rgba(47,189,142,0.55)]">
+                          <svg
+                            viewBox="0 0 24 24"
+                            className="size-2.5"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={3.5}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <motion.path
+                              d="M5 13l4 4L19 7"
+                              initial={isFreshlyDone ? { pathLength: 0 } : false}
+                              animate={{ pathLength: 1 }}
+                              transition={{ duration: 0.32, delay: 0.06, ease: 'easeOut' }}
+                            />
+                          </svg>
+                        </span>
+                        <span>Done</span>
+                      </motion.span>
+                    ) : isLoading ? (
+                      <motion.span
+                        key="verifying"
+                        initial={{ opacity: 0, y: 5, filter: 'blur(4px)' }}
+                        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                        exit={{ opacity: 0, y: -5, filter: 'blur(4px)' }}
+                        transition={{ duration: 0.18 }}
+                        className="inline-flex items-center gap-1.5"
+                      >
+                        <span className="size-3 rounded-full border-2 border-white/35 border-t-white animate-spin" />
+                        <span>Verifying...</span>
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key="claim"
+                        initial={false}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.88, filter: 'blur(4px)' }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        Claim
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                )}
               </button>
             </div>
           );

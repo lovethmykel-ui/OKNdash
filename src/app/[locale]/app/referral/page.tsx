@@ -332,32 +332,39 @@ const DEFAULT_INVITED_FRIENDS: InvitedFriendRow[] = [
                 onClick={() => void copy()}
                 className="flex h-10 flex-1 sm:flex-initial sm:px-5 items-center justify-center gap-2 rounded-xl bg-white text-[#5B0AC2] font-extrabold text-xs sm:text-sm shadow-md hover:bg-purple-50 active:scale-[0.98] transition-all cursor-pointer whitespace-nowrap"
               >
-                <AnimatePresence mode="wait" initial={false}>
-                  {copied ? (
-                    <motion.span
-                      key="copied"
-                      initial={{ opacity: 0, scale: 0.85, filter: 'blur(4px)' }}
-                      animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                      exit={{ opacity: 0, scale: 0.85 }}
-                      transition={{ duration: 0.2 }}
-                      className="inline-flex items-center gap-1.5 text-[#10B981]"
-                    >
-                      <Check className="size-4 stroke-[2.8]" />
-                      <span>✔️ Copied</span>
-                    </motion.span>
-                  ) : (
-                    <motion.span
-                      key="copy"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="inline-flex items-center gap-1.5"
-                    >
-                      <Copy className="size-3.5" />
-                      <span>Copy Link</span>
-                    </motion.span>
-                  )}
-                </AnimatePresence>
+                {!hydrated ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Copy className="size-3.5" />
+                    <span>Copy Link</span>
+                  </span>
+                ) : (
+                  <AnimatePresence mode="wait" initial={false}>
+                    {copied ? (
+                      <motion.span
+                        key="copied"
+                        initial={{ opacity: 0, scale: 0.85, filter: 'blur(4px)' }}
+                        animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                        exit={{ opacity: 0, scale: 0.85 }}
+                        transition={{ duration: 0.2 }}
+                        className="inline-flex items-center gap-1.5 text-[#10B981]"
+                      >
+                        <Check className="size-4 stroke-[2.8]" />
+                        <span>✔️ Copied</span>
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key="copy"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="inline-flex items-center gap-1.5"
+                      >
+                        <Copy className="size-3.5" />
+                        <span>Copy Link</span>
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                )}
               </button>
 
               <button

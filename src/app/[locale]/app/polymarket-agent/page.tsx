@@ -3,7 +3,7 @@
 /**
  * /app/polymarket-agent — Minimalist Polymarket Copy Agent Dashboard.
  */
-import { Suspense, useCallback } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
@@ -14,13 +14,29 @@ import { FundsPanel } from '@/components/polymarket-agent/funds-panel';
 import { RiskDisclosure } from '@/components/polymarket-agent/risk-disclosure';
 import { parseAgentTab, type AgentTab } from '@/components/polymarket-agent/tab-param';
 
-function PolymarketAgentWorkspace() {
+/**
+ * Isolated query-param reader wrapped in `<Suspense fallback={null}>` so
+ * `useSearchParams()` never triggers an SSR Suspense bailout on the main page.
+ */
+function AgentTabParamSync({ onTabParam }: { onTabParam: (tab: AgentTab) => void }) {
   const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+
+  useEffect(() => {
+    onTabParam(parseAgentTab(tabParam));
+  }, [tabParam, onTabParam]);
+
+  return null;
+}
+
+export default function PolymarketAgentPage() {
+  const t = useTranslations('dashboard.polymarketAgent');
   const router = useRouter();
-  const activeTab = parseAgentTab(searchParams.get('tab'));
+  const [activeTab, setActiveTab] = useState<AgentTab>('agent');
 
   const handleTabChange = useCallback(
     (nextTab: AgentTab) => {
+      setActiveTab(nextTab);
       const target =
         nextTab === 'agent'
           ? '/app/polymarket-agent'
@@ -31,21 +47,11 @@ function PolymarketAgentWorkspace() {
   );
 
   return (
-    <AgentCopierTabs
-      value={activeTab}
-      onValueChange={handleTabChange}
-      agent={<AgentPanel onNavigateTab={handleTabChange} />}
-      copy={<CopierPanel onNavigateTab={handleTabChange} />}
-      fund={<FundsPanel onNavigateTab={handleTabChange} />}
-    />
-  );
-}
-
-export default function PolymarketAgentPage() {
-  const t = useTranslations('dashboard.polymarketAgent');
-
-  return (
     <div className="space-y-5 pb-24 md:pb-10">
+      <Suspense fallback={null}>
+        <AgentTabParamSync onTabParam={setActiveTab} />
+      </Suspense>
+
       {/* Compact Single-Row Dashboard Header */}
       <header className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -69,13 +75,13 @@ export default function PolymarketAgentPage() {
         </p>
       </header>
 
-      <Suspense
-        fallback={
-          <div className="h-56 rounded-2xl border border-[var(--line)] bg-[var(--s1)] animate-pulse" />
-        }
-      >
-        <PolymarketAgentWorkspace />
-      </Suspense>
+      <AgentCopierTabs
+        value={activeTab}
+        onValueChange={handleTabChange}
+        agent={<AgentPanel onNavigateTab={handleTabChange} />}
+        copy={<CopierPanel onNavigateTab={handleTabChange} />}
+        fund={<FundsPanel onNavigateTab={handleTabChange} />}
+      />
 
       <RiskDisclosure />
     </div>

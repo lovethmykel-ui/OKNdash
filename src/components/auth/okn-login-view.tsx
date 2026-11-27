@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ArrowRight,
   ChevronRight,
@@ -23,14 +23,19 @@ const LAST_USED_KEY = 'okn_last_auth_provider';
  * OknLoginView — Zero-asset, instant-loading editorial authentication view
  * for the OKNexus ecosystem.
  *
- * - Top bar: OKN logo + full brand name "OKNexus" on the left, LanguageSwitcher on the right.
- * - No heavy 3D coin or background image assets (pure CSS layout for instant first paint).
- * - Primary CTA: Login with Telegram.
- * - Secondary CTA: Connect Wallet (triggers the existing-accounts-only confirmation modal).
- * - Zero Scan QR Code option.
+ * Uses a native top-level `<form method="POST" action="/api/auth/session">`
+ * submission that returns an HTTP 303 redirect with `Set-Cookie` on the same
+ * navigation response. This eliminates iOS Chrome (WKWebView) / Safari ITP
+ * `fetch()` -> `window.location.assign()` cookie-sync race conditions on Vercel.
  */
 export function OknLoginView() {
   const locale = useLocale();
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const providerInputRef = useRef<HTMLInputElement | null>(null);
+  const noticeInputRef = useRef<HTMLInputElement | null>(null);
+  const redirectInputRef = useRef<HTMLInputElement | null>(null);
+  const loginPathInputRef = useRef<HTMLInputElement | null>(null);
+  const frameInputRef = useRef<HTMLInputElement | null>(null);
 
   const [pendingProvider, setPendingProvider] = useState<AuthProvider | null>(null);
   const [walletModalOpen, setWalletModalOpen] = useState(false);
@@ -44,12 +49,17 @@ export function OknLoginView() {
       if (stored === 'wallet' || stored === 'telegram') {
         setLastUsed(stored);
       }
+      const params = new URLSearchParams(window.location.search);
+      const urlError = params.get('error');
+      if (urlError) {
+        setErrorMessage(urlError);
+      }
     } catch {
       // Ignore storage read restrictions
     }
   }, []);
 
-  const submitSessionSignIn = async (
+  const submitSessionSignIn = (
     provider: AuthProvider,
     acceptedExistingAccountNotice = false,
   ) => {
@@ -63,54 +73,47 @@ export function OknLoginView() {
     );
 
     try {
-      const isEmbedded =
-        typeof window !== 'undefined' && window.self !== window.top;
-
-      const response = await fetch('/api/auth/session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'OKN-Auth',
-          'X-Frame-Context': isEmbedded ? 'iframe' : 'top',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          provider,
-          acceptedExistingAccountNotice,
-        }),
-      });
-
-      const data = (await response.json().catch(() => null)) as
-        | { ok?: boolean; error?: string }
-        | null;
-
-      if (!response.ok || !data?.ok) {
-        throw new Error(data?.error || 'Unable to sign in right now. Please try again.');
-      }
-
-      try {
-        window.localStorage.setItem(LAST_USED_KEY, provider);
-        setLastUsed(provider);
-      } catch {
-        // Ignore storage quota errors
-      }
-
-      setWalletModalOpen(false);
-      resetReferralBattlePopupForFreshLogin(undefined, true);
-      window.dispatchEvent(new CustomEvent('okn:login', { detail: { provider } }));
-
-      const targetPath =
-        locale && locale !== routing.defaultLocale
-          ? `/${locale}/app/portfolio`
-          : '/app/portfolio';
-      window.location.assign(targetPath);
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Unable to sign in right now. Please try again.';
-      setErrorMessage(message);
-      setStatusMessage(null);
-      setPendingProvider(null);
+      window.localStorage.setItem(LAST_USED_KEY, provider);
+      setLastUsed(provider);
+    } catch {
+      // Ignore storage quota errors
     }
+
+    setWalletModalOpen(false);
+    resetReferralBattlePopupForFreshLogin(undefined, true);
+    window.dispatchEvent(new CustomEvent('okn:login', { detail: { provider } }));
+
+    const localePrefix =
+      locale && locale !== routing.defaultLocale ? `/${locale}` : '';
+    const targetPath = `${localePrefix}/app/portfolio`;
+    const loginPath = `${localePrefix}/login`;
+    let isEmbedded = false;
+    try {
+      isEmbedded = window.self !== window.top;
+    } catch {
+      isEmbedded = true;
+    }
+
+    if (
+      formRef.current &&
+      providerInputRef.current &&
+      noticeInputRef.current &&
+      redirectInputRef.current &&
+      loginPathInputRef.current &&
+      frameInputRef.current
+    ) {
+      providerInputRef.current.value = provider;
+      noticeInputRef.current.value = acceptedExistingAccountNotice ? 'true' : 'false';
+      redirectInputRef.current.value = targetPath;
+      loginPathInputRef.current.value = loginPath;
+      frameInputRef.current.value = isEmbedded ? 'iframe' : 'top';
+      formRef.current.submit();
+      return;
+    }
+
+    setErrorMessage('Unable to submit sign-in form. Please refresh and try again.');
+    setStatusMessage(null);
+    setPendingProvider(null);
   };
 
   return (
@@ -293,15 +296,43 @@ export function OknLoginView() {
         </div>
       </footer>
 
+      {/* Native Top-Level POST Form for Atomic 303 + Set-Cookie Navigation */}
+      <form
+        ref={formRef}
+        method="POST"
+        action="/api/auth/session"
+        autoComplete="off"
+        className="hidden"
+        aria-hidden="true"
+      >
+        <input ref={providerInputRef} type="hidden" name="provider" defaultValue="telegram" suppressHydrationWarning />
+        <input
+          ref={noticeInputRef}
+          type="hidden"
+          name="acceptedExistingAccountNotice"
+          defaultValue="false"
+          suppressHydrationWarning
+        />
+        <input
+          ref={redirectInputRef}
+          type="hidden"
+          name="redirectTo"
+          defaultValue="/app/portfolio"
+          suppressHydrationWarning
+        />
+        <input ref={loginPathInputRef} type="hidden" name="loginPath" defaultValue="/login" suppressHydrationWarning />
+        <input ref={frameInputRef} type="hidden" name="frameContext" defaultValue="top" suppressHydrationWarning />
+      </form>
+
       {/* Existing-Accounts-Only Wallet Notice Modal */}
       <WalletNoticeModal
         open={walletModalOpen}
         busy={pendingProvider === 'wallet'}
         onClose={() => setWalletModalOpen(false)}
-        onAcceptWalletSignIn={() => void submitSessionSignIn('wallet', true)}
+        onAcceptWalletSignIn={() => submitSessionSignIn('wallet', true)}
         onSwitchToTelegram={() => {
           setWalletModalOpen(false);
-          void submitSessionSignIn('telegram', false);
+          submitSessionSignIn('telegram', false);
         }}
       />
     </div>

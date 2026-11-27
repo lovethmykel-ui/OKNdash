@@ -16,6 +16,8 @@ import { AppShell } from '@/components/layout/app-shell';
 import { WagmiProviders } from '@/components/providers/wagmi-provider';
 import { routing, type Locale } from '@/i18n/routing';
 
+export const dynamic = 'force-dynamic';
+
 // Nav structure: hrefs are structural (kept here), labels come from the
 // dashboard.nav message namespace by key (resolved in the sidebar component).
 const APP_NAV = [

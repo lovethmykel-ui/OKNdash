@@ -4,13 +4,19 @@ import {
   createSessionPayload,
   signSessionToken,
   verifySessionToken,
+  verifyAnySessionToken,
   validateLoginPayload,
   isTrustedAuthRequest,
+  isTrustedFormOrigin,
+  resolveSafeRedirectPath,
   buildSessionSetCookieHeader,
   getSessionSecret,
   SESSION_COOKIE_NAME,
 } from './session-token';
-import { hasPlausibleSessionCookie } from './session-cookie-check';
+import {
+  hasPlausibleSessionCookie,
+  hasAnyPlausibleSessionCookie,
+} from './session-cookie-check';
 
 const TEST_SECRET = 'test-signing-secret-with-at-least-32-chars-0123456789';
 
@@ -77,6 +83,20 @@ test('verifySessionToken rejects tampered, wrong-secret, malformed, and expired 
   assert.equal(verifySessionToken('a.b.c', TEST_SECRET, now), null);
 });
 
+test('verifyAnySessionToken and hasAnyPlausibleSessionCookie recover from stale duplicate cookies', () => {
+  const now = 1_800_000_000;
+  const validPayload = createSessionPayload('telegram', now);
+  const validToken = signSessionToken(validPayload, TEST_SECRET);
+  const staleToken = signSessionToken(validPayload, 'old-stale-secret-from-prior-deploy-999999');
+
+  const verified = verifyAnySessionToken([staleToken, 'garbage', validToken], TEST_SECRET, now + 5);
+  assert.ok(verified);
+  assert.equal(verified.provider, 'telegram');
+
+  assert.equal(hasAnyPlausibleSessionCookie(['invalid', validToken], now + 5), true);
+  assert.equal(hasAnyPlausibleSessionCookie(['invalid', ''], now + 5), false);
+});
+
 test('hasPlausibleSessionCookie validates token structure and expiry for Edge middleware', () => {
   const now = 1_800_000_000;
   const payload = createSessionPayload('telegram', now);
@@ -141,6 +161,48 @@ test('isTrustedAuthRequest requires custom header and matching origin', () => {
     host: 'preview.example.com',
   });
   assert.equal(isTrustedAuthRequest(crossOrigin), false);
+});
+
+test('isTrustedFormOrigin validates native form POST origin and rejects cross-site requests', () => {
+  assert.equal(
+    isTrustedFormOrigin(
+      new Headers({
+        origin: 'https://okndash.vercel.app',
+        'x-forwarded-host': 'okndash.vercel.app',
+        'sec-fetch-site': 'same-origin',
+      }),
+    ),
+    true,
+  );
+
+  assert.equal(
+    isTrustedFormOrigin(
+      new Headers({
+        referer: 'https://okndash.vercel.app/login',
+        host: 'okndash.vercel.app',
+      }),
+    ),
+    true,
+  );
+
+  assert.equal(
+    isTrustedFormOrigin(
+      new Headers({
+        origin: 'https://evil.example.org',
+        host: 'okndash.vercel.app',
+        'sec-fetch-site': 'cross-site',
+      }),
+    ),
+    false,
+  );
+});
+
+test('resolveSafeRedirectPath blocks open redirects and keeps relative paths', () => {
+  assert.equal(resolveSafeRedirectPath('/app/portfolio'), '/app/portfolio');
+  assert.equal(resolveSafeRedirectPath('/es/app/portfolio'), '/es/app/portfolio');
+  assert.equal(resolveSafeRedirectPath('https://evil.com'), '/app/portfolio');
+  assert.equal(resolveSafeRedirectPath('//evil.com/phish'), '/app/portfolio');
+  assert.equal(resolveSafeRedirectPath('/\\evil.com'), '/app/portfolio');
 });
 
 test('buildSessionSetCookieHeader sets HttpOnly, SameSite=None, Secure, and Partitioned by default and supports SameSite=Lax', () => {

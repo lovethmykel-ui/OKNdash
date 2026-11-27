@@ -9,6 +9,8 @@ export const metadata: Metadata = {
     'Sign in to $OKN with Telegram or connect your existing Web3 wallet to access your OKNexus dashboard.',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function LoginPage() {
   const session = await getVerifiedSession();
   if (session) {

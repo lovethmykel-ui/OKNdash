@@ -8,7 +8,7 @@ import { redirect } from 'next/navigation';
 import type { AdminRole } from './permissions';
 import {
   SESSION_COOKIE_NAME,
-  verifySessionToken,
+  verifyAnySessionToken,
   type AuthProvider,
 } from './session-token';
 
@@ -32,8 +32,8 @@ export const DEMO_SESSION: DemoSession = {
 
 export async function getVerifiedSession(): Promise<DemoSession | null> {
   const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-  const verified = verifySessionToken(token);
+  const tokens = cookieStore.getAll(SESSION_COOKIE_NAME).map((c) => c.value);
+  const verified = verifyAnySessionToken(tokens);
   if (!verified) return null;
 
   return {

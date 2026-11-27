@@ -1,10 +1,11 @@
 /**
- * Edge-safe structural & expiry check for the `okn_session` cookie.
+ * Edge-safe structural & expiry check for the `okn_session_v2` cookie.
  * Used in Next.js Middleware (Edge Runtime) to redirect unauthenticated visitors
  * immediately, while full HMAC-SHA256 verification runs in Node Server Components
  * and Route Handlers (`verifySessionToken`).
  */
-export const SESSION_COOKIE_NAME = 'okn_session';
+export const SESSION_COOKIE_NAME = 'okn_session_v2';
+export const LEGACY_SESSION_COOKIE_NAME = 'okn_session';
 
 function decodeBase64UrlToUtf8(input: string): string | null {
   try {
@@ -51,4 +52,15 @@ export function hasPlausibleSessionCookie(
   } catch {
     return false;
   }
+}
+
+/**
+ * Checks all matching cookies (protecting against duplicate partitioned vs
+ * unpartitioned cookies in the same browser jar).
+ */
+export function hasAnyPlausibleSessionCookie(
+  tokens: readonly (string | undefined | null)[],
+  nowSeconds = Math.floor(Date.now() / 1000),
+): boolean {
+  return tokens.some((token) => hasPlausibleSessionCookie(token, nowSeconds));
 }
