@@ -450,12 +450,12 @@ export function StageCountdownBar({ className }: { className?: string }) {
     <div
       data-testid="stage-1-countdown"
       className={cn(
-        'relative z-40 w-full shrink-0 overflow-hidden border-b border-[#F472B6]/20 backdrop-blur-2xl text-white shadow-[0_8px_24px_rgba(44,5,36,0.32)]',
+        'relative w-full shrink-0 overflow-hidden border-b border-[#F472B6]/18 text-white shadow-none',
         className,
       )}
       style={{
         background:
-          'linear-gradient(135deg, rgba(79, 8, 50, 0.97) 0%, rgba(62, 6, 45, 0.98) 54%, rgba(44, 5, 36, 0.98) 100%)',
+          'linear-gradient(135deg, rgba(79, 8, 50, 0.99) 0%, rgba(62, 6, 45, 0.99) 54%, rgba(44, 5, 36, 0.99) 100%)',
       }}
     >
       {/* Velvet Burgundy Atmospheric Aurora Drift + Architectural Diagonal Planes */}

@@ -23,7 +23,6 @@ import { LanguageSwitcher } from '@/components/landing/language-switcher';
 import { DevRoleToggle } from '@/components/admin/dev-role-toggle';
 import { SilentRefresher } from './silent-refresher';
 import { DailyCheckIn } from '@/components/dashboard/daily-check-in';
-import { ReferralBattlePopup } from '@/components/dashboard/referral-battle-popup';
 import { ScreenshotShareListener } from '@/components/share/screenshot-share-listener';
 import { StageCountdownBar } from '@/components/presale/stage-countdown-bar';
 import { AgentsHubSheet } from './agents-hub-sheet';
@@ -81,7 +80,7 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
           <div className="sticky top-0 z-50 w-full shrink-0">
             {area === 'app' && <StageCountdownBar />}
 
-            <header className="flex h-14 md:h-16 w-full items-center justify-between gap-2 border-b border-[var(--line)] bg-[var(--s1)]/92 px-3 backdrop-blur-xl md:px-6">
+            <header className="relative z-10 flex h-14 md:h-16 w-full items-center justify-between gap-2 border-b border-[var(--line)] bg-[var(--s1)]/95 px-3 backdrop-blur-xl md:px-6">
               <div className="flex items-center gap-2.5 min-w-0">
                 <SidebarTrigger className="size-9 md:size-10 shrink-0 rounded-xl border border-[var(--line)] bg-[var(--s2)] text-[var(--tx)] hover:bg-[var(--s1)] transition-colors" />
                 <Separator orientation="vertical" className="hidden md:block h-5 bg-[var(--line)]" />
@@ -222,7 +221,7 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
           )}
         </SidebarInset>
 
-        {/* Mobile Agents Hub Pop-up Sheet, Daily Check-In, Campaign Popups & Share Card */}
+        {/* Mobile Agents Hub Pop-up Sheet, Daily Check-In & Share Card */}
         {area === 'app' && (
           <AgentsHubSheet
             open={agentsSheetOpen}
@@ -230,7 +229,6 @@ export function AppShell({ area, navItems, isAdmin, roleLabel, children }: AppSh
           />
         )}
         {area === 'app' && <DailyCheckIn />}
-        {area === 'app' && <ReferralBattlePopup />}
         {area === 'app' && <ScreenshotShareListener />}
       </SidebarProvider>
     </AreaThemeProvider>
